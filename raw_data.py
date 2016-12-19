@@ -5,7 +5,7 @@ from file_helper import read_lines_and
 
 
 camera_cnt = 6
-train_track_path = 'training_track.txt'
+train_track_path = 'data/training_track.txt'
 
 
 def distribute_with_camera(persons_in_cameras):
@@ -32,7 +32,7 @@ def count_person_in_camera(camera_num):
         if person_id not in persons:
             persons.append(person_id)
 
-    read_lines_and('c%d_tracks.txt' % (camera_num + 1), count_person)
+    read_lines_and('data/c%d_tracks.txt' % (camera_num + 1), count_person)
     # print(persons)
     return persons
 
@@ -42,7 +42,7 @@ def viz_data_for_market():
     for i in range(camera_cnt):
         persons_in_cameras.append(count_person_in_camera(i))
     person_distribution4_camera = distribute_with_camera(persons_in_cameras)
-    # print(person_distribution4_camera)
+    print(person_distribution4_camera)
     return person_distribution4_camera
 
 
@@ -60,14 +60,14 @@ def viz_camera(fig, track_data, subplot_place, size, m):
 def viz_market():
     viz_data = viz_data_for_market()
     fig = plt.figure()
-    for i in range(6):
+    for i in range(camera_cnt):
         track_data = np.array(viz_data[i]).transpose()
         viz_camera(fig, track_data, i + 1, 10, m='x')
     plt.show()
 
 
 def count_with_camera(persons_in_cameras):
-    camera_distribution = [[[0 for i in range(6)] for i in range(6)] for i in range(6)]
+    camera_distribution = [[[0 for i in range(camera_cnt)] for i in range(camera_cnt)] for i in range(camera_cnt)]
 
     def shuffle_person(img_name):
         if '.' not in img_name:
@@ -79,8 +79,8 @@ def count_with_camera(persons_in_cameras):
                 camera_distribution[i][int(track_info[1][1]) - 1][int(track_info[1][3]) - 1] += 1
 
     read_lines_and(train_track_path, shuffle_person)
-    for i in range(6):
-        for j in range(6):
+    for i in range(camera_cnt):
+        for j in range(camera_cnt):
             print(camera_distribution[i][j])
         print('=' * 40)
     return camera_distribution
@@ -98,13 +98,13 @@ def viz_market_round():
     size_data = count_market()
     viz_data = [
             [
-                [[i + 1 for _ in range(6)] for i in range(6)],
-                [[j + 1 for j in range(6)] for _ in range(6)]
-            ] for _ in range(6)
+                [[i + 1 for _ in range(camera_cnt)] for i in range(camera_cnt)],
+                [[j + 1 for j in range(camera_cnt)] for _ in range(camera_cnt)]
+            ] for _ in range(camera_cnt)
         ]
     print(viz_data)
     fig = plt.figure()
-    for i in range(6):
+    for i in range(camera_cnt):
         track_data = np.array(viz_data[i])
         track_size = np.array(size_data[i])
         viz_camera(fig, track_data, i + 1, size=track_size)
