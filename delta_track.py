@@ -10,7 +10,7 @@ from raw_data import camera_cnt, viz_camera
 
 def camera_intervals(camera_num):
     intervals = list()
-    cur_values = { 'id': 0, 'start': 0, 'end': 0}
+    cur_values = {'id': 0, 'start': 0, 'end': 0}
 
     def count_interval(img_name):
         if '.' not in img_name:
@@ -27,14 +27,14 @@ def camera_intervals(camera_num):
             if track_time > cur_values['end']:
                 cur_values['end'] = track_time
 
-    read_lines_and('data_s1/track_c%ds1.txt' % (camera_num), count_interval)
+    read_lines_and('data_s1/track_c%ds1.txt' % camera_num, count_interval)
     return intervals[1:]
 
 
-def find_id_delta(intervals, id, frame):
+def find_id_delta(intervals, pid, frame):
     frame = int(frame)
     for interval in intervals:
-        if interval[0] == id:
+        if interval[0] == pid:
             delta0 = frame - interval[1]
             delta1 = frame - interval[2]
             if abs(delta0) < abs(delta1):
