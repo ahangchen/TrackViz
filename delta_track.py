@@ -59,25 +59,21 @@ def camera_distribute(camera_num):
         person_id = track_info[0]
         track_delta = find_id_delta(intervals, person_id, int(track_info[2]))
         camera_id = int(track_info[1][1])
-        if cur_delta['id'] != person_id or cur_delta['camera'] != camera_id:
-            # new person
-            if cur_delta['id'] != 0:
-                # exclude first zero record and not found id records
-                # deltas.append([cur_delta['id'], cur_delta['camera'], cur_delta['delta']])
-                # ignore large data
-                if abs(cur_delta['delta']) < 10000:
-                    deltas.append([cur_delta['camera'] + random.uniform(-0.4, 0.4), cur_delta['delta']])
-            if track_delta == -0.1:
-                # id not found
-                cur_delta['id'] = 0
-                return
-            # new id, has appeared in camera -camera_num
-            cur_delta['id'] = person_id
-            cur_delta['delta'] = track_delta
-            cur_delta['camera'] = camera_id
-        elif abs(cur_delta['delta'] ) > abs(track_delta):
-            # get the smallest delta
-            cur_delta['delta'] = track_delta
+        if track_delta == -0.1:
+            # id not found
+            cur_delta['id'] = 0
+            return
+        # new id, has appeared in camera -camera_num
+        cur_delta['id'] = person_id
+        cur_delta['delta'] = track_delta
+        cur_delta['camera'] = camera_id
+
+        if cur_delta['id'] != 0:
+            # exclude first zero record and not found id records
+            # deltas.append([cur_delta['id'], cur_delta['camera'], cur_delta['delta']])
+            # ignore large data
+            if abs(cur_delta['delta']) < 2000:
+                deltas.append([cur_delta['camera'] + random.uniform(-0.45, 0.45), cur_delta['delta']])
 
     read_lines_and('data_s1/track_s1.txt', shuffle_person)
     return deltas
