@@ -1,11 +1,9 @@
-import random
-
-import numpy as np
-import seaborn
 import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
 
 from file_helper import read_lines_and
-from raw_data import camera_cnt, viz_camera
+from raw_data import camera_cnt
 
 
 def camera_intervals(camera_num):
@@ -49,7 +47,7 @@ def find_id_delta(intervals, id, frame):
 def camera_distribute(camera_num):
     intervals = camera_intervals(camera_num)
     print('get intervals for c%d' % camera_num)
-    deltas = list()
+    deltas = [list() for i in range(6)]
     cur_delta = {'id': 0, 'delta': 1000000, 'camera': -1}
 
     def shuffle_person(img_name):
@@ -73,7 +71,7 @@ def camera_distribute(camera_num):
             # deltas.append([cur_delta['id'], cur_delta['camera'], cur_delta['delta']])
             # ignore large data
             if abs(cur_delta['delta']) < 2000:
-                deltas.append([cur_delta['camera'] + random.uniform(-0.45, 0.45), cur_delta['delta']])
+                deltas[cur_delta['camera'] - 1].append(cur_delta['delta'])
 
     read_lines_and('data_s1/track_s1.txt', shuffle_person)
     return deltas
@@ -86,14 +84,24 @@ def viz_data_for_market():
     return track_distribute
 
 
+def distribute_in_cameras(data_s, subplot, camera_id):
+    sns.set(color_codes=True)
+    sns.plt.xlabel('time')
+    sns.plt.ylabel('appear density')
+
+    for i, data in enumerate(data_s):
+        sns.distplot(np.array(data), label='camera %d' % (i + 1), hist=False, ax=subplot, axlabel='Distribution for camera %d' % camera_id)
+
+
 def viz_market():
     viz_data = viz_data_for_market()
-    fig = plt.figure()
+    f, axes = plt.subplots(3, 2, figsize=(7, 21), sharex=True)
+    sns.despine(left=True)
     for i in range(camera_cnt):
-        track_data = np.array(viz_data[i]).transpose()
-        viz_camera(fig, track_data, i + 1, 10, m='x')
+        # sns.plt.title('Appear distribution in cameras %d' % (i + 1))
+        distribute_in_cameras(viz_data[i], axes[i / 2, i % 2], i + 1)
         print('viz camera %d' % (i + 1))
-    plt.show()
+    sns.plt.show()
 
 
 if __name__ == '__main__':
