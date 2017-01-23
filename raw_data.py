@@ -1,11 +1,11 @@
 import numpy as np
+import scipy.io as sio
 import seaborn
 import matplotlib.pyplot as plt
 from file_helper import read_lines_and
 
-
 camera_cnt = 6
-train_track_path = 'data/training_track.txt'
+train_track_path = 'market/training_track.txt'
 
 
 def distribute_with_camera(persons_in_cameras):
@@ -18,7 +18,8 @@ def distribute_with_camera(persons_in_cameras):
         person_id = track_info[0]
         for i in range(camera_cnt):
             if person_id in persons_in_cameras[i]:
-                camera_distribution[i].append([float(track_info[1][1]), float(track_info[1][3]) + float(track_info[2]) / 100000])
+                camera_distribution[i].append(
+                    [float(track_info[1][1]), float(track_info[1][3]) + float(track_info[2]) / 100000])
 
     read_lines_and(train_track_path, shuffle_person)
     return camera_distribution
@@ -32,7 +33,7 @@ def count_person_in_camera(camera_num):
         if person_id not in persons:
             persons.append(person_id)
 
-    read_lines_and('data/c%d_tracks.txt' % (camera_num + 1), count_person)
+    read_lines_and('market/c%d_tracks.txt' % (camera_num + 1), count_person)
     # print(persons)
     return persons
 
@@ -47,7 +48,6 @@ def viz_data_for_market():
 
 
 def viz_camera(fig, track_data, subplot_place, size, m):
-
     ax1 = fig.add_subplot(2, 3, subplot_place)
 
     ax1.set_title('Distribute with camera %d' % subplot_place)
@@ -97,10 +97,10 @@ def count_market():
 def viz_market_round():
     size_data = count_market()
     viz_data = [
-            [
-                [[i + 1 for _ in range(camera_cnt)] for i in range(camera_cnt)],
-                [[j + 1 for j in range(camera_cnt)] for _ in range(camera_cnt)]
-            ] for _ in range(camera_cnt)
+        [
+            [[i + 1 for _ in range(camera_cnt)] for i in range(camera_cnt)],
+            [[j + 1 for j in range(camera_cnt)] for _ in range(camera_cnt)]
+        ] for _ in range(camera_cnt)
         ]
     print(viz_data)
     fig = plt.figure()
@@ -110,6 +110,15 @@ def viz_market_round():
         viz_camera(fig, track_data, i + 1, size=track_size)
     plt.show()
 
+
+# grid
+def read_mat():
+    grid_mat_path = 'grid/features_and_partitions.mat'
+    data = sio.loadmat(grid_mat_path)
+    print(data)
+
+
 if __name__ == '__main__':
-    viz_market()
+    # viz_market()
     # viz_market_round()
+    read_mat()
