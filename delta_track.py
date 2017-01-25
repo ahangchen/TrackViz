@@ -5,6 +5,8 @@ import seaborn as sns
 from file_helper import read_lines_and
 from raw_data import camera_cnt
 
+viz_type = 1
+
 
 def camera_intervals(camera_num):
     intervals = list()
@@ -24,8 +26,10 @@ def camera_intervals(camera_num):
         else:
             if track_time > cur_values['end']:
                 cur_values['end'] = track_time
-
-    read_lines_and('market_s1/track_c%ds1.txt' % (camera_num), count_interval)
+    if viz_type == 0:
+        read_lines_and('market_s1/track_c%ds1.txt' % (camera_num), count_interval)
+    else:
+        read_lines_and('top10/predict_trackc%ds1.txt' % (camera_num), count_interval)
     return intervals[1:]
 
 
@@ -81,8 +85,10 @@ def camera_distribute(camera_num):
             # ignore large data
             if abs(cur_delta['delta']) < 2000:
                 deltas[cur_delta['camera'] - 1].append(cur_delta['delta'])
-
-    read_lines_and('market_s1/track_s1.txt', shuffle_person)
+    if viz_type == 0:
+        read_lines_and('market_s1/track_s1.txt', shuffle_person)
+    else:
+        read_lines_and('top10/predict_tracks1.txt', shuffle_person)
     return deltas
 
 
