@@ -39,6 +39,15 @@ def find_id_delta(intervals, id, frame):
                 return delta0
             else:
                 return delta1
+            # if interval[1] < frame < interval[2]:
+            #     return 0
+            # else:
+            #     delta0 = frame - interval[1]
+            #     delta1 = frame - interval[2]
+            #     if abs(delta0) < abs(delta1):
+            #         return delta0
+            #     else:
+            #         return delta1
         else:
             continue
     return -0.1
@@ -95,7 +104,7 @@ def distribute_in_cameras(data_s, subplot, camera_id):
 
 def viz_market():
     viz_data = viz_data_for_market()
-    f, axes = plt.subplots(3, 2, figsize=(7, 21), sharex=True)
+    f, axes = plt.subplots(3, 2, figsize=(15, 10))
     sns.despine(left=True)
     for i in range(camera_cnt):
         # sns.plt.title('Appear distribution in cameras %d' % (i + 1))
