@@ -5,7 +5,8 @@ import seaborn as sns
 from file_helper import read_lines_and
 from raw_data import camera_cnt
 
-viz_type = 1
+data_type = 0
+viz_local = True
 
 
 def camera_intervals(camera_num):
@@ -26,7 +27,7 @@ def camera_intervals(camera_num):
         else:
             if track_time > cur_values['end']:
                 cur_values['end'] = track_time
-    if viz_type == 0:
+    if data_type == 0:
         read_lines_and('market_s1/track_c%ds1.txt' % (camera_num), count_interval)
     else:
         read_lines_and('top10/predict_trackc%ds1.txt' % (camera_num), count_interval)
@@ -85,7 +86,7 @@ def camera_distribute(camera_num):
             # ignore large data
             if abs(cur_delta['delta']) < 2000:
                 deltas[cur_delta['camera'] - 1].append(cur_delta['delta'])
-    if viz_type == 0:
+    if data_type == 0:
         read_lines_and('market_s1/track_s1.txt', shuffle_person)
     else:
         read_lines_and('top10/predict_tracks1.txt', shuffle_person)
@@ -101,9 +102,8 @@ def viz_data_for_market():
 
 def distribute_in_cameras(data_s, subplot, camera_id):
     sns.set(color_codes=True)
-    sns.plt.xlabel('time')
-    sns.plt.ylabel('appear density')
-
+    plt.xlabel('time')
+    plt.ylabel('appear density')
     for i, data in enumerate(data_s):
         sns.distplot(np.array(data), label='camera %d' % (i + 1), hist=False, ax=subplot, axlabel='Distribution for camera %d' % camera_id)
 
@@ -111,6 +111,12 @@ def distribute_in_cameras(data_s, subplot, camera_id):
 def viz_market():
     viz_data = viz_data_for_market()
     f, axes = plt.subplots(3, 2, figsize=(15, 10))
+    if viz_local:
+        for ax_s in axes:
+            for ax in ax_s:
+                ax.set_xlabel('time')
+                ax.set_ylabel('appear density')
+                ax.set_ylim([0, 0.005])
     sns.despine(left=True)
     for i in range(camera_cnt):
         # sns.plt.title('Appear distribution in cameras %d' % (i + 1))
