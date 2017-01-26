@@ -1,4 +1,4 @@
-from delta_track import viz_market
+from delta_track import viz_market, viz_data_for_market
 from file_helper import read_lines_and
 from file_helper import write
 from raw_data import train_track_path
@@ -17,6 +17,7 @@ def get_person_idx():
         if cur_class != last_class:
             ids.append(cur_class)
             last_class = cur_class
+
     read_lines_and(train_track_path, count_id)
     print(ids)
     return ids
@@ -27,6 +28,7 @@ def get_tracks():
 
     def add_track(line):
         tracks.append(line)
+
     read_lines_and(train_track_path, add_track)
     return tracks
 
@@ -46,9 +48,20 @@ def get_predict_tracks():
         for mid in mids:
             write(predict_track_path, '%04d' % person_ids[int(mid)] + tail)
         predict_line_idx += 1
+
     read_lines_and(predict_path, add_predict_track)
 
 
+def store_sorted_deltas():
+    camera_delta_s = viz_data_for_market()
+    for camera_delta in camera_delta_s:
+        for delta_s in camera_delta:
+            delta_s.sort()
+    for camera_delta in camera_delta_s:
+        for delta_s in camera_delta:
+            per_camera_deltas = ' '.join(map(str, delta_s))
+            write('top10/sorted_deltas', per_camera_deltas)
+
 if __name__ == '__main__':
     # get_predict_tracks()
-    viz_market()
+    store_sorted_deltas()
