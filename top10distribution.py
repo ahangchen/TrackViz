@@ -2,6 +2,7 @@ from delta_track import viz_market, viz_data_for_market
 from file_helper import read_lines_and
 from file_helper import write
 from raw_data import train_track_path
+from serialize import pickle_save
 
 predict_path = 'top10/predict.log'
 
@@ -57,10 +58,13 @@ def store_sorted_deltas():
     for camera_delta in camera_delta_s:
         for delta_s in camera_delta:
             delta_s.sort()
+    # for matlab
     for camera_delta in camera_delta_s:
         for delta_s in camera_delta:
             per_camera_deltas = ' '.join(map(str, delta_s))
-            write('top10/sorted_deltas', per_camera_deltas)
+            write('top10/sorted_deltas.txt', per_camera_deltas)
+    # for python
+    pickle_save('top10/sorted_deltas.pickle', camera_delta_s)
 
 if __name__ == '__main__':
     # get_predict_tracks()

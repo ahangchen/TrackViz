@@ -84,7 +84,7 @@ def camera_distribute(camera_num):
             # exclude first zero record and not found id records
             # deltas.append([cur_delta['id'], cur_delta['camera'], cur_delta['delta']])
             # ignore large data
-            if abs(cur_delta['delta']) < 2000:
+            if abs(cur_delta['delta']) < 1000000:
                 deltas[cur_delta['camera'] - 1].append(cur_delta['delta'])
     if data_type == 0:
         read_lines_and('market_s1/track_s1.txt', shuffle_person)
