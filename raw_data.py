@@ -54,9 +54,10 @@ def viz_camera(track_data, target_ax):
 
 def viz_market():
     f, axes = plt.subplots(3, 2, figsize=(15, 10))
-    for ax_s in axes:
-        for ax in ax_s:
-            ax.set_xlabel('Camera')
+    for i, ax_s in enumerate(axes):
+        for j, ax in enumerate(ax_s):
+            ax.set_title('Distribution for camera %d' % (i * 2 + j))
+            # ax.set_xlabel('Camera')
             ax.set_ylabel('Time')
     viz_data = viz_data_for_market()
     for i in range(camera_cnt):

@@ -131,7 +131,7 @@ def deltas2track():
     for i, camera_deltas in enumerate(viz_data):
         for j, per_camera_deltas in enumerate(camera_deltas):
             for delta in per_camera_deltas:
-                track[i][0].append(j + 1 + random.uniform(-0.4, 0.4))
+                track[i][0].append(j + 1)
                 track[i][1].append(delta)
     return track
 
@@ -143,11 +143,12 @@ def distribute_joint(data_s, subplot, camera_id):
 
 def viz_market():
     viz_data = deltas2track()
-    f, axes = plt.subplots(3, 2, figsize=(15, 10))
+    f, axes = plt.subplots(3, 2)
     if viz_local:
-        for ax_s in axes:
-            for ax in ax_s:
-                ax.set_xlabel('camera')
+        for i, ax_s in enumerate(axes):
+            for j, ax in enumerate(ax_s):
+                ax.set_title('Distribution for camera %d' % (i * 2 + j))
+                # ax.set_xlabel('camera')
                 ax.set_ylabel('time')
                 ax.set_ylim([-3000, 3000])
     sns.despine(left=True)
@@ -160,5 +161,5 @@ def viz_market():
 
 if __name__ == '__main__':
     # print(camera_distribute(1))
-    # viz_market_distribution()
-    viz_market()
+    viz_market_distribution()
+    # viz_market()
