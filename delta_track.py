@@ -1,3 +1,5 @@
+import random
+
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -102,13 +104,11 @@ def viz_data_for_market():
 
 def distribute_in_cameras(data_s, subplot, camera_id):
     sns.set(color_codes=True)
-    plt.xlabel('time')
-    plt.ylabel('appear density')
     for i, data in enumerate(data_s):
         sns.distplot(np.array(data), label='camera %d' % (i + 1), hist=False, ax=subplot, axlabel='Distribution for camera %d' % camera_id)
 
 
-def viz_market():
+def viz_market_distribution():
     viz_data = viz_data_for_market()
     f, axes = plt.subplots(3, 2, figsize=(15, 10))
     if viz_local:
@@ -125,6 +125,40 @@ def viz_market():
     sns.plt.show()
 
 
+def deltas2track():
+    viz_data = viz_data_for_market()
+    track = [[list(), list()] for _ in range(6)]
+    for i, camera_deltas in enumerate(viz_data):
+        for j, per_camera_deltas in enumerate(camera_deltas):
+            for delta in per_camera_deltas:
+                track[i][0].append(j + 1 + random.uniform(-0.4, 0.4))
+                track[i][1].append(delta)
+    return track
+
+
+def distribute_joint(data_s, subplot, camera_id):
+    sns.kdeplot(np.array(data_s[0]), np.array(data_s[1]), shade=True, bw="silverman", ax=subplot, cmap="Purples")
+    # subplot.scatter(data_s[0], data_s[1], s=10, c='g', marker='o')
+
+
+def viz_market():
+    viz_data = deltas2track()
+    f, axes = plt.subplots(3, 2, figsize=(15, 10))
+    if viz_local:
+        for ax_s in axes:
+            for ax in ax_s:
+                ax.set_xlabel('camera')
+                ax.set_ylabel('time')
+                ax.set_ylim([-3000, 3000])
+    sns.despine(left=True)
+    for i in range(camera_cnt):
+        # sns.plt.title('Appear distribution in cameras %d' % (i + 1))
+        distribute_joint(viz_data[i], axes[i / 2, i % 2], i + 1)
+        print('viz camera %d' % (i + 1))
+    sns.plt.show()
+
+
 if __name__ == '__main__':
     # print(camera_distribute(1))
+    # viz_market_distribution()
     viz_market()

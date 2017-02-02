@@ -1,4 +1,4 @@
-from delta_track import viz_market, viz_data_for_market
+from delta_track import viz_market_distribution, viz_data_for_market
 from file_helper import read_lines_and
 from file_helper import write
 from raw_data import train_track_path

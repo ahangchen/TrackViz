@@ -1,6 +1,5 @@
 import numpy as np
-import scipy.io as sio
-import seaborn
+import seaborn as sns
 import matplotlib.pyplot as plt
 from file_helper import read_lines_and
 
@@ -47,22 +46,22 @@ def viz_data_for_market():
     return person_distribution4_camera
 
 
-def viz_camera(fig, track_data, subplot_place, size, m):
-    ax1 = fig.add_subplot(2, 3, subplot_place)
-
-    ax1.set_title('Distribute with camera %d' % subplot_place)
-    plt.xlabel('Camera')
-    plt.ylabel('Time')
-    ax1.scatter(track_data[0], track_data[1], s=size, c='g', marker=m)
+def viz_camera(track_data, target_ax):
+    # target_ax.scatter(track_data[0], track_data[1], s=10, c='g', marker='o')
     # plt.legend('x%d' % subplot_place)
+    sns.kdeplot(track_data[0], track_data[1], shade=True, bw="silverman", ax=target_ax, cmap="Purples")
 
 
 def viz_market():
+    f, axes = plt.subplots(3, 2, figsize=(15, 10))
+    for ax_s in axes:
+        for ax in ax_s:
+            ax.set_xlabel('Camera')
+            ax.set_ylabel('Time')
     viz_data = viz_data_for_market()
-    fig = plt.figure()
     for i in range(camera_cnt):
         track_data = np.array(viz_data[i]).transpose()
-        viz_camera(fig, track_data, i + 1, 10, m='x')
+        viz_camera(track_data, axes[i / 2][i % 2])
     plt.show()
 
 
@@ -94,31 +93,5 @@ def count_market():
     return camera_distribute
 
 
-def viz_market_round():
-    size_data = count_market()
-    viz_data = [
-        [
-            [[i + 1 for _ in range(camera_cnt)] for i in range(camera_cnt)],
-            [[j + 1 for j in range(camera_cnt)] for _ in range(camera_cnt)]
-        ] for _ in range(camera_cnt)
-        ]
-    print(viz_data)
-    fig = plt.figure()
-    for i in range(camera_cnt):
-        track_data = np.array(viz_data[i])
-        track_size = np.array(size_data[i])
-        viz_camera(fig, track_data, i + 1, size=track_size)
-    plt.show()
-
-
-# grid
-def read_mat():
-    grid_mat_path = 'grid/features_and_partitions.mat'
-    data = sio.loadmat(grid_mat_path)
-    print(data)
-
-
 if __name__ == '__main__':
-    # viz_market()
-    # viz_market_round()
-    read_mat()
+    viz_market()
