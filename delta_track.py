@@ -86,7 +86,7 @@ def camera_distribute(camera_num):
             # exclude first zero record and not found id records
             # deltas.append([cur_delta['id'], cur_delta['camera'], cur_delta['delta']])
             # ignore large data
-            if abs(cur_delta['delta']) < 1000000:
+            if abs(cur_delta['delta']) < 2000:
                 deltas[cur_delta['camera'] - 1].append(cur_delta['delta'])
     if data_type == 0:
         read_lines_and('market_s1/track_s1.txt', shuffle_person)
@@ -116,7 +116,8 @@ def viz_market_distribution():
             for ax in ax_s:
                 ax.set_xlabel('time')
                 ax.set_ylabel('appear density')
-                ax.set_ylim([0, 0.005])
+                # ax.set_xlim([-2000, 2000])
+                # ax.set_ylim([0, 0.025])
     sns.despine(left=True)
     for i in range(camera_cnt):
         # sns.plt.title('Appear distribution in cameras %d' % (i + 1))
