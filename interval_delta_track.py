@@ -7,12 +7,13 @@ import seaborn as sns
 from file_helper import read_lines_and
 from raw_data import camera_cnt
 
-data_type = 1
+data_type = 0
 viz_local = True
 
 
-def track_infos(camera_num):
-    tracks = list()
+def camera_intervals(camera_num):
+    intervals = list()
+    cur_values = {'id': 0, 'start': 0, 'end': 0}
 
     def count_interval(img_name):
         if '.' not in img_name:
@@ -20,47 +21,64 @@ def track_infos(camera_num):
         track_info = img_name.split('.')[0].split('_')
         person_id = track_info[0]
         track_time = int(track_info[2])
-        tracks.append([person_id, track_time])
+        if person_id != cur_values['id']:
+            intervals.append([cur_values['id'], cur_values['start'], cur_values['end']])
+            cur_values['id'] = person_id
+            cur_values['start'] = track_time
+            cur_values['end'] = track_time
+        else:
+            if track_time > cur_values['end']:
+                cur_values['end'] = track_time
     if data_type == 0:
         read_lines_and('market_s1/track_c%ds1.txt' % (camera_num), count_interval)
     else:
         read_lines_and('top10/predict_trackc%ds1.txt' % (camera_num), count_interval)
-    return tracks
+    return intervals[1:]
 
 
 def find_id_delta(intervals, id, frame):
-    # if we find the smallest delta, the distribution of tracks will be different
     frame = int(frame)
-    deltas = list()
     for interval in intervals:
         if interval[0] == id:
-            deltas.append(frame - interval[1])
+            delta0 = frame - interval[1]
+            delta1 = frame - interval[2]
+            if abs(delta0) < abs(delta1):
+                return delta0
+            else:
+                return delta1
         else:
             continue
-    return deltas
+    return -0.1
 
 
 def camera_distribute(camera_num):
-    intervals = track_infos(camera_num)
+    intervals = camera_intervals(camera_num)
     print('get intervals for c%d' % camera_num)
     deltas = [list() for i in range(6)]
+    cur_delta = {'id': 0, 'delta': 1000000, 'camera': -1}
 
     def shuffle_person(img_name):
         if '.' not in img_name:
             return
         track_info = img_name.split('.')[0].split('_')
         person_id = track_info[0]
-        track_deltas = find_id_delta(intervals, person_id, int(track_info[2]))
+        track_delta = find_id_delta(intervals, person_id, int(track_info[2]))
         camera_id = int(track_info[1][1])
-        if len(track_deltas) == 0:
+        if track_delta == -0.1:
+            # id not found
+            cur_delta['id'] = 0
             return
-        for delta in track_deltas:
-            if person_id != 0:
-                # exclude first zero record and not found id records
-                # deltas.append([cur_delta['id'], cur_delta['camera'], cur_delta['delta']])
-                # ignore large data
-                if abs(delta) < 2000:
-                    deltas[camera_id - 1].append(delta)
+        # new id, has appeared in camera -camera_num
+        cur_delta['id'] = person_id
+        cur_delta['delta'] = track_delta
+        cur_delta['camera'] = camera_id
+
+        if cur_delta['id'] != 0:
+            # exclude first zero record and not found id records
+            # deltas.append([cur_delta['id'], cur_delta['camera'], cur_delta['delta']])
+            # ignore large data
+            if abs(cur_delta['delta']) < 2000:
+                deltas[cur_delta['camera'] - 1].append(cur_delta['delta'])
     if data_type == 0:
         read_lines_and('market_s1/track_s1.txt', shuffle_person)
     else:
