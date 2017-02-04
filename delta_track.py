@@ -1,5 +1,3 @@
-import random
-
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -7,7 +5,7 @@ import seaborn as sns
 from file_helper import read_lines_and
 from raw_data import camera_cnt
 
-data_type = 1
+data_type = 0
 viz_local = True
 
 
