@@ -1,3 +1,5 @@
+from random import uniform
+
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -57,7 +59,7 @@ def camera_distribute(camera_num):
                 # exclude first zero record and not found id records
                 # deltas.append([cur_delta['id'], cur_delta['camera'], cur_delta['delta']])
                 # ignore large data
-                if abs(delta) < 2000:
+                if abs(delta) < 10000000:
                     deltas[camera_id - 1].append(delta)
     if data_type == 0:
         read_lines_and('market_s1/track_s1.txt', shuffle_person)
@@ -103,7 +105,7 @@ def deltas2track():
     for i, camera_deltas in enumerate(viz_data):
         for j, per_camera_deltas in enumerate(camera_deltas):
             for delta in per_camera_deltas:
-                track[i][0].append(j + 1)
+                track[i][0].append(j + 1 + uniform(-0.4, 0.4))
                 track[i][1].append(delta)
     return track
 
@@ -122,7 +124,7 @@ def viz_market():
                 ax.set_title('Distribution for camera %d' % (i * 2 + j))
                 # ax.set_xlabel('camera')
                 ax.set_ylabel('time')
-                ax.set_ylim([-3000, 3000])
+                ax.set_ylim([-5000, 5000])
     sns.despine(left=True)
     for i in range(camera_cnt):
         # sns.plt.title('Appear distribution in cameras %d' % (i + 1))
@@ -133,5 +135,5 @@ def viz_market():
 
 if __name__ == '__main__':
     # print(camera_distribute(1))
-    viz_market_distribution()
-    # viz_market()
+    # viz_market_distribution()
+    viz_market()
