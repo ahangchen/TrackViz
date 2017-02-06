@@ -14,7 +14,7 @@
 ## GRID
 
 - 时间差分布
-![](grid/distribution.png)
+![](grid/raw.png)
 
 - 时间差概率密度曲线(s1)
 ![](grid/density.png)
