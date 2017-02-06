@@ -153,5 +153,5 @@ def viz_market():
 
 if __name__ == '__main__':
     # print(camera_distribute(1))
-    viz_market_distribution()
-    # viz_market()
+    # viz_market_distribution()
+    viz_market()
