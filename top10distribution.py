@@ -4,7 +4,9 @@ from file_helper import write
 from raw_data import train_track_path
 from serialize import pickle_save
 
-predict_path = 'top10/predict.log'
+predict_path = 'grid_predict/predict_grid.log'
+test_path = 'grid_predict/grid_tracks.txt'
+
 
 last_class = 0
 
@@ -30,24 +32,29 @@ def get_tracks():
     def add_track(line):
         tracks.append(line)
 
-    read_lines_and(train_track_path, add_track)
+    read_lines_and(test_path, add_track)
     return tracks
 
 
 predict_line_idx = 0
-predict_track_path = 'top10/predict_tracks.txt'
+predict_track_path = 'grid_predict/predict_grid.txt'
 
 
 def get_predict_tracks():
-    train_tracks = get_tracks()
+    origin_tracks = get_tracks()
     person_ids = get_person_idx()
 
     def add_predict_track(line):
         global predict_line_idx
-        tail = train_tracks[predict_line_idx][4:-1]
+        if origin_tracks[predict_line_idx].startswith('-1'):
+            tail = origin_tracks[predict_line_idx][2:-1]
+        else:
+            tail = origin_tracks[predict_line_idx][4: -1]
+        camera = tail[1]
         mids = line.split()
         for mid in mids:
             write(predict_track_path, '%04d' % person_ids[int(mid)] + tail)
+            write('grid_predict/grid_c%d.txt' % int(camera), '%04d' % person_ids[int(mid)] + tail)
         predict_line_idx += 1
 
     read_lines_and(predict_path, add_predict_track)
@@ -67,5 +74,5 @@ def store_sorted_deltas():
     pickle_save('top10/sorted_deltas.pickle', camera_delta_s)
 
 if __name__ == '__main__':
-    # get_predict_tracks()
-    store_sorted_deltas()
+    get_predict_tracks()
+    # store_sorted_deltas()

@@ -7,8 +7,8 @@ import seaborn as sns
 from file_helper import read_lines_and
 from raw_data import camera_cnt
 
-# data type : 0: market1501 real data, 1: market1501 predict top10 data, 2: grid true data
-data_type = 2
+# data type : 0: market1501 real data, 1: market1501 predict top10 data, 2: grid true data, 3: grid predict data
+data_type = 3
 
 viz_local = True
 
@@ -27,8 +27,10 @@ def track_infos(camera_num):
         read_lines_and('market_s1/track_c%ds1.txt' % camera_num, count_interval)
     elif data_type == 2:
         read_lines_and('grid/trackc%d.txt' % camera_num, count_interval)
+    elif data_type == 3:
+        read_lines_and('grid_predict/grid_c%d.txt' % camera_num, count_interval)
     else:
-        read_lines_and('top10/predict_trackc%ds1.txt' % camera_num, count_interval)
+        read_lines_and('top10/predictc%d.txt' % camera_num, count_interval)
     return tracks
 
 
@@ -55,7 +57,7 @@ def camera_distribute(camera_num):
         track_info = img_name.split('.')[0].split('_')
         person_id = track_info[0]
         track_deltas = find_id_delta(intervals, person_id, int(track_info[2]))
-        if data_type == 2:
+        if data_type == 2 or data_type == 3:
             camera_id = int(track_info[1])
         else:
             camera_id = int(track_info[1][1])
@@ -66,14 +68,16 @@ def camera_distribute(camera_num):
                 # exclude first zero record and not found id records
                 # deltas.append([cur_delta['id'], cur_delta['camera'], cur_delta['delta']])
                 # ignore large data
-                if abs(delta) < 10000000:
+                if abs(delta) < 1000:
                     deltas[camera_id - 1].append(delta)
     if data_type == 0:
         read_lines_and('market_s1/track_s1.txt', shuffle_person)
     elif data_type == 2:
         read_lines_and('grid/tracks.txt', shuffle_person)
+    elif data_type == 3:
+        read_lines_and('grid_predict/grid_tracks.txt', shuffle_person)
     else:
-        read_lines_and('top10/predict_tracks1.txt', shuffle_person)
+        read_lines_and('top10/predict_tracks.txt', shuffle_person)
     return deltas
 
 
@@ -141,7 +145,7 @@ def viz_market():
                 ax.set_title('Distribution for camera %d' % (i * 2 + j + 1))
                 # ax.set_xlabel('camera')
                 ax.set_ylabel('time')
-                if data_type != 2:
+                if data_type != 2 and data_type != 3:
                     ax.set_ylim([-5000, 5000])
     sns.despine(left=True)
     for i in range(camera_cnt):
@@ -153,5 +157,5 @@ def viz_market():
 
 if __name__ == '__main__':
     # print(camera_distribute(1))
-    # viz_market_distribution()
-    viz_market()
+    viz_market_distribution()
+    #viz_market()
