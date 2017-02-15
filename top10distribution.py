@@ -42,7 +42,7 @@ predict_track_path = 'grid_predict/predict_grid.txt'
 
 def get_predict_tracks():
     origin_tracks = get_tracks()
-    person_ids = get_person_idx()
+    # person_ids = get_person_idx()
 
     def add_predict_track(line):
         global predict_line_idx
@@ -53,8 +53,10 @@ def get_predict_tracks():
         camera = tail[1]
         mids = line.split()
         for mid in mids:
-            write(predict_track_path, '%04d' % person_ids[int(mid)] + tail)
-            write('grid_predict/grid_c%d.txt' % int(camera), '%04d' % person_ids[int(mid)] + tail)
+            write(predict_track_path, origin_tracks)
+            write(predict_track_path, '%04d' % int(mid) + tail)
+            write('grid_predict/grid_c%d.txt' % int(camera), ('%04d' % int(mid)) + tail)
+            write('grid_predict/grid_c%d.txt' % int(camera), origin_tracks)
         predict_line_idx += 1
 
     read_lines_and(predict_path, add_predict_track)
