@@ -1,6 +1,11 @@
-def write(path, content):
+def write_line(path, content):
     with open(path, "a+") as dst_file:
         dst_file.write(content + '\n')
+
+
+def write(path, content):
+    with open(path, "a+") as dst_file:
+        dst_file.write(content)
 
 
 def read_lines(path):

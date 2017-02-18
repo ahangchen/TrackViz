@@ -1,11 +1,11 @@
 from delta_track import viz_market_distribution, viz_data_for_market
 from file_helper import read_lines_and
-from file_helper import write
+from file_helper import write_line
 from raw_data import train_track_path
 from serialize import pickle_save
 
-predict_path = 'grid_predict/predict_grid.log'
-test_path = 'grid_predict/grid_tracks.txt'
+predict_path = 'top10/predict_test.log'
+test_path = 'top10/test_tracks.txt'
 
 
 last_class = 0
@@ -37,7 +37,7 @@ def get_tracks():
 
 
 predict_line_idx = 0
-predict_track_path = 'grid_predict/predict_grid.txt'
+predict_track_path = 'top10/predict_tracks.txt'
 
 
 def get_predict_tracks():
@@ -50,13 +50,11 @@ def get_predict_tracks():
             tail = origin_tracks[predict_line_idx][2:-1]
         else:
             tail = origin_tracks[predict_line_idx][4: -1]
-        camera = tail[1]
+        camera = tail[2]
         mids = line.split()
         for mid in mids:
-            write(predict_track_path, origin_tracks)
-            write(predict_track_path, '%04d' % int(mid) + tail)
-            write('grid_predict/grid_c%d.txt' % int(camera), ('%04d' % int(mid)) + tail)
-            write('grid_predict/grid_c%d.txt' % int(camera), origin_tracks)
+            write_line(predict_track_path, '%04d' % int(mid) + tail)
+            write_line('top10/predict_c%d.txt' % int(camera), ('%04d' % int(mid)) + tail)
         predict_line_idx += 1
 
     read_lines_and(predict_path, add_predict_track)
@@ -71,10 +69,10 @@ def store_sorted_deltas():
     for camera_delta in camera_delta_s:
         for delta_s in camera_delta:
             per_camera_deltas = ' '.join(map(str, delta_s))
-            write('top10/sorted_deltas.txt', per_camera_deltas)
+            write_line('top10/sorted_deltas.txt', per_camera_deltas)
     # for python
     pickle_save('top10/sorted_deltas.pickle', camera_delta_s)
 
 if __name__ == '__main__':
-    get_predict_tracks()
-    # store_sorted_deltas()
+    # get_predict_tracks()
+    store_sorted_deltas()
