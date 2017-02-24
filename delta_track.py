@@ -11,7 +11,7 @@ from raw_data import camera_cnt
 # 0: market1501 real data, 1: market1501 predict top10 data,
 # 2: grid true data, 3: grid predict data,
 # 4: grid rand data
-data_type = 4
+data_type = 1
 
 viz_local = True
 
@@ -73,7 +73,7 @@ def camera_distribute(camera_num):
                 # exclude first zero record and not found id records
                 # deltas.append([cur_delta['id'], cur_delta['camera'], cur_delta['delta']])
                 # ignore large data
-                if abs(delta) < 100000:
+                if abs(delta) < 2000:
                     deltas[camera_id - 1].append(delta)
     if data_type == 0:
         read_lines_and('market_s1/track_s1.txt', shuffle_person)
@@ -153,7 +153,7 @@ def viz_market():
                 # ax.set_xlabel('camera')
                 ax.set_ylabel('time')
                 if data_type != 2 and data_type != 3 and data_type != 4:
-                    ax.set_ylim([-5000, 5000])
+                    ax.set_ylim([-4000, 4000])
     sns.despine(left=True)
     for i in range(camera_cnt):
         # sns.plt.title('Appear distribution in cameras %d' % (i + 1))

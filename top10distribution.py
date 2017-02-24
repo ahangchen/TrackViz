@@ -52,7 +52,11 @@ def get_predict_tracks():
             tail = origin_tracks[predict_line_idx][4: -1]
         camera = tail[2]
         mids = line.split()
-        for mid in mids:
+        write_line(predict_track_path, '%04d' % (int(predict_line_idx) + 1) + tail)
+        write_line('top10/predict_c%d.txt' % int(camera), ('%04d' % (int(predict_line_idx) + 1) + tail))
+        for i, mid in enumerate(mids):
+            if i >= 10:
+                break
             write_line(predict_track_path, '%04d' % int(mid) + tail)
             write_line('top10/predict_c%d.txt' % int(camera), ('%04d' % int(mid)) + tail)
         predict_line_idx += 1
