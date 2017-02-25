@@ -4,7 +4,7 @@ from file_helper import write_line
 from raw_data import train_track_path
 from serialize import pickle_save
 
-predict_path = 'top10/predict_test.log'
+predict_path = 'top10/predict_pid.log'
 test_path = 'top10/test_tracks.txt'
 
 
@@ -55,7 +55,7 @@ def get_predict_tracks():
         write_line(predict_track_path, '%04d' % (int(predict_line_idx) + 1) + tail)
         write_line('top10/predict_c%d.txt' % int(camera), ('%04d' % (int(predict_line_idx) + 1) + tail))
         for i, mid in enumerate(mids):
-            if i >= 10:
+            if i >= 5:
                 break
             write_line(predict_track_path, '%04d' % int(mid) + tail)
             write_line('top10/predict_c%d.txt' % int(camera), ('%04d' % int(mid)) + tail)

@@ -4,6 +4,8 @@ from file_helper import read_lines_and, write, write_line, read_lines
 
 line_idx = 0
 shot_line_cnt = 0
+predict_cnt = 0
+predict_line_cnt = 0
 
 
 def predict_eval():
@@ -25,24 +27,31 @@ def predict_eval():
 shot_cnt = 0
 
 
-def predict_market_eval():
+def predict_market_eval(target_path):
     answer_path = 'top10/test_tracks.txt'
-    predict_path = 'top10/predict_test.log'
+    predict_path = target_path
     answer_lines = read_lines(answer_path)
     real_pids = [answer.split('_')[0] for answer in answer_lines]
-    top_cnt = 5
+    top_cnt = 10
 
     def is_shot(line):
         global line_idx
         global shot_line_cnt
         global shot_cnt
+        global predict_cnt
+        global predict_line_cnt
         line_idx += 1
         predict_idx_es = line.split()
         has_shot = False
+        predict_cnt += len(predict_idx_es)
+
+        if len(predict_idx_es) > 0:
+            predict_line_cnt += 1
 
         for i, predict_idx in enumerate(predict_idx_es):
             if i >= top_cnt:
                 break
+
             if real_pids[int(predict_idx) - 1] == real_pids[line_idx]:
                 if not has_shot:
                     shot_line_cnt += 1
@@ -50,9 +59,18 @@ def predict_market_eval():
                 shot_cnt += 1
 
     read_lines_and(predict_path, is_shot)
-    print('all shot: %f' % (shot_cnt / float(line_idx) / top_cnt))
-    print('top10 shot: %f' % (shot_line_cnt / float(line_idx)))
-
+    global line_idx
+    global shot_line_cnt
+    global shot_cnt
+    global predict_cnt
+    global predict_line_cnt
+    print('all shot: %f' % (float(shot_cnt) / predict_cnt))
+    print('top10 shot: %f' % (shot_line_cnt / float(predict_line_cnt)))
+    line_idx = 0
+    shot_cnt = 0
+    shot_line_cnt = 0
+    predict_cnt = 0
+    predict_line_cnt = 0
 
 clean_line_idx = 0
 
@@ -82,5 +100,6 @@ def rand_predict():
 
 if __name__ == '__main__':
     # predict_clean()
-    predict_market_eval()
+    predict_market_eval('top10/filter_pid.log')
+    predict_market_eval('top10/predict_test.log')
     # rand_predict()
