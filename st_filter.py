@@ -32,12 +32,16 @@ def predict_filter():
             c1 = real_tracks[int(predict_idx) - 1][1]
             c2 = real_tracks[line_idx][1]
             score = track_score(camera_delta_s, c1, time1, c2, time2)
-            if score > 0.60:
+            # score, [0, 0.48] shot rate up, [0.48, 0.7], shot rate keep the same
+            if score > 0.48:
                 write(filter_path, predict_idx + ' ')
-            # if score > 0.90:
-            #     write(sure_path, predict_idx + ' ')
+            # score [0.7, 0.9], all shot up, line shot down
+            # score [0.9, 1], show rate down
+            # all shot max is 53%, line shot max is 83%
+            if score > 0.9:
+                write(sure_path, predict_idx + ' ')
         write(filter_path, '\n')
-        # write(sure_path, '\n')
+        write(sure_path, '\n')
     read_lines_and(predict_path, predict_judge)
 
 

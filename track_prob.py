@@ -33,8 +33,8 @@ def track_score(camera_delta_s, camera1, time1, camera2, time2):
 
     cur_delta = time2 - time1
     delta_distribution = camera_delta_s[camera1][camera2]
-    # 30 second
-    interval = 1 * 30 * 25
+    # 10 second
+    interval = 1 * 10 * 25
     left_bound = cur_delta - interval
     right_bound = cur_delta + interval
     left_index = binary_search(delta_distribution, left_bound)

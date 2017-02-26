@@ -102,4 +102,5 @@ if __name__ == '__main__':
     # predict_clean()
     predict_market_eval('top10/filter_pid.log')
     predict_market_eval('top10/predict_test.log')
+    predict_market_eval('top10/sure_pid.log')
     # rand_predict()
