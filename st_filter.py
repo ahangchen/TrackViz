@@ -1,6 +1,3 @@
-import os
-from math import sqrt
-
 from file_helper import read_lines, read_lines_and, write, read_lines_idx_and, safe_remove
 from serialize import pickle_load, pickle_save
 from track_prob import track_score
