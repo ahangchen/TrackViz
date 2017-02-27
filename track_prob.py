@@ -49,4 +49,4 @@ def track_score(camera_delta_s, camera1, time1, camera2, time2):
 
 if __name__ == '__main__':
     camera_delta_s = pickle_load('top10/sorted_deltas.pickle')
-    track_score(camera_delta_s, 1, 500, 3, 0)
+    track_score(camera_delta_s, 1, 500, 2, 500)

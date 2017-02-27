@@ -32,7 +32,7 @@ def predict_market_eval(target_path):
     predict_path = target_path
     answer_lines = read_lines(answer_path)
     real_pids = [answer.split('_')[0] for answer in answer_lines]
-    top_cnt = 10
+    top_cnt = 1
 
     def is_shot(line):
         global line_idx
@@ -40,10 +40,13 @@ def predict_market_eval(target_path):
         global shot_cnt
         global predict_cnt
         global predict_line_cnt
-        line_idx += 1
+
         predict_idx_es = line.split()
         has_shot = False
-        predict_cnt += len(predict_idx_es)
+        if len(predict_idx_es) > top_cnt:
+            predict_cnt += top_cnt
+        else:
+            predict_cnt += len(predict_idx_es)
 
         if len(predict_idx_es) > 0:
             predict_line_cnt += 1
@@ -51,12 +54,13 @@ def predict_market_eval(target_path):
         for i, predict_idx in enumerate(predict_idx_es):
             if i >= top_cnt:
                 break
-
+            # print(line_idx)
             if real_pids[int(predict_idx) - 1] == real_pids[line_idx]:
                 if not has_shot:
                     shot_line_cnt += 1
                     has_shot = True
                 shot_cnt += 1
+        line_idx += 1
 
     read_lines_and(predict_path, is_shot)
     global line_idx
@@ -64,8 +68,8 @@ def predict_market_eval(target_path):
     global shot_cnt
     global predict_cnt
     global predict_line_cnt
-    print('all shot: %f' % (float(shot_cnt) / predict_cnt))
-    print('top10 shot: %f' % (shot_line_cnt / float(predict_line_cnt)))
+    print('all predict shot(ac1): %f' % (float(shot_cnt) / predict_cnt))
+    print('top10 shot(ac2): %f\n' % (shot_line_cnt / 3914.0))
     line_idx = 0
     shot_cnt = 0
     shot_line_cnt = 0
@@ -100,7 +104,8 @@ def rand_predict():
 
 if __name__ == '__main__':
     # predict_clean()
-    predict_market_eval('top10/filter_pid.log')
-    predict_market_eval('top10/predict_test.log')
-    predict_market_eval('top10/sure_pid.log')
+    print('origin:')
+    predict_market_eval('top10/renew_pid.log')
+    print('appearance and track filter:')
+    predict_market_eval('top10/cross_filter_pid.log')
     # rand_predict()
