@@ -25,6 +25,7 @@ def predict_eval():
 
 
 shot_cnt = 0
+top_cnt = 10
 
 
 def predict_market_eval(target_path):
@@ -32,7 +33,7 @@ def predict_market_eval(target_path):
     predict_path = target_path
     answer_lines = read_lines(answer_path)
     real_pids = [answer.split('_')[0] for answer in answer_lines]
-    top_cnt = 1
+
 
     def is_shot(line):
         global line_idx
@@ -105,7 +106,6 @@ def rand_predict():
 if __name__ == '__main__':
     # predict_clean()
     print('origin:')
-    predict_market_eval('top10/renew_pid.log')
+    predict_market_eval('top%d/renew_pid.log' % top_cnt)
     print('appearance and track filter:')
-    predict_market_eval('top10/cross_filter_pid.log')
-    # rand_predict()
+    predict_market_eval('top%d/cross_filter_pid.log' % top_cnt)

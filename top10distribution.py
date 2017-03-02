@@ -78,7 +78,7 @@ predict_track_path = 'top10/predict_tracks.txt'
 
 
 def get_predict_tracks():
-    renew_tracks()
+    # renew_tracks()
     origin_tracks = get_tracks()
     # person_ids = get_person_idx()
 
