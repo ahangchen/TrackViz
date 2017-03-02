@@ -190,7 +190,6 @@ def cross_st_img_ranker():
         for j in range(len(person_ap_pids)):
             if j > line_log_cnt:
                 break
-            print('%f' % persons_track_scores[i][person_score_idx_s[i][j]])
             write(score_path, '%f ' % persons_cross_scores[i][person_score_idx_s[i][j]])
             write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
         write(log_path, '\n')
