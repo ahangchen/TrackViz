@@ -120,5 +120,5 @@ def store_sorted_deltas():
     pickle_save('top10/sorted_deltas.pickle', camera_delta_s)
 
 if __name__ == '__main__':
-    # get_predict_tracks()
+    get_predict_tracks()
     store_sorted_deltas()

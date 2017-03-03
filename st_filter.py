@@ -10,8 +10,8 @@ track_score_idx = 0
 
 
 def predict_track_scores():
-    persons_deltas_score = pickle_load('persons_deltas_score.pickle')
-    if pickle_load('persons_deltas_score.pickle') is not None:
+    persons_deltas_score = pickle_load('top10/persons_deltas_score.pickle')
+    if pickle_load('top10/persons_deltas_score.pickle') is not None:
         return persons_deltas_score
     predict_path = 'top10/renew_pid.log'
     answer_path = 'top10/test_tracks.txt'
@@ -44,13 +44,13 @@ def predict_track_scores():
         persons_deltas_score.append(person_deltas_score)
 
     read_lines_and(predict_path, predict_judge)
-    pickle_save('persons_deltas_score.pickle', persons_deltas_score)
+    pickle_save('top10/persons_deltas_score.pickle', persons_deltas_score)
     return persons_deltas_score
 
 
 def predict_img_scores():
-    final_persons_scores = pickle_load('persons_ap_scores.pickle')
-    if pickle_load('persons_ap_score.pickle') is not None:
+    final_persons_scores = pickle_load('top10/persons_ap_scores.pickle')
+    if pickle_load('top10/persons_ap_score.pickle') is not None:
         return final_persons_scores
     predict_score_path = 'top10/renew_ac.log'
     final_persons_scores = list()
@@ -61,13 +61,13 @@ def predict_img_scores():
         for score in scores:
             res_score.append(float(score))
         final_persons_scores.append(res_score)
-    pickle_save('persons_ap_scores.pickle', final_persons_scores)
+    pickle_save('top10/persons_ap_scores.pickle', final_persons_scores)
     return final_persons_scores
 
 
 def predict_pids():
-    predict_persons = pickle_load('predict_persons.pickle')
-    if pickle_load('predict_persons.pickle') is not None:
+    predict_persons = pickle_load('top10/predict_persons.pickle')
+    if pickle_load('top10/predict_persons.pickle') is not None:
         return predict_persons
     predict_person_path = 'top10/renew_pid.log'
     predict_persons = list()
@@ -78,7 +78,7 @@ def predict_pids():
         for pid in pids:
             res_pids.append(int(pid))
         predict_persons.append(res_pids)
-    pickle_save('predict_persons.pickle', predict_persons)
+    pickle_save('top10/predict_persons.pickle', predict_persons)
     return predict_persons
 
 
