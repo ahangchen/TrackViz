@@ -33,13 +33,15 @@ def track_score(camera_delta_s, camera1, time1, camera2, time2):
 
     cur_delta = time2 - time1
     delta_distribution = camera_delta_s[camera1][camera2]
+    total_cnt = sum(map(len, camera_delta_s[camera1]))
     # 10 second
     interval = 1 * 10 * 10
     left_bound = cur_delta - interval
     right_bound = cur_delta + interval
     left_index = binary_search(delta_distribution, left_bound)
     right_index = binary_search(delta_distribution, right_bound)
-    score = (right_index - left_index) / float(len(delta_distribution))
+
+    score = (right_index - left_index + 1) / float(total_cnt)
     if score > 0:
         print(len(delta_distribution))
         print('delta range %d ~ %d' % (delta_distribution[0], delta_distribution[-1]))
@@ -50,4 +52,4 @@ def track_score(camera_delta_s, camera1, time1, camera2, time2):
 
 if __name__ == '__main__':
     camera_delta_s = pickle_load('top10/sorted_deltas.pickle')
-    track_score(camera_delta_s, 1, 25, 1, 25)
+    track_score(camera_delta_s, 1, 25, 2, 200)
