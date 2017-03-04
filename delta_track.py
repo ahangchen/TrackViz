@@ -5,13 +5,15 @@ import numpy as np
 import seaborn as sns
 
 from file_helper import read_lines_and
-from raw_data import camera_cnt
 
 # data type :
 # 0: market1501 real data, 1: market1501 predict top10 data,
 # 2: grid true data, 3: grid predict data,
 # 4: grid rand data
-data_type = 1
+# 5: 3dpes data
+data_type = 5
+
+camera_cnt = 8
 
 viz_local = True
 
@@ -34,6 +36,8 @@ def track_infos(camera_num):
         read_lines_and('grid_predict/grid_c%d.txt' % camera_num, count_interval)
     elif data_type == 4:
         read_lines_and('grid_predict/rand/grid_c%d.txt' % camera_num, count_interval)
+    elif data_type == 5:
+        read_lines_and('3dpes/c%d_tracks.txt' % camera_num, count_interval)
     else:
         read_lines_and('top10/predict_c%d.txt' % camera_num, count_interval)
     return tracks
@@ -54,7 +58,7 @@ def find_id_delta(intervals, id, frame):
 def camera_distribute(camera_num):
     intervals = track_infos(camera_num)
     print('get intervals for c%d' % camera_num)
-    deltas = [list() for i in range(6)]
+    deltas = [list() for i in range(camera_cnt)]
 
     def shuffle_person(img_name):
         if '.' not in img_name:
@@ -73,7 +77,7 @@ def camera_distribute(camera_num):
                 # exclude first zero record and not found id records
                 # deltas.append([cur_delta['id'], cur_delta['camera'], cur_delta['delta']])
                 # ignore large data
-                if abs(delta) < 2000:
+                if 0 < abs(delta) < 400:
                     deltas[camera_id - 1].append(delta)
     if data_type == 0:
         read_lines_and('market_s1/track_s1.txt', shuffle_person)
@@ -81,6 +85,8 @@ def camera_distribute(camera_num):
         read_lines_and('grid/tracks.txt', shuffle_person)
     elif data_type == 3 or data_type == 4:
         read_lines_and('grid_predict/grid_tracks.txt', shuffle_person)
+    elif data_type == 5:
+        read_lines_and('3dpes/training_track.txt', shuffle_person)
     else:
         read_lines_and('top10/predict_tracks.txt', shuffle_person)
     return deltas
@@ -96,6 +102,8 @@ def viz_data_for_market():
 def distribute_in_cameras(data_s, subplot, camera_id):
     sns.set(color_codes=True)
     for i, data in enumerate(data_s):
+        if camera_id == i + 1:
+            continue
         if len(data) == 0:
             print('no data: %d - %d' %(camera_id, i))
             continue
@@ -106,7 +114,7 @@ def distribute_in_cameras(data_s, subplot, camera_id):
 
 def viz_market_distribution():
     viz_data = viz_data_for_market()
-    f, axes = plt.subplots(3, 2, figsize=(15, 10))
+    f, axes = plt.subplots(camera_cnt / 2, 2, figsize=(15, 10))
     if viz_local:
         for ax_s in axes:
             for ax in ax_s:
@@ -124,7 +132,7 @@ def viz_market_distribution():
 
 def deltas2track():
     viz_data = viz_data_for_market()
-    track = [[list(), list()] for _ in range(6)]
+    track = [[list(), list()] for _ in range(camera_cnt)]
     for i, camera_deltas in enumerate(viz_data):
         for j, per_camera_deltas in enumerate(camera_deltas):
             for delta in per_camera_deltas:
@@ -145,15 +153,15 @@ def distribute_joint(data_s, subplot, camera_id):
 
 def viz_market():
     viz_data = deltas2track()
-    f, axes = plt.subplots(3, 2)
+    f, axes = plt.subplots(camera_cnt / 2, 2)
     if viz_local:
         for i, ax_s in enumerate(axes):
             for j, ax in enumerate(ax_s):
                 ax.set_title('Distribution for camera %d' % (i * 2 + j + 1))
                 # ax.set_xlabel('camera')
                 ax.set_ylabel('time')
-                if data_type != 2 and data_type != 3 and data_type != 4:
-                    ax.set_ylim([-4000, 4000])
+                if data_type <= 1 or data_type > 4:
+                    ax.set_ylim([-500, 500])
     sns.despine(left=True)
     for i in range(camera_cnt):
         # sns.plt.title('Appear distribution in cameras %d' % (i + 1))

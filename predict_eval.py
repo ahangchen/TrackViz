@@ -70,7 +70,7 @@ def predict_market_eval(target_path):
     global predict_cnt
     global predict_line_cnt
     print('all predict shot(ac1): %f' % (float(shot_cnt) / predict_cnt))
-    print('top%d shot(ac2): %f\n' % (top_cnt, shot_line_cnt / 3914.0))
+    print('top%d shot(ac2): %f\n' % (top_cnt, shot_line_cnt / float(line_idx)))
     line_idx = 0
     shot_cnt = 0
     shot_line_cnt = 0

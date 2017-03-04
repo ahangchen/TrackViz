@@ -19,6 +19,8 @@ def predict_track_scores():
     real_tracks = list()
     for answer in answer_lines:
         info = answer.split('_')
+        if 'bmp' in info[2]:
+            info[2] = info[2].split('.')[0]
         real_tracks.append([info[0], int(info[1][1]), int(info[2])])
 
     top_cnt = 10
@@ -185,7 +187,7 @@ def cross_st_img_ranker():
 
     for i, person_ap_pids in enumerate(persons_ap_pids):
         for j in range(len(person_ap_pids)):
-            if j > line_log_cnt:
+            if j >= line_log_cnt:
                 break
             write(score_path, '%f ' % persons_cross_scores[i][person_score_idx_s[i][j]])
             write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
