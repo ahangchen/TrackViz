@@ -102,8 +102,8 @@ def viz_data_for_market():
 def distribute_in_cameras(data_s, subplot, camera_id):
     sns.set(color_codes=True)
     for i, data in enumerate(data_s):
-        if camera_id == i + 1:
-            continue
+        # if camera_id == i + 1:
+        #     continue
         if len(data) == 0:
             print('no data: %d - %d' %(camera_id, i))
             continue
@@ -175,5 +175,5 @@ def viz_market():
 
 if __name__ == '__main__':
     # print(camera_distribute(1))
-    viz_market_distribution()
-    # viz_market()
+    # viz_market_distribution()
+    viz_market()

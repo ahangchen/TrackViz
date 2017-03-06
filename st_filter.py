@@ -1,9 +1,11 @@
 from file_helper import read_lines, read_lines_and, write, read_lines_idx_and, safe_remove
 from serialize import pickle_load, pickle_save
+from track_prob import track_interval_score
 from track_prob import track_score
 
 line_idx = 0
 camera_delta_s = pickle_load('top10/sorted_deltas.pickle')
+interval_scores = pickle_load('top10/interval_scores.pickle')
 
 
 track_score_idx = 0

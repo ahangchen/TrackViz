@@ -119,6 +119,33 @@ def store_sorted_deltas():
     # for python
     pickle_save('top10/sorted_deltas.pickle', camera_delta_s)
 
+
+def interval_scores():
+    camera_delta_s = viz_data_for_market()
+    for camera_delta in camera_delta_s:
+        for delta_s in camera_delta:
+            delta_s.sort()
+    gap_cnt = 5
+    camera_pair_travel_probs = [[list() for _ in range(len(camera_delta_s[0]))] for _ in range(len(camera_delta_s))]
+    for i, camera_delta in enumerate(camera_delta_s):
+        for j, delta_s in enumerate(camera_delta):
+            gap_width = (delta_s[-1] - delta_s[0])/float(gap_cnt)
+            for k in range(gap_cnt):
+                left_bound = delta_s[0] + gap_width * k
+                right_bound = delta_s[1] + gap_width * (k + 1)
+                total_cnt = sum(map(len, camera_delta))
+                sp_cnt = len(delta_s)
+                camera_pair_travel_probs[i][j].append({
+                    'left': left_bound,
+                    'right': right_bound,
+                    'prob': sp_cnt / float(total_cnt)
+                    # 'prob': (binary_search(delta_s, right_bound) - binary_search(delta_s, left_bound)) / float(total_cnt)
+                })
+    pickle_save('top10/interval_scores.pickle', camera_pair_travel_probs)
+    return camera_pair_travel_probs
+
+
 if __name__ == '__main__':
     # get_predict_tracks()
-    store_sorted_deltas()
+    # store_sorted_deltas()
+    scores = interval_scores()

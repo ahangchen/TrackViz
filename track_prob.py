@@ -42,6 +42,7 @@ def track_score(camera_delta_s, camera1, time1, camera2, time2):
     right_index = binary_search(delta_distribution, right_bound)
 
     score = (right_index - left_index + 1) / float(total_cnt)
+    # score = (right_index - left_index + 1) / float(len(camera_delta_s[camera1][2]))
     if score > 0:
         print(len(delta_distribution))
         print('delta range %d ~ %d' % (delta_distribution[0], delta_distribution[-1]))
@@ -50,6 +51,16 @@ def track_score(camera_delta_s, camera1, time1, camera2, time2):
         print('probablity: %f%%' % (score * 100))
     return score
 
+
+def track_interval_score(interval_score_s, camera1, time1, camera2, time2):
+    delta = time2 - time1
+    for i, camera_pair_travel_prob in enumerate(interval_score_s[camera1 - 1][camera2 - 1]):
+        if camera_pair_travel_prob['left'] < delta < camera_pair_travel_prob['right']:
+            print('camera1: %d, camera2: %d, delta: %d, interval: %d, prob: %f' % (
+                camera1, camera2, delta, i, camera_pair_travel_prob['prob']))
+            return camera_pair_travel_prob['prob']
+    return 0
+
 if __name__ == '__main__':
     camera_delta_s = pickle_load('top10/sorted_deltas.pickle')
-    track_score(camera_delta_s, 1, 25, 2, 200)
+    track_score(camera_delta_s, 1, 25, 2, 250)
