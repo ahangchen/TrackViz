@@ -28,12 +28,11 @@ shot_cnt = 0
 top_cnt = 10
 
 
-def predict_market_eval(target_path):
-    answer_path = 'top10/test_tracks.txt'
+def predict_market_eval(target_path, top_cnt):
+    answer_path = target_path.split('/')[0] + '/test_tracks.txt'
     predict_path = target_path
     answer_lines = read_lines(answer_path)
     real_pids = [answer.split('_')[0] for answer in answer_lines]
-
 
     def is_shot(line):
         global line_idx
@@ -69,8 +68,8 @@ def predict_market_eval(target_path):
     global shot_cnt
     global predict_cnt
     global predict_line_cnt
-    print('all predict shot(ac1): %f' % (float(shot_cnt) / predict_cnt))
-    print('top%d shot(ac2): %f\n' % (top_cnt, shot_line_cnt / float(line_idx)))
+    # print('all predict shot(ac1): %f' % (float(shot_cnt) / predict_cnt))
+    print('top%d shot(ac2): %f' % (top_cnt, shot_line_cnt / float(line_idx)))
     line_idx = 0
     shot_cnt = 0
     shot_line_cnt = 0
@@ -105,7 +104,21 @@ def rand_predict():
 
 if __name__ == '__main__':
     # predict_clean()
-    print('origin:')
-    predict_market_eval('top10/renew_pid.log')
-    print('appearance and track filter:')
-    predict_market_eval('top10/cross_filter_pid.log')
+    print('\nMarket to GRID:')
+    predict_market_eval('top10-g2m/renew_pid.log', 10)
+    predict_market_eval('top10-g2m/renew_pid.log', 5)
+    predict_market_eval('top10-g2m/renew_pid.log', 1)
+    # print('\nMarket to GRID with reused track score:')
+    # predict_market_eval('top10/cross_filter_pid.log', 10)
+    # predict_market_eval('top10/cross_filter_pid.log', 5)
+    # predict_market_eval('top10/cross_filter_pid.log', 1)
+    # print('\nretrain():')
+    # predict_market_eval('top10/renew_pid.log', 10)
+    # predict_market_eval('top10/renew_pid.log', 5)
+    # predict_market_eval('top10/renew_pid.log', 1)
+    # print('\nCUHK to Market with track score:')
+    # predict_market_eval('top10/cross_filter_pid.log', 10)
+    # predict_market_eval('top10/cross_filter_pid.log', 5)
+    # predict_market_eval('top10/cross_filter_pid.log', 1)
+    # print('appearance and track filter:')
+    # predict_market_eval('top10/cross_filter_pid.log')

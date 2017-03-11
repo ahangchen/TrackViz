@@ -1,10 +1,9 @@
-from delta_track import viz_market_distribution, viz_data_for_market
+from delta_track import viz_data_for_market
 from file_helper import read_lines_and, write
 from file_helper import write_line
 from raw_data import train_track_path
 from serialize import pickle_save
 from st_filter import predict_img_scores, predict_pids
-from track_prob import binary_search
 
 predict_path = 'top10/predict_pid.log'
 test_path = 'top10/test_tracks.txt'
@@ -92,17 +91,27 @@ def get_predict_tracks():
             tail = origin_tracks[predict_line_idx][2:-1]
         else:
             tail = origin_tracks[predict_line_idx][4: -1]
-        camera = tail[2]
+        if predict_line_idx == 499:
+            print(predict_line_idx)
+        if 'jpe' in tail:
+            camera = tail[1]
+        else:
+            camera = tail[2]
+        track_time = tail.split('_')[2]
         mids = line.split()
-        write_line(predict_track_path, '%04d' % (int(predict_line_idx) + 1) + tail)
-        write_line('top10/predict_c%d.txt' % int(camera), ('%04d' % (int(predict_line_idx) + 1) + tail))
+        write_line(predict_track_path,
+                   ('%04d_c%d_%d_n.jpg' % (int(predict_line_idx) + 1, int(camera), int(track_time))))
+        write_line('top10/predict_c%d.txt' % int(camera),
+                   ('%04d_c%d_%d_n.jpg' % (int(predict_line_idx) + 1, int(camera), int(track_time))))
         for i, mid in enumerate(mids):
-            if i >= 5:
+            if i >= 10:
                 break
-            write_line(predict_track_path, '%04d' % int(mid) + tail)
-            write_line('top10/predict_c%d.txt' % int(camera), ('%04d' % int(mid)) + tail)
+            write_line(predict_track_path,
+                       ('%04d_c%d_%d_n.jpg' % (int(mid), int(camera), int(track_time))))
+            write_line('top10/predict_c%d.txt' % int(camera),
+                       ('%04d_c%d_%d_n.jpg' % (int(mid), int(camera), int(track_time))))
         predict_line_idx += 1
-
+        # print('done')
     read_lines_and(renew_pid_path, add_predict_track)
 
 
@@ -146,6 +155,6 @@ def interval_scores():
 
 
 if __name__ == '__main__':
-    # get_predict_tracks()
-    # store_sorted_deltas()
-    scores = interval_scores()
+    get_predict_tracks()
+    store_sorted_deltas()
+    # scores = interval_scores()

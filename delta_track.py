@@ -11,9 +11,9 @@ from file_helper import read_lines_and
 # 2: grid true data, 3: grid predict data,
 # 4: grid rand data
 # 5: 3dpes data
-data_type = 5
+data_type = 1
 
-camera_cnt = 8
+camera_cnt = 6
 
 viz_local = True
 
@@ -77,7 +77,7 @@ def camera_distribute(camera_num):
                 # exclude first zero record and not found id records
                 # deltas.append([cur_delta['id'], cur_delta['camera'], cur_delta['delta']])
                 # ignore large data
-                if 0 < abs(delta) < 1000000:
+                if abs(delta) < 1000000:
                     deltas[camera_id - 1].append(delta)
     if data_type == 0:
         read_lines_and('market_s1/track_s1.txt', shuffle_person)
@@ -175,5 +175,5 @@ def viz_market():
 
 if __name__ == '__main__':
     # print(camera_distribute(1))
-    # viz_market_distribution()
-    viz_market()
+    viz_market_distribution()
+    # viz_market()

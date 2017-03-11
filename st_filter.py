@@ -1,4 +1,4 @@
-from file_helper import read_lines, read_lines_and, write, read_lines_idx_and, safe_remove
+from file_helper import read_lines, read_lines_and, write, read_lines_idx_and, safe_remove, write_line
 from serialize import pickle_load, pickle_save
 from track_prob import track_interval_score
 from track_prob import track_score
@@ -9,6 +9,7 @@ interval_scores = pickle_load('top10/interval_scores.pickle')
 
 
 track_score_idx = 0
+data_type = 1
 
 
 def predict_track_scores():
@@ -23,8 +24,10 @@ def predict_track_scores():
         info = answer.split('_')
         if 'bmp' in info[2]:
             info[2] = info[2].split('.')[0]
-        real_tracks.append([info[0], int(info[1][1]), int(info[2])])
-
+        if 'jpe' in info[6]:
+            real_tracks.append([info[0], int(info[1][0]), int(info[2])])
+        else:
+            real_tracks.append([info[0], int(info[1][1]), int(info[2])])
     top_cnt = 10
     persons_deltas_score = list()
 
@@ -171,15 +174,19 @@ def cross_st_img_ranker():
     persons_cross_scores = list()
     log_path = 'top10/cross_filter_pid.log'
     score_path = 'top10/cross_filter_score.log'
+    renew_path = 'top10/renew_pid1.log'
+    renew_ac_path = 'top10/renew_ac1.log'
     safe_remove(log_path)
     safe_remove(score_path)
+    safe_remove(renew_path)
+    safe_remove(renew_ac_path)
     line_log_cnt = 10
 
     for i, person_ap_pids in enumerate(persons_ap_pids):
         cross_scores = list()
         for j, person_ap_pid in enumerate(person_ap_pids):
             cross_score = (persons_track_scores[i][j] * 1) * (persons_ap_scores[i][j] * 1)
-            cross_scores.append(cross_score)
+            cross_scores.append(cross_score**0.5)
         persons_cross_scores.append(cross_scores)
     person_score_idx_s = list()
 
@@ -189,12 +196,15 @@ def cross_st_img_ranker():
 
     for i, person_ap_pids in enumerate(persons_ap_pids):
         for j in range(len(person_ap_pids)):
-            if j >= line_log_cnt:
-                break
-            write(score_path, '%f ' % persons_cross_scores[i][person_score_idx_s[i][j]])
-            write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
+            if j <= line_log_cnt:
+                write(score_path, '%f ' % persons_cross_scores[i][person_score_idx_s[i][j]])
+                write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
+            write(renew_ac_path, '%f ' % persons_cross_scores[i][person_score_idx_s[i][j]])
+            write(renew_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
         write(log_path, '\n')
         write(score_path, '\n')
+        write(renew_path, '\n')
+        write(renew_ac_path, '\n')
 
 
 if __name__ == '__main__':
