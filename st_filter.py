@@ -24,7 +24,7 @@ def predict_track_scores():
         info = answer.split('_')
         if 'bmp' in info[2]:
             info[2] = info[2].split('.')[0]
-        if 'jpe' in info[6]:
+        if len(info) > 4 and 'jpe' in info[6]:
             real_tracks.append([info[0], int(info[1][0]), int(info[2])])
         else:
             real_tracks.append([info[0], int(info[1][1]), int(info[2])])
@@ -188,6 +188,8 @@ def cross_st_img_ranker():
             cross_score = (persons_track_scores[i][j] * 1) * (persons_ap_scores[i][j] * 1)
             cross_scores.append(cross_score**0.5)
         persons_cross_scores.append(cross_scores)
+
+    max_score = max([max(predict_cross_scores) for predict_cross_scores in persons_cross_scores])
     person_score_idx_s = list()
 
     for i, person_cross_scores in enumerate(persons_cross_scores):
@@ -197,9 +199,9 @@ def cross_st_img_ranker():
     for i, person_ap_pids in enumerate(persons_ap_pids):
         for j in range(len(person_ap_pids)):
             if j <= line_log_cnt:
-                write(score_path, '%f ' % persons_cross_scores[i][person_score_idx_s[i][j]])
+                write(score_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]] / max_score))
                 write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
-            write(renew_ac_path, '%f ' % persons_cross_scores[i][person_score_idx_s[i][j]])
+            write(renew_ac_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]]))
             write(renew_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
         write(log_path, '\n')
         write(score_path, '\n')
