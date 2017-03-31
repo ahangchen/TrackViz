@@ -12,6 +12,20 @@ track_score_idx = 0
 data_type = 1
 
 
+def real_track(answer_path):
+    answer_lines = read_lines(answer_path)
+    real_tracks = list()
+    for answer in answer_lines:
+        info = answer.split('_')
+        if 'bmp' in info[2]:
+            info[2] = info[2].split('.')[0]
+        if len(info) > 4 and 'jpe' in info[6]:
+            real_tracks.append([info[0], int(info[1][0]), int(info[2])])
+        else:
+            real_tracks.append([info[0], int(info[1][1]), int(info[2])])
+    return real_tracks
+
+
 def predict_track_scores():
     persons_deltas_score = pickle_load('top10/persons_deltas_score.pickle')
     if pickle_load('top10/persons_deltas_score.pickle') is not None:
@@ -173,9 +187,11 @@ def cross_st_img_ranker():
 
     persons_cross_scores = list()
     log_path = 'top10/cross_filter_pid.log'
-    score_path = 'top10/cross_filter_score.log'
+    map_score_path = 'top10/cross_filter_score.log'
+    score_path = 'top10/raw_cross_filter_score.log'
     renew_path = 'top10/renew_pid1.log'
     renew_ac_path = 'top10/renew_ac1.log'
+    safe_remove(map_score_path)
     safe_remove(log_path)
     safe_remove(score_path)
     safe_remove(renew_path)
@@ -197,14 +213,23 @@ def cross_st_img_ranker():
         person_score_idx_s.append(sort_score_idx_s)
 
     for i, person_ap_pids in enumerate(persons_ap_pids):
+        img_score_s = list()
+        img_score_idx_s = list()
         for j in range(len(person_ap_pids)):
-            if j <= line_log_cnt:
+            if j < line_log_cnt:
+                img_score_idx_s.append(person_ap_pids.index(person_ap_pids[person_score_idx_s[i][j]]))
+                img_score_s.append(persons_ap_scores[i][img_score_idx_s[j]])
+        sort_img_score_s = sorted(img_score_s, reverse=True)
+        for j in range(len(person_ap_pids)):
+            if j < line_log_cnt:
+                write(map_score_path, '%f ' % sort_img_score_s[j])
                 write(score_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]] / max_score))
                 write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
             write(renew_ac_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]]))
             write(renew_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
         write(log_path, '\n')
         write(score_path, '\n')
+        write(map_score_path, '\n')
         write(renew_path, '\n')
         write(renew_ac_path, '\n')
 
