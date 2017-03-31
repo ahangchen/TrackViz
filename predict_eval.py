@@ -69,7 +69,8 @@ def predict_market_eval(target_path, top_cnt):
     global predict_cnt
     global predict_line_cnt
     # print('all predict shot(ac1): %f' % (float(shot_cnt) / predict_cnt))
-    print('top%d shot(ac2): %f' % (top_cnt, shot_line_cnt / float(line_idx)))
+    valid_line_cnt = 250
+    print('top%d shot: %f' % (top_cnt, shot_line_cnt / float(valid_line_cnt)))
     line_idx = 0
     shot_cnt = 0
     shot_line_cnt = 0
@@ -103,15 +104,36 @@ def rand_predict():
         write_line(raw_path, rand_output_str)
 
 if __name__ == '__main__':
-    # predict_clean()
+    # cross_st_img_ranker()
+
+    # print('\nbefore retrain')
+    # predict_market_eval('top-m2g-std1-train/renew_pid.log', 10)
+    # predict_market_eval('top-m2g-std1-train/renew_pid.log', 5)
+    # predict_market_eval('top-m2g-std1-train/renew_pid.log', 1)
+    # print('\ntop10 for same image pair, after retrain')
+    # predict_market_eval('top-m2g-std1-retrain-train-bck/renew_pid.log', 10)
+    # predict_market_eval('top-m2g-std1-retrain-train-bck/renew_pid.log', 5)
+    # predict_market_eval('top-m2g-std1-retrain-train-bck/renew_pid.log', 1)
+    # print('\ntop3 for same image pair, after retrain')
+    # predict_market_eval('top-m2g-std1-retrain-train-top3/renew_pid.log', 10)
+    # predict_market_eval('top-m2g-std1-retrain-train-top3/renew_pid.log', 5)
+    # predict_market_eval('top-m2g-std1-retrain-train-top3/renew_pid.log', 1)
+    # print('\ntop2 for same image pair, after retrain')
+    # predict_market_eval('top-m2g-std1-retrain-train-top2/renew_pid.log', 10)
+    # predict_market_eval('top-m2g-std1-retrain-train-top2/renew_pid.log', 5)
+    # predict_market_eval('top-m2g-std1-retrain-train-top2/renew_pid.log', 1)
+    # print('\ntop1 for same image pair, after retrain')
+    # predict_market_eval('top-m2g-std1-retrain-train-top1/renew_pid.log', 10)
+    # predict_market_eval('top-m2g-std1-retrain-train-top1/renew_pid.log', 5)
+    # predict_market_eval('top-m2g-std1-retrain-train-top1/renew_pid.log', 1)
     print('\nMarket to GRID:')
-    predict_market_eval('top10-g2m/renew_pid.log', 10)
-    predict_market_eval('top10-g2m/renew_pid.log', 5)
-    predict_market_eval('top10-g2m/renew_pid.log', 1)
-    # print('\nMarket to GRID with reused track score:')
-    # predict_market_eval('top10/cross_filter_pid.log', 10)
-    # predict_market_eval('top10/cross_filter_pid.log', 5)
-    # predict_market_eval('top10/cross_filter_pid.log', 1)
+    predict_market_eval('top10/renew_pid.log', 10)
+    predict_market_eval('top10/renew_pid.log', 5)
+    predict_market_eval('top10/renew_pid.log', 1)
+    print('\nMarket to GRID with track score:')
+    predict_market_eval('top10/cross_filter_pid.log', 10)
+    predict_market_eval('top10/cross_filter_pid.log', 5)
+    predict_market_eval('top10/cross_filter_pid.log', 1)
     # print('\nretrain():')
     # predict_market_eval('top10/renew_pid.log', 10)
     # predict_market_eval('top10/renew_pid.log', 5)
