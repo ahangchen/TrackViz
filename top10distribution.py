@@ -91,6 +91,10 @@ def get_predict_tracks():
             tail = origin_tracks[predict_line_idx][2:-1]
         else:
             tail = origin_tracks[predict_line_idx][4: -1]
+        if 's' in tail:
+            s_num = int(tail[4])
+        else:
+            s_num = 1
         if predict_line_idx == 499:
             print(predict_line_idx)
         if 'jpe' in tail:
@@ -100,16 +104,16 @@ def get_predict_tracks():
         track_time = tail.split('_')[2]
         mids = line.split()
         write_line(predict_track_path,
-                   ('%04d_c%d_%d_n.jpg' % (int(predict_line_idx) + 1, int(camera), int(track_time))))
+                   ('%04d_c%ds%d_%d_n.jpg' % (int(predict_line_idx) + 1, int(camera), s_num, int(track_time))))
         write_line('top10/predict_c%d.txt' % int(camera),
-                   ('%04d_c%d_%d_n.jpg' % (int(predict_line_idx) + 1, int(camera), int(track_time))))
+                   ('%04d_c%ds%d_%d_n.jpg' % (int(predict_line_idx) + 1, int(camera), s_num, int(track_time))))
         for i, mid in enumerate(mids):
             if i >= 10:
                 break
             write_line(predict_track_path,
-                       ('%04d_c%d_%d_n.jpg' % (int(mid), int(camera), int(track_time))))
+                       ('%04d_c%ds%d_%d_n.jpg' % (int(mid), int(camera), s_num, int(track_time))))
             write_line('top10/predict_c%d.txt' % int(camera),
-                       ('%04d_c%d_%d_n.jpg' % (int(mid), int(camera), int(track_time))))
+                       ('%04d_c%ds%d_%d_n.jpg' % (int(mid), int(camera), s_num, int(track_time))))
         predict_line_idx += 1
         # print('done')
     read_lines_and(renew_pid_path, add_predict_track)
@@ -157,4 +161,5 @@ def interval_scores():
 if __name__ == '__main__':
     get_predict_tracks()
     store_sorted_deltas()
+
     # scores = interval_scores()
