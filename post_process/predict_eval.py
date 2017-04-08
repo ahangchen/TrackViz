@@ -1,28 +1,13 @@
 import random
 
-from util.file_helper import read_lines_and, write, write_line, read_lines
+from profile.fusion_param import fusion_param
+from util.file_helper import read_lines_and, write_line, read_lines
 from util.str_helper import folder
 
 line_idx = 0
 shot_line_cnt = 0
 predict_cnt = 0
 predict_line_cnt = 0
-
-
-def predict_eval():
-    path = 'grid/predict_grid.log'
-
-    def is_shot(line):
-        global line_idx
-        global shot_line_cnt
-        line_idx += 1
-        predict_idx = line.split()
-        if str(line_idx + 2) in predict_idx[0:4]:
-            shot_line_cnt += 1
-            print(line_idx)
-
-    read_lines_and(path, is_shot)
-    print(shot_line_cnt * 2 / float(line_idx))
 
 
 shot_cnt = 0
@@ -81,19 +66,6 @@ def predict_market_eval(target_path, top_cnt):
 clean_line_idx = 0
 
 
-def predict_clean():
-    raw_path = 'grid_predict/predict_grid_raw.log'
-
-    def idx_up(line):
-        global clean_line_idx
-        predict_idx = line.split()
-        for idx in predict_idx:
-            write('grid_predict/predict_grid.log', str(int(idx) + clean_line_idx + 1) + ' ')
-        write('grid_predict/predict_grid.log', '\n')
-        clean_line_idx += 1
-    read_lines_and(raw_path, idx_up)
-
-
 def rand_predict():
     raw_path = 'grid_predict/predict_grid_rand.log'
 
@@ -104,44 +76,17 @@ def rand_predict():
             rand_output_str += str(rand_id) + ' '
         write_line(raw_path, rand_output_str)
 
-if __name__ == '__main__':
-    # cross_st_img_ranker()
 
-    # print('\nbefore retrain')
-    # predict_market_eval('top-m2g-std1-train/renew_pid.log', 10)
-    # predict_market_eval('top-m2g-std1-train/renew_pid.log', 5)
-    # predict_market_eval('top-m2g-std1-train/renew_pid.log', 1)
-    # print('\ntop10 for same image pair, after retrain')
-    # predict_market_eval('top-m2g-std1-retrain-train-bck/renew_pid.log', 10)
-    # predict_market_eval('top-m2g-std1-retrain-train-bck/renew_pid.log', 5)
-    # predict_market_eval('top-m2g-std1-retrain-train-bck/renew_pid.log', 1)
-    # print('\ntop3 for same image pair, after retrain')
-    # predict_market_eval('top-m2g-std1-retrain-train-top3/renew_pid.log', 10)
-    # predict_market_eval('top-m2g-std1-retrain-train-top3/renew_pid.log', 5)
-    # predict_market_eval('top-m2g-std1-retrain-train-top3/renew_pid.log', 1)
-    # print('\ntop2 for same image pair, after retrain')
-    # predict_market_eval('top-m2g-std1-retrain-train-top2/renew_pid.log', 10)
-    # predict_market_eval('top-m2g-std1-retrain-train-top2/renew_pid.log', 5)
-    # predict_market_eval('top-m2g-std1-retrain-train-top2/renew_pid.log', 1)
-    # print('\ntop1 for same image pair, after retrain')
-    # predict_market_eval('top-m2g-std1-retrain-train-top1/renew_pid.log', 10)
-    # predict_market_eval('top-m2g-std1-retrain-train-top1/renew_pid.log', 5)
-    # predict_market_eval('top-m2g-std1-retrain-train-top1/renew_pid.log', 1)
+def eval_on_train_test():
     print('\nMarket to GRID:')
-    predict_market_eval('data/top10/renew_pid.log', 10)
-    predict_market_eval('data/top10/renew_pid.log', 5)
-    predict_market_eval('data/top10/renew_pid.log', 1)
+    predict_market_eval(fusion_param['renew_pid_path'], 10)
+    predict_market_eval(fusion_param['renew_pid_path'], 5)
+    predict_market_eval(fusion_param['renew_pid_path'], 1)
     print('\nMarket to GRID with track score:')
-    predict_market_eval('data/top10/cross_filter_pid.log', 10)
-    predict_market_eval('data/top10/cross_filter_pid.log', 5)
-    predict_market_eval('data/top10/cross_filter_pid.log', 1)
-    # print('\nretrain():')
-    # predict_market_eval('data/top10/renew_pid.log', 10)
-    # predict_market_eval('data/top10/renew_pid.log', 5)
-    # predict_market_eval('data/top10/renew_pid.log', 1)
-    # print('\nCUHK to Market with track score:')
-    # predict_market_eval('data/top10/cross_filter_pid.log', 10)
-    # predict_market_eval('data/top10/cross_filter_pid.log', 5)
-    # predict_market_eval('data/top10/cross_filter_pid.log', 1)
-    # print('appearance and track filter:')
-    # predict_market_eval('data/top10/cross_filter_pid.log')
+    predict_market_eval(fusion_param['eval_fusion_path'], 10)
+    predict_market_eval(fusion_param['eval_fusion_path'], 5)
+    predict_market_eval(fusion_param['eval_fusion_path'], 1)
+
+
+if __name__ == '__main__':
+    eval_on_train_test()
