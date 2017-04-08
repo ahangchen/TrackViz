@@ -1,6 +1,7 @@
 import random
 
-from file_helper import read_lines_and, write, write_line, read_lines
+from util.file_helper import read_lines_and, write, write_line, read_lines
+from util.str_helper import folder
 
 line_idx = 0
 shot_line_cnt = 0
@@ -29,7 +30,7 @@ top_cnt = 10
 
 
 def predict_market_eval(target_path, top_cnt):
-    answer_path = target_path.split('/')[0] + '/test_tracks.txt'
+    answer_path = folder(target_path) + '/test_tracks.txt'
     predict_path = target_path
     answer_lines = read_lines(answer_path)
     real_pids = [answer.split('_')[0] for answer in answer_lines]
@@ -127,20 +128,20 @@ if __name__ == '__main__':
     # predict_market_eval('top-m2g-std1-retrain-train-top1/renew_pid.log', 5)
     # predict_market_eval('top-m2g-std1-retrain-train-top1/renew_pid.log', 1)
     print('\nMarket to GRID:')
-    predict_market_eval('top10/renew_pid.log', 10)
-    predict_market_eval('top10/renew_pid.log', 5)
-    predict_market_eval('top10/renew_pid.log', 1)
+    predict_market_eval('data/top10/renew_pid.log', 10)
+    predict_market_eval('data/top10/renew_pid.log', 5)
+    predict_market_eval('data/top10/renew_pid.log', 1)
     print('\nMarket to GRID with track score:')
-    predict_market_eval('top10/cross_filter_pid.log', 10)
-    predict_market_eval('top10/cross_filter_pid.log', 5)
-    predict_market_eval('top10/cross_filter_pid.log', 1)
+    predict_market_eval('data/top10/cross_filter_pid.log', 10)
+    predict_market_eval('data/top10/cross_filter_pid.log', 5)
+    predict_market_eval('data/top10/cross_filter_pid.log', 1)
     # print('\nretrain():')
-    # predict_market_eval('top10/renew_pid.log', 10)
-    # predict_market_eval('top10/renew_pid.log', 5)
-    # predict_market_eval('top10/renew_pid.log', 1)
+    # predict_market_eval('data/top10/renew_pid.log', 10)
+    # predict_market_eval('data/top10/renew_pid.log', 5)
+    # predict_market_eval('data/top10/renew_pid.log', 1)
     # print('\nCUHK to Market with track score:')
-    # predict_market_eval('top10/cross_filter_pid.log', 10)
-    # predict_market_eval('top10/cross_filter_pid.log', 5)
-    # predict_market_eval('top10/cross_filter_pid.log', 1)
+    # predict_market_eval('data/top10/cross_filter_pid.log', 10)
+    # predict_market_eval('data/top10/cross_filter_pid.log', 5)
+    # predict_market_eval('data/top10/cross_filter_pid.log', 1)
     # print('appearance and track filter:')
-    # predict_market_eval('top10/cross_filter_pid.log')
+    # predict_market_eval('data/top10/cross_filter_pid.log')

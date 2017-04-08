@@ -1,11 +1,11 @@
+import os
 from random import uniform
 
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-import os
 
-from file_helper import read_lines_and
+from util.file_helper import read_lines_and
 
 # data type :
 # 0: market1501 real data, 1: market1501 predict top10 data,
@@ -42,8 +42,8 @@ def track_infos(camera_num, s_num):
     elif data_type == 5:
         read_lines_and('3dpes/c%d_tracks.txt' % camera_num, count_interval)
     else:
-        if os.path.exists('top10/predict_c%d.txt' % camera_num):
-            read_lines_and('top10/predict_c%d.txt' % camera_num, count_interval)
+        if os.path.exists('data/top10/predict_c%d.txt' % camera_num):
+            read_lines_and('data/top10/predict_c%d.txt' % camera_num, count_interval)
 
     return tracks
 
@@ -95,7 +95,7 @@ def camera_distribute(camera_num):
         elif data_type == 5:
             read_lines_and('3dpes/training_track.txt', shuffle_person)
         else:
-            read_lines_and('top10/predict_tracks.txt', shuffle_person)
+            read_lines_and('data/top10/predict_tracks.txt', shuffle_person)
     return deltas
 
 

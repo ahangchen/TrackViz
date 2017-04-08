@@ -1,9 +1,7 @@
 # -*- coding: UTF-8 -*-
-import shutil
-from xml.dom.minidom import parse
 import xml.dom.minidom
 
-from file_helper import write_line
+from util.file_helper import write_line
 
 
 def rename_3dpes():

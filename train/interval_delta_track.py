@@ -1,11 +1,9 @@
-import random
-
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-from file_helper import read_lines_and
-from raw_data import camera_cnt
+from pre_process.raw_data import camera_cnt
+from util.file_helper import read_lines_and
 
 data_type = 0
 viz_local = True
@@ -32,7 +30,7 @@ def camera_intervals(camera_num):
     if data_type == 0:
         read_lines_and('market_s1/track_c%ds1.txt' % (camera_num), count_interval)
     else:
-        read_lines_and('top10/predict_trackc%ds1.txt' % (camera_num), count_interval)
+        read_lines_and('data/top10/predict_trackc%ds1.txt' % (camera_num), count_interval)
     return intervals[1:]
 
 
@@ -82,7 +80,7 @@ def camera_distribute(camera_num):
     if data_type == 0:
         read_lines_and('market_s1/track_s1.txt', shuffle_person)
     else:
-        read_lines_and('top10/predict_tracks1.txt', shuffle_person)
+        read_lines_and('data/top10/predict_tracks1.txt', shuffle_person)
     return deltas
 
 

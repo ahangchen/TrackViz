@@ -1,6 +1,6 @@
 import os
-import random
 import pickle
+import random
 
 
 def random6():

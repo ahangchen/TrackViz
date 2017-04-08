@@ -1,11 +1,10 @@
-from file_helper import read_lines, read_lines_and, write, read_lines_idx_and, safe_remove, write_line
-from serialize import pickle_load, pickle_save
-from track_prob import track_interval_score
-from track_prob import track_score
+from post_process.track_prob import track_score
+from util.file_helper import read_lines, read_lines_and, write, safe_remove
+from util.serialize import pickle_load, pickle_save
 
 line_idx = 0
-camera_delta_s = pickle_load('top10/sorted_deltas.pickle')
-interval_scores = pickle_load('top10/interval_scores.pickle')
+camera_delta_s = pickle_load('data/top10/sorted_deltas.pickle')
+interval_scores = pickle_load('data/top10/interval_scores.pickle')
 
 
 track_score_idx = 0
@@ -27,11 +26,11 @@ def real_track(answer_path):
 
 
 def predict_track_scores():
-    persons_deltas_score = pickle_load('top10/persons_deltas_score.pickle')
-    if pickle_load('top10/persons_deltas_score.pickle') is not None:
+    persons_deltas_score = pickle_load('data/top10/persons_deltas_score.pickle')
+    if pickle_load('data/top10/persons_deltas_score.pickle') is not None:
         return persons_deltas_score
-    predict_path = 'top10/renew_pid.log'
-    answer_path = 'top10/test_tracks.txt'
+    predict_path = 'data/top10/renew_pid.log'
+    answer_path = 'data/top10/test_tracks.txt'
     answer_lines = read_lines(answer_path)
     real_tracks = list()
     for answer in answer_lines:
@@ -65,15 +64,15 @@ def predict_track_scores():
         persons_deltas_score.append(person_deltas_score)
 
     read_lines_and(predict_path, predict_judge)
-    pickle_save('top10/persons_deltas_score.pickle', persons_deltas_score)
+    pickle_save('data/top10/persons_deltas_score.pickle', persons_deltas_score)
     return persons_deltas_score
 
 
 def predict_img_scores():
-    final_persons_scores = pickle_load('top10/persons_ap_scores.pickle')
-    if pickle_load('top10/persons_ap_score.pickle') is not None:
+    final_persons_scores = pickle_load('data/top10/persons_ap_scores.pickle')
+    if pickle_load('data/top10/persons_ap_score.pickle') is not None:
         return final_persons_scores
-    predict_score_path = 'top10/renew_ac.log'
+    predict_score_path = 'data/top10/renew_ac.log'
     final_persons_scores = list()
     persons_scores = read_lines(predict_score_path)
     for person_scores in persons_scores:
@@ -82,15 +81,15 @@ def predict_img_scores():
         for score in scores:
             res_score.append(float(score))
         final_persons_scores.append(res_score)
-    pickle_save('top10/persons_ap_scores.pickle', final_persons_scores)
+    pickle_save('data/top10/persons_ap_scores.pickle', final_persons_scores)
     return final_persons_scores
 
 
 def predict_pids():
-    predict_persons = pickle_load('top10/predict_persons.pickle')
-    if pickle_load('top10/predict_persons.pickle') is not None:
+    predict_persons = pickle_load('data/top10/predict_persons.pickle')
+    if pickle_load('data/top10/predict_persons.pickle') is not None:
         return predict_persons
-    predict_person_path = 'top10/renew_pid.log'
+    predict_person_path = 'data/top10/renew_pid.log'
     predict_persons = list()
     persons_predicts = read_lines(predict_person_path)
     for person_predict in persons_predicts:
@@ -99,7 +98,7 @@ def predict_pids():
         for pid in pids:
             res_pids.append(int(pid))
         predict_persons.append(res_pids)
-    pickle_save('top10/predict_persons.pickle', predict_persons)
+    pickle_save('data/top10/predict_persons.pickle', predict_persons)
     return predict_persons
 
 
@@ -117,10 +116,10 @@ def get_person_pids(predict_path):
 
 
 def st_filter_s():
-    predict_path = 'top10/renew_pid.log'
-    answer_path = 'top10/test_tracks.txt'
-    filter_path = 'top10/filter_pid.log'
-    sure_path = 'top10/sure_pid.log'
+    predict_path = 'data/top10/renew_pid.log'
+    answer_path = 'data/top10/test_tracks.txt'
+    filter_path = 'data/top10/filter_pid.log'
+    sure_path = 'data/top10/sure_pid.log'
     safe_remove(filter_path)
     safe_remove(sure_path)
     answer_lines = read_lines(answer_path)
@@ -167,7 +166,7 @@ def st_img_filter():
     persons_ap_scores = predict_img_scores()
     persons_ap_pids = predict_pids()
     persons_track_scores = predict_track_scores()
-    log_path = 'top10/double_filter_pid.log'
+    log_path = 'data/top10/double_filter_pid.log'
     safe_remove(log_path)
     for i, person_ap_pids in enumerate(persons_ap_pids):
         for j, person_ap_pid in enumerate(person_ap_pids):
@@ -186,16 +185,17 @@ def cross_st_img_ranker():
     persons_track_scores = predict_track_scores()
 
     persons_cross_scores = list()
-    log_path = 'top10/cross_filter_pid.log'
-    map_score_path = 'top10/cross_filter_score.log'
-    score_path = 'top10/raw_cross_filter_score.log'
-    renew_path = 'top10/renew_pid1.log'
-    renew_ac_path = 'top10/renew_ac1.log'
+    log_path = 'data/top10/cross_filter_pid.log'
+    map_score_path = 'data/top10/cross_filter_score.log'
+    score_path = 'data/top10/raw_cross_filter_score.log'
+    renew_path = 'data/top10/renew_pid1.log'
+    renew_ac_path = 'data/top10/renew_ac1.log'
     safe_remove(map_score_path)
     safe_remove(log_path)
     safe_remove(score_path)
     safe_remove(renew_path)
     safe_remove(renew_ac_path)
+    # not limit this count for logging all probability
     line_log_cnt = 10
 
     for i, person_ap_pids in enumerate(persons_ap_pids):

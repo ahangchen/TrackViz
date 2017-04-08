@@ -1,7 +1,6 @@
 import random
 
 import matplotlib.pyplot as plt
-import seaborn
 
 
 # Make a prediction with coefficients

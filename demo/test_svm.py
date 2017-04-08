@@ -6,11 +6,10 @@
 # Email  : zouxy09@qq.com
 #################################################
 import random
-
-import numpy as np
-import matplotlib.pyplot as plt
 import time
-import seaborn
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 # calculate the sigmoid function

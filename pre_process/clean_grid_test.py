@@ -1,9 +1,9 @@
-from file_helper import read_lines, write_line
+from util.file_helper import read_lines, write_line
 
 
 def clean_grid():
-    grid_test_path = 'top-m2g-std4-test/test_track.txt'
-    new_test_path = 'top-m2g-std4-test/test_tracks.txt'
+    grid_test_path = 'data/top10/test_track.txt'
+    new_test_path = 'data/top10/test_tracks.txt'
     grid_test_lines = read_lines(grid_test_path)
     for i, grid_test_line in enumerate(grid_test_lines):
         tail = grid_test_line[4: -1]
