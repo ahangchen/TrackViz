@@ -2,6 +2,8 @@ from util.file_helper import read_lines, write_line
 
 
 def clean_grid():
+    grid_test_path = 'top10/test_track.txt'
+    new_test_path = 'top10/test_tracks.txt'
     grid_test_path = 'data/top10/test_track.txt'
     new_test_path = 'data/top10/test_tracks.txt'
     grid_test_lines = read_lines(grid_test_path)
