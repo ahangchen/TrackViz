@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
+from profile.fusion_param import fusion_param
 from util.file_helper import read_lines_and
 
 # data type :
@@ -20,6 +21,7 @@ viz_local = True
 
 
 def track_infos(camera_num, s_num):
+    camera_num = str(camera_num)
     tracks = list()
 
     def count_interval(img_name):
@@ -32,18 +34,23 @@ def track_infos(camera_num, s_num):
         if seq_num == s_num:
             tracks.append([person_id, track_time])
     if data_type == 0:
-        read_lines_and('market_s1/track_c%ds1.txt' % camera_num, count_interval)
+        # read_lines_and('market_s1/track_c%ds1.txt' % camera_num, count_interval)
+        read_lines_and(fusion_param['predict_camera_path'] + camera_num + '.txt', count_interval)
     elif data_type == 2:
-        read_lines_and('grid/trackc%d.txt' % camera_num, count_interval)
+        # read_lines_and('grid/trackc%d.txt' % camera_num, count_interval)
+        read_lines_and(fusion_param['predict_camera_path'] + camera_num + '.txt', count_interval)
     elif data_type == 3:
         read_lines_and('grid_predict/grid_c%d.txt' % camera_num, count_interval)
+        read_lines_and(fusion_param['predict_camera_path'] + camera_num + '.txt', count_interval)
     elif data_type == 4:
-        read_lines_and('grid_predict/rand/grid_c%d.txt' % camera_num, count_interval)
+        # read_lines_and('grid_predict/rand/grid_c%d.txt' % camera_num, count_interval)
+        read_lines_and(fusion_param['predict_camera_path'] + camera_num + '.txt', count_interval)
     elif data_type == 5:
-        read_lines_and('3dpes/c%d_tracks.txt' % camera_num, count_interval)
+        # read_lines_and('3dpes/c%d_tracks.txt' % camera_num, count_interval)
+        read_lines_and(fusion_param['predict_camera_path'] + camera_num + '.txt', count_interval)
     else:
-        if os.path.exists('data/top10/predict_c%d.txt' % camera_num):
-            read_lines_and('data/top10/predict_c%d.txt' % camera_num, count_interval)
+        if os.path.exists(fusion_param['predict_camera_path'] + camera_num + '.txt'):
+            read_lines_and(fusion_param['predict_camera_path'] + camera_num + '.txt', count_interval)
 
     return tracks
 
@@ -87,15 +94,19 @@ def camera_distribute(camera_num):
                     if abs(delta) < 1000000:
                         deltas[camera_id - 1].append(delta)
         if data_type == 0:
-            read_lines_and('market_s1/track_s1.txt', shuffle_person)
+            # read_lines_and('market_s1/track_s1.txt', shuffle_person)
+            read_lines_and(fusion_param['predict_track_path'], shuffle_person)
         elif data_type == 2:
-            read_lines_and('grid/tracks.txt', shuffle_person)
+            # read_lines_and('grid/tracks.txt', shuffle_person)
+            read_lines_and(fusion_param['predict_track_path'], shuffle_person)
         elif data_type == 3 or data_type == 4:
-            read_lines_and('grid_predict/grid_tracks.txt', shuffle_person)
+            # read_lines_and('grid_predict/grid_tracks.txt', shuffle_person)
+            read_lines_and(fusion_param['predict_track_path'], shuffle_person)
         elif data_type == 5:
-            read_lines_and('3dpes/training_track.txt', shuffle_person)
+            # read_lines_and('3dpes/training_track.txt', shuffle_person)
+            read_lines_and(fusion_param['predict_track_path'], shuffle_person)
         else:
-            read_lines_and('data/top10/predict_tracks.txt', shuffle_person)
+            read_lines_and(fusion_param['predict_track_path'], shuffle_person)
     return deltas
 
 
