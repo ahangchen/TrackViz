@@ -10,11 +10,3 @@
 
 - 时间差概率密度曲线(s1)
 ![](viz_result/delta_density.png)
-
-## GRID
-
-- 时间差分布
-![](data/grid/raw.png)
-
-- 时间差概率密度曲线(s1)
-![](data/grid/density.png)
