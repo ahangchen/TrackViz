@@ -171,6 +171,64 @@ def cross_st_img_ranker():
         write(renew_ac_path, '\n')
 
 
+def fusion_st_img_ranker():
+    persons_ap_scores = predict_img_scores()
+    persons_ap_pids = predict_pids()
+    persons_track_scores = predict_track_scores()
+
+    persons_cross_scores = list()
+    log_path = fusion_param['eval_fusion_path']
+    map_score_path = fusion_param['fusion_normal_score_path']
+    score_path = fusion_param['fusion_raw_score_path']
+    renew_path = fusion_param['fusion_pid_path']
+    renew_ac_path = fusion_param['fusion_score_path']
+    safe_remove(map_score_path)
+    safe_remove(log_path)
+    safe_remove(score_path)
+    safe_remove(renew_path)
+    safe_remove(renew_ac_path)
+    # not limit this count for logging all probability
+    line_log_cnt = 10
+
+    for i, person_ap_pids in enumerate(persons_ap_pids):
+        cross_scores = list()
+        for j, person_ap_pid in enumerate(person_ap_pids):
+            m1 = persons_ap_scores[i][j] * (1 - fusion_param['pos_shot_rate'] - fusion_param['neg_shot_rate']) + \
+                 fusion_param['neg_shot_rate']
+            m2 = persons_track_scores[i][j]
+            cross_score = (persons_track_scores[i][j] * 1) * (persons_ap_scores[i][j] * 1)
+            cross_scores.append(cross_score**0.5)
+        persons_cross_scores.append(cross_scores)
+
+    max_score = max([max(predict_cross_scores) for predict_cross_scores in persons_cross_scores])
+    person_score_idx_s = list()
+
+    for i, person_cross_scores in enumerate(persons_cross_scores):
+        sort_score_idx_s = sorted(range(len(person_cross_scores)), key=lambda k: -person_cross_scores[k])
+        person_score_idx_s.append(sort_score_idx_s)
+
+    for i, person_ap_pids in enumerate(persons_ap_pids):
+        img_score_s = list()
+        img_score_idx_s = list()
+        for j in range(len(person_ap_pids)):
+            if j < line_log_cnt:
+                img_score_idx_s.append(person_ap_pids.index(person_ap_pids[person_score_idx_s[i][j]]))
+                img_score_s.append(persons_ap_scores[i][img_score_idx_s[j]])
+        sort_img_score_s = sorted(img_score_s, reverse=True)
+        for j in range(len(person_ap_pids)):
+            if j < line_log_cnt:
+                write(map_score_path, '%f ' % sort_img_score_s[j])
+                write(score_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]] / max_score))
+                write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
+            write(renew_ac_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]]))
+            write(renew_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
+        write(log_path, '\n')
+        write(score_path, '\n')
+        write(map_score_path, '\n')
+        write(renew_path, '\n')
+        write(renew_ac_path, '\n')
+
+
 if __name__ == '__main__':
     # st_scissors()
     # st_img_ranker()

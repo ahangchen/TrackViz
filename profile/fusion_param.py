@@ -21,4 +21,6 @@ fusion_param = {
     'fusion_score_path': 'data/' + data_folder_path + '/renew_ac1.log',
     'fusion_normal_score_path': 'data/' + data_folder_path + '/cross_filter_score.log',
     'fusion_raw_score_path': 'data/' + data_folder_path + '/raw_cross_filter_score.log',
+    'pos_shot_rate': 0.003302,
+    'neg_shot_rate': 0.001252,
 }
