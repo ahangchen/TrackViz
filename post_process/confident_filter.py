@@ -1,4 +1,4 @@
-from predict_eval import predict_market_eval
+from predict_eval import percent_shot_eval
 from util.file_helper import read_lines, write, safe_remove
 
 
@@ -43,6 +43,6 @@ if __name__ == '__main__':
 
         print('\nremain confidence < %f' % (1-1.0/(i+3)))
         print('write line cnt: %d' % write_line_cnt)
-        predict_market_eval('data/top10/conf_filter_pid.log', 10)
-        predict_market_eval('data/top10/conf_filter_pid.log', 5)
-        predict_market_eval('data/top10/conf_filter_pid.log', 1)
+        percent_shot_eval('data/top10/conf_filter_pid.log', 10)
+        percent_shot_eval('data/top10/conf_filter_pid.log', 5)
+        percent_shot_eval('data/top10/conf_filter_pid.log', 1)

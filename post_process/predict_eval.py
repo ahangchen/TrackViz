@@ -14,7 +14,7 @@ shot_cnt = 0
 top_cnt = 10
 
 
-def predict_market_eval(target_path, top_cnt):
+def percent_shot_eval(target_path, top_cnt):
     answer_path = folder(target_path) + '/test_tracks.txt'
     predict_path = target_path
     answer_lines = read_lines(answer_path)
@@ -63,7 +63,41 @@ def predict_market_eval(target_path, top_cnt):
     predict_cnt = 0
     predict_line_cnt = 0
 
-clean_line_idx = 0
+
+def pos_neg_shot_eval(target_pid_path, target_score_path):
+    answer_path = folder(target_pid_path) + '/test_tracks.txt'
+    answer_lines = read_lines(answer_path)
+    real_pids = [answer.split('_')[0] for answer in answer_lines]
+
+    predict_score_lines = read_lines(target_score_path)
+    predict_scores = [scores.split() for scores in predict_score_lines]
+
+    predict_pid_lines = read_lines(target_pid_path)
+    predict_pids = [pids.split() for pids in predict_pid_lines]
+
+    neg_sample_cnt = 0
+    neg_shot_cnt = 0
+    pos_sample_cnt = 0
+    pos_shot_cnt = 0
+
+    for i in range(len(predict_pids)):
+        for j in range(len(predict_pids[i])):
+            predict_idx = int(predict_pids[i][j]) - 1
+            if real_pids[predict_idx] == real_pids[line_idx]:
+                # pos sample
+                pos_sample_cnt += 1
+                if float(predict_scores[i][j]) > 0.9:
+                    # judge same
+                    pos_shot_cnt += 1
+            else:
+                # neg sample
+                neg_sample_cnt += 1
+                if float(predict_scores[i][j]) < 0.7:
+                    # judge diff
+                    neg_shot_cnt += 1
+
+    print('positive shot rate: %f' % (float(pos_shot_cnt) / pos_sample_cnt))
+    print('negative shot rate: %f' % (float(neg_shot_cnt) / neg_sample_cnt))
 
 
 def rand_predict():
@@ -79,14 +113,15 @@ def rand_predict():
 
 def eval_on_train_test():
     print('\nMarket to GRID:')
-    predict_market_eval(fusion_param['renew_pid_path'], 10)
-    predict_market_eval(fusion_param['renew_pid_path'], 5)
-    predict_market_eval(fusion_param['renew_pid_path'], 1)
+    percent_shot_eval(fusion_param['renew_pid_path'], 10)
+    percent_shot_eval(fusion_param['renew_pid_path'], 5)
+    percent_shot_eval(fusion_param['renew_pid_path'], 1)
     print('\nMarket to GRID with track score:')
-    predict_market_eval(fusion_param['eval_fusion_path'], 10)
-    predict_market_eval(fusion_param['eval_fusion_path'], 5)
-    predict_market_eval(fusion_param['eval_fusion_path'], 1)
+    percent_shot_eval(fusion_param['eval_fusion_path'], 10)
+    percent_shot_eval(fusion_param['eval_fusion_path'], 5)
+    percent_shot_eval(fusion_param['eval_fusion_path'], 1)
 
 
 if __name__ == '__main__':
-    eval_on_train_test()
+    # eval_on_train_test()
+    pos_neg_shot_eval(fusion_param['renew_pid_path'], fusion_param['renew_ac_path'])

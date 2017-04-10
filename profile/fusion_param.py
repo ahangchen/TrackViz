@@ -1,4 +1,4 @@
-data_folder_path = 'top-m2g-std0-r-test'
+data_folder_path = 'top-m2g-std0-r-train'
 dist_src_path = 'top-m2g-std0-r-train'
 fusion_param = {
     'renew_pid_path': 'data/' + data_folder_path + '/renew_pid.log',
