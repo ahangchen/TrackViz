@@ -1,5 +1,5 @@
 # coding=utf-8
-from serialize import pickle_load
+from util.serialize import pickle_load
 
 
 def binary_search(a, target):
@@ -65,5 +65,5 @@ def track_interval_score(interval_score_s, camera1, time1, camera2, time2):
     return 0
 
 if __name__ == '__main__':
-    camera_delta_s = pickle_load('top10/sorted_deltas.pickle')
+    camera_delta_s = pickle_load('data/top10/sorted_deltas.pickle')
     track_score(camera_delta_s, 1, 25, 2, 250)

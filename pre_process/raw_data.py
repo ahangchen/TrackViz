@@ -1,7 +1,8 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-import matplotlib.pyplot as plt
-from file_helper import read_lines_and
+
+from util.file_helper import read_lines_and
 
 camera_cnt = 6
 train_track_path = 'market/training_track.txt'

@@ -1,11 +1,10 @@
-import random
-
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-from file_helper import read_lines_and
-from raw_data import camera_cnt
+from pre_process.raw_data import camera_cnt
+from profile.fusion_param import fusion_param
+from util.file_helper import read_lines_and
 
 data_type = 0
 viz_local = True
@@ -30,9 +29,10 @@ def camera_intervals(camera_num):
             if track_time > cur_values['end']:
                 cur_values['end'] = track_time
     if data_type == 0:
-        read_lines_and('market_s1/track_c%ds1.txt' % (camera_num), count_interval)
+        # read_lines_and('market_s1/track_c%ds1.txt' % (camera_num), count_interval)
+        read_lines_and(fusion_param['predict_camera_path'] + camera_num + '.txt', count_interval)
     else:
-        read_lines_and('top10/predict_trackc%ds1.txt' % (camera_num), count_interval)
+        read_lines_and(fusion_param['predict_camera_path'] + camera_num + '.txt', count_interval)
     return intervals[1:]
 
 
@@ -80,9 +80,10 @@ def camera_distribute(camera_num):
             if abs(cur_delta['delta']) < 2000:
                 deltas[cur_delta['camera'] - 1].append(cur_delta['delta'])
     if data_type == 0:
-        read_lines_and('market_s1/track_s1.txt', shuffle_person)
+        # read_lines_and('market_s1/track_s1.txt', shuffle_person)
+        read_lines_and(fusion_param['predict_track_path'], shuffle_person)
     else:
-        read_lines_and('top10/predict_tracks1.txt', shuffle_person)
+        read_lines_and(fusion_param['predict_track_path'], shuffle_person)
     return deltas
 
 

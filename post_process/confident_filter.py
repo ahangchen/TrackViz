@@ -1,15 +1,13 @@
-from time import sleep
-
-from file_helper import read_lines, write, safe_remove
-from predict_eval import predict_market_eval
+from predict_eval import percent_shot_eval
+from util.file_helper import read_lines, write, safe_remove
 
 
 def write_with_confidence(confidence_bound):
-    cross_score_path = 'top10-test/cross_filter_score.log'
-    cross_pid_path = 'top10-test/cross_filter_pid.log'
+    cross_score_path = 'data/top10-test/cross_filter_score.log'
+    cross_pid_path = 'data/top10-test/cross_filter_pid.log'
 
-    filter_pid_path = 'top10/conf_filter_pid.log'
-    filter_score_path = 'top10/conf_filter_score.log'
+    filter_pid_path = 'data/top10/conf_filter_pid.log'
+    filter_score_path = 'data/top10/conf_filter_score.log'
 
     safe_remove(filter_pid_path)
     safe_remove(filter_score_path)
@@ -45,6 +43,6 @@ if __name__ == '__main__':
 
         print('\nremain confidence < %f' % (1-1.0/(i+3)))
         print('write line cnt: %d' % write_line_cnt)
-        predict_market_eval('top10/conf_filter_pid.log', 10)
-        predict_market_eval('top10/conf_filter_pid.log', 5)
-        predict_market_eval('top10/conf_filter_pid.log', 1)
+        percent_shot_eval('data/top10/conf_filter_pid.log', 10)
+        percent_shot_eval('data/top10/conf_filter_pid.log', 5)
+        percent_shot_eval('data/top10/conf_filter_pid.log', 1)
