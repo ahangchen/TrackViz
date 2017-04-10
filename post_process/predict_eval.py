@@ -86,18 +86,18 @@ def pos_neg_shot_eval(target_pid_path, target_score_path):
             if real_pids[predict_idx] == real_pids[line_idx]:
                 # pos sample
                 pos_sample_cnt += 1
-                if float(predict_scores[i][j]) > 0.9:
+                if float(predict_scores[i][j]) > 0.5:
                     # judge same
                     pos_shot_cnt += 1
             else:
                 # neg sample
                 neg_sample_cnt += 1
-                if float(predict_scores[i][j]) < 0.7:
+                if float(predict_scores[i][j]) < 0.5:
                     # judge diff
                     neg_shot_cnt += 1
 
-    print('positive shot rate: %f' % (float(pos_shot_cnt) / pos_sample_cnt))
-    print('negative shot rate: %f' % (float(neg_shot_cnt) / neg_sample_cnt))
+    print('positive shot error rate: %f' % (1 - float(pos_shot_cnt) / pos_sample_cnt))
+    print('negative shot error rate: %f' % (1 - float(neg_shot_cnt) / neg_sample_cnt))
 
 
 def rand_predict():
