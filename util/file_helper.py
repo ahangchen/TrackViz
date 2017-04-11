@@ -67,3 +67,8 @@ def safe_remove(path):
         return True
     else:
         return False
+
+
+def safe_mkdir(path):
+    if not os.path.exists(path):
+        os.mkdir(path)

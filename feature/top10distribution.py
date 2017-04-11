@@ -1,31 +1,13 @@
-from pre_process.raw_data import train_track_path
 from profile.fusion_param import fusion_param
 from train.delta_track import viz_data_for_market
-from train.st_filter import predict_img_scores, predict_pids
-from util.file_helper import read_lines_and, write, safe_remove
+from util.file_helper import read_lines_and, safe_remove
 from util.file_helper import write_line
 from util.serialize import pickle_save
 
 predict_path = fusion_param['predict_pid_path']
 test_path = fusion_param['answer_path']
 
-
 last_class = 0
-
-
-def get_person_idx():
-    ids = list()
-
-    def count_id(line):
-        global last_class
-        cur_class = int(line.split('_')[0])
-        if cur_class != last_class:
-            ids.append(cur_class)
-            last_class = cur_class
-
-    read_lines_and(train_track_path, count_id)
-    print(ids)
-    return ids
 
 
 def get_tracks():
@@ -40,39 +22,6 @@ def get_tracks():
 
 renew_pid_path = fusion_param['renew_pid_path']
 renew_score_path = fusion_param['renew_ac_path']
-
-
-def renew_tracks():
-    persons_ap_scores = predict_img_scores()
-    persons_ap_pids = predict_pids()
-    new_ap_scores = [list() for _ in range(3914)]
-    new_ap_pids = [list() for _ in range(3914)]
-    for i in range(3913):
-        new_ap_scores[i] = persons_ap_scores[i][:]
-        new_ap_pids[i] = persons_ap_pids[i][:]
-    new_ap_pids.append(list())
-    new_ap_scores.append(list())
-    for i, person_ap_pids in enumerate(persons_ap_pids):
-        for j, person_ap_pid in enumerate(person_ap_pids):
-            append_score = persons_ap_scores[i][j]
-            if person_ap_pid == 1:
-                break
-            new_ap_pids[person_ap_pid - 1].append(i + 1)
-            new_ap_scores[person_ap_pid - 1].append(append_score)
-    sort_idxes = list()
-    for i, person_ap_scores in enumerate(new_ap_scores):
-        sort_idx = sorted(range(len(person_ap_scores)), key=lambda k: -person_ap_scores[k])
-        sort_idxes.append(sort_idx)
-
-    for i, person_ap_pids in enumerate(new_ap_pids):
-
-        for j, person_ap_pid in enumerate(person_ap_pids):
-            if j >= 10:
-                break
-            write(renew_pid_path, '%d ' % person_ap_pids[sort_idxes[i][j]])
-            write(renew_score_path, '%f ' % new_ap_scores[i][sort_idxes[i][j]])
-        write(renew_pid_path, '\n')
-        write(renew_score_path, '\n')
 
 predict_line_idx = 0
 predict_track_path = fusion_param['predict_track_path']
