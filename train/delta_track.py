@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-from profile.fusion_param import fusion_param
+from profile.fusion_param import get_fusion_param
 from util.file_helper import read_lines_and
 
 # data type :
@@ -21,6 +21,7 @@ viz_local = True
 
 
 def track_infos(camera_num, s_num):
+    fusion_param = get_fusion_param()
     camera_num = str(camera_num)
     tracks = list()
 
@@ -68,6 +69,7 @@ def find_id_delta(intervals, id, frame):
 
 
 def camera_distribute(camera_num):
+    fusion_param = get_fusion_param()
     deltas = [list() for i in range(camera_cnt)]
     seq_s = [1, 2, 3, 4, 5, 6]
     for i in range(len(seq_s)):

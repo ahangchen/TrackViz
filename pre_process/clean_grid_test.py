@@ -1,8 +1,9 @@
-from profile.fusion_param import fusion_param
+from profile.fusion_param import get_fusion_param
 from util.file_helper import read_lines, write_line
 
 
 def clean_grid():
+    fusion_param = get_fusion_param()
     grid_test_path = fusion_param['origin_answer_path']
     new_test_path = fusion_param['answer_path']
     grid_test_lines = read_lines(grid_test_path)

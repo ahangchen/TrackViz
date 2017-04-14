@@ -2,7 +2,7 @@ import shutil
 
 from feature.top10distribution import get_predict_tracks, store_sorted_deltas
 from post_process.predict_eval import eval_on_train_test
-from profile.fusion_param import fusion_param
+from profile.fusion_param import get_fusion_param
 from train.st_filter import cross_st_img_ranker
 
 
@@ -21,6 +21,7 @@ def img_st_fusion():
 
 
 def retrain_fusion():
+    fusion_param = get_fusion_param()
     shutil.copy(fusion_param['src_distribution_pickle_path'], fusion_param['distribution_pickle_path'])
     # merge visual probability and track distribution probability
     cross_st_img_ranker()

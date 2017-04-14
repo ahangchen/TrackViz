@@ -3,7 +3,7 @@ import numpy as np
 import seaborn as sns
 
 from pre_process.raw_data import camera_cnt
-from profile.fusion_param import fusion_param
+from profile.fusion_param import get_fusion_param
 from util.file_helper import read_lines_and
 
 data_type = 0
@@ -11,6 +11,7 @@ viz_local = True
 
 
 def camera_intervals(camera_num):
+    fusion_param = get_fusion_param()
     intervals = list()
     cur_values = {'id': 0, 'start': 0, 'end': 0}
 

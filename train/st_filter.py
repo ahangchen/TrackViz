@@ -1,9 +1,10 @@
 from post_process.track_prob import track_score
-from profile.fusion_param import fusion_param
+from profile.fusion_param import get_fusion_param
 from util.file_helper import read_lines, read_lines_and, write, safe_remove
 from util.serialize import pickle_load, pickle_save
 
 line_idx = 0
+fusion_param = get_fusion_param()
 camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
 interval_scores = pickle_load(fusion_param['interval_pickle_path'])
 
@@ -27,6 +28,7 @@ def real_track(answer_path):
 
 
 def predict_track_scores():
+    fusion_param = get_fusion_param()
     persons_deltas_score = pickle_load(fusion_param['persons_deltas_path'])
     if pickle_load(fusion_param['persons_deltas_path']) is not None:
         return persons_deltas_score
@@ -70,6 +72,7 @@ def predict_track_scores():
 
 
 def predict_img_scores():
+    fusion_param = get_fusion_param()
     final_persons_scores = pickle_load(fusion_param['persons_ap_path'])
     if pickle_load(fusion_param['persons_ap_path']) is not None:
         return final_persons_scores
@@ -87,6 +90,7 @@ def predict_img_scores():
 
 
 def predict_pids():
+    fusion_param = get_fusion_param()
     predict_persons = pickle_load(fusion_param['predict_person_path'])
     if pickle_load(fusion_param['predict_person_path']) is not None:
         return predict_persons
@@ -117,6 +121,7 @@ def get_person_pids(predict_path):
 
 
 def cross_st_img_ranker():
+    fusion_param = get_fusion_param()
     persons_ap_scores = predict_img_scores()
     persons_ap_pids = predict_pids()
     persons_track_scores = predict_track_scores()
@@ -172,6 +177,7 @@ def cross_st_img_ranker():
 
 
 def fusion_st_img_ranker():
+    fusion_param = get_fusion_param()
     persons_ap_scores = predict_img_scores()
     persons_ap_pids = predict_pids()
     persons_track_scores = predict_track_scores()

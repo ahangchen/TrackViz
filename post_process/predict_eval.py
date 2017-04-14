@@ -1,6 +1,6 @@
 import random
 
-from profile.fusion_param import fusion_param
+from profile.fusion_param import get_fusion_param
 from util.file_helper import read_lines_and, write_line, read_lines
 from util.str_helper import folder
 
@@ -116,6 +116,7 @@ def rand_predict():
 
 
 def eval_on_train_test():
+    fusion_param = get_fusion_param()
     print('\nMarket to GRID:')
     percent_shot_eval(fusion_param['renew_pid_path'], 10)
     percent_shot_eval(fusion_param['renew_pid_path'], 5)
@@ -128,4 +129,5 @@ def eval_on_train_test():
 
 if __name__ == '__main__':
     # eval_on_train_test()
+    fusion_param = get_fusion_param()
     pos_neg_shot_eval(fusion_param['renew_pid_path'], fusion_param['renew_ac_path'])
