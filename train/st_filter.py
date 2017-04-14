@@ -4,11 +4,6 @@ from util.file_helper import read_lines, read_lines_and, write, safe_remove
 from util.serialize import pickle_load, pickle_save
 
 line_idx = 0
-fusion_param = get_fusion_param()
-camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
-interval_scores = pickle_load(fusion_param['interval_pickle_path'])
-
-
 track_score_idx = 0
 data_type = 1
 
@@ -29,6 +24,7 @@ def real_track(answer_path):
 
 def predict_track_scores():
     fusion_param = get_fusion_param()
+    camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     persons_deltas_score = pickle_load(fusion_param['persons_deltas_path'])
     if pickle_load(fusion_param['persons_deltas_path']) is not None:
         return persons_deltas_score
