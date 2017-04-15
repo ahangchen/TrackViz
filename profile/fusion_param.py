@@ -1,6 +1,6 @@
 ctrl_msg = {
     'data_folder_path': 'top-m2g-std0-r-train',
-    'dist_src_path': 'top-m2g-std0-r-train'
+    'retrain_src_path': 'top-m2g-std0-r-train',
 }
 
 
@@ -16,7 +16,8 @@ def get_fusion_param():
         'predict_camera_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_c',
 
         'distribution_pickle_path': 'data/' + ctrl_msg['data_folder_path'] + '/sorted_deltas.pickle',
-        'src_distribution_pickle_path': 'data/' + ctrl_msg['dist_src_path'] + '/sorted_deltas.pickle',
+        'src_distribution_pickle_path': 'data/' + ctrl_msg['retrain_src_path'] + '/sorted_deltas.pickle',
+        'rand_distribution_pickle_path': 'data/' + ctrl_msg['data_folder_path'] + '_rand/sorted_deltas.pickle',
         'interval_pickle_path': 'data/' + ctrl_msg['data_folder_path'] + '/interval_scores.pickle',
         'persons_deltas_path': 'data/' + ctrl_msg['data_folder_path'] + '/persons_deltas_score.pickle',
         'persons_ap_path': 'data/' + ctrl_msg['data_folder_path'] + '/persons_ap_scores.pickle',

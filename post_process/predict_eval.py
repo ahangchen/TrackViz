@@ -115,8 +115,8 @@ def rand_predict():
         write_line(raw_path, rand_output_str)
 
 
-def eval_on_train_test():
-    fusion_param = get_fusion_param()
+def eval_on_train_test(fusion_param):
+    # fusion_param = get_fusion_param()
     print('\nMarket to GRID:')
     percent_shot_eval(fusion_param['renew_pid_path'], 10)
     percent_shot_eval(fusion_param['renew_pid_path'], 5)

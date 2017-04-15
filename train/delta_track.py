@@ -20,8 +20,8 @@ camera_cnt = 6
 viz_local = True
 
 
-def track_infos(camera_num, s_num):
-    fusion_param = get_fusion_param()
+def track_infos(fusion_param, camera_num, s_num):
+    # fusion_param = get_fusion_param()
     camera_num = str(camera_num)
     tracks = list()
 
@@ -68,12 +68,12 @@ def find_id_delta(intervals, id, frame):
     return deltas
 
 
-def camera_distribute(camera_num):
-    fusion_param = get_fusion_param()
+def camera_distribute(fusion_param, camera_num):
+    # fusion_param = get_fusion_param()
     deltas = [list() for i in range(camera_cnt)]
     seq_s = [1, 2, 3, 4, 5, 6]
     for i in range(len(seq_s)):
-        intervals = track_infos(camera_num, seq_s[i])
+        intervals = track_infos(fusion_param, camera_num, seq_s[i])
         print('get intervals for c%d' % camera_num)
 
         def shuffle_person(img_name):
@@ -112,10 +112,10 @@ def camera_distribute(camera_num):
     return deltas
 
 
-def viz_data_for_market():
+def viz_data_for_market(fusion_param):
     track_distribute = list()
     for i in range(camera_cnt):
-        track_distribute.append(camera_distribute(i + 1))
+        track_distribute.append(camera_distribute(fusion_param, i + 1))
     return track_distribute
 
 
@@ -132,8 +132,8 @@ def distribute_in_cameras(data_s, subplot, camera_id):
         sns.distplot(np.array(data), label='camera %d' % (i + 1), hist=False, ax=subplot, axlabel='Distribution for camera %d' % camera_id)
 
 
-def viz_market_distribution():
-    viz_data = viz_data_for_market()
+def viz_market_distribution(fusion_param):
+    viz_data = viz_data_for_market(fusion_param)
     f, axes = plt.subplots(camera_cnt / 2, 2, figsize=(15, 10))
     if viz_local:
         for ax_s in axes:
@@ -150,8 +150,8 @@ def viz_market_distribution():
     sns.plt.show()
 
 
-def deltas2track():
-    viz_data = viz_data_for_market()
+def deltas2track(fusion_param):
+    viz_data = viz_data_for_market(fusion_param)
     track = [[list(), list()] for _ in range(camera_cnt)]
     for i, camera_deltas in enumerate(viz_data):
         for j, per_camera_deltas in enumerate(camera_deltas):
@@ -171,8 +171,8 @@ def distribute_joint(data_s, subplot, camera_id):
     # subplot.scatter(data_s[0], data_s[1], s=10, c='g', marker='o')
 
 
-def viz_market():
-    viz_data = deltas2track()
+def viz_market(fusion_param):
+    viz_data = deltas2track(fusion_param)
     f, axes = plt.subplots(camera_cnt / 2, 2)
     if viz_local:
         for i, ax_s in enumerate(axes):
@@ -195,5 +195,6 @@ def viz_market():
 
 if __name__ == '__main__':
     # print(camera_distribute(1))
-    viz_market_distribution()
+    fusion_param = get_fusion_param()
+    viz_market_distribution(fusion_param)
     # viz_market()

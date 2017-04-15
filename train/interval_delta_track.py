@@ -10,8 +10,8 @@ data_type = 0
 viz_local = True
 
 
-def camera_intervals(camera_num):
-    fusion_param = get_fusion_param()
+def camera_intervals(fusion_param, camera_num):
+    # fusion_param = get_fusion_param()
     intervals = list()
     cur_values = {'id': 0, 'start': 0, 'end': 0}
 

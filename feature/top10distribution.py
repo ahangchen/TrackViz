@@ -5,8 +5,8 @@ from util.file_helper import write_line
 from util.serialize import pickle_save
 
 
-def get_tracks():
-    fusion_param = get_fusion_param()
+def get_tracks(fusion_param):
+    # fusion_param = get_fusion_param()
     test_path = fusion_param['answer_path']
     tracks = list()
 
@@ -20,12 +20,12 @@ def get_tracks():
 predict_line_idx = 0
 
 
-def get_predict_tracks():
-    fusion_param = get_fusion_param()
+def get_predict_tracks(fusion_param):
+    # fusion_param = get_fusion_param()
     renew_pid_path = fusion_param['renew_pid_path']
     predict_track_path = fusion_param['predict_track_path']
     # renew_tracks()
-    origin_tracks = get_tracks()
+    origin_tracks = get_tracks(fusion_param)
     # person_ids = get_person_idx()
     safe_remove(predict_track_path)
     camera_cnt = 8
@@ -70,9 +70,9 @@ def get_predict_tracks():
     read_lines_and(renew_pid_path, add_predict_track)
 
 
-def store_sorted_deltas():
-    fusion_param = get_fusion_param()
-    camera_delta_s = viz_data_for_market()
+def store_sorted_deltas(fusion_param):
+    # fusion_param = get_fusion_param()
+    camera_delta_s = viz_data_for_market(fusion_param)
     for camera_delta in camera_delta_s:
         for delta_s in camera_delta:
             delta_s.sort()
@@ -80,9 +80,9 @@ def store_sorted_deltas():
     pickle_save(fusion_param['distribution_pickle_path'], camera_delta_s)
 
 
-def interval_scores():
-    fusion_param = get_fusion_param()
-    camera_delta_s = viz_data_for_market()
+def interval_scores(fusion_param):
+    # fusion_param = get_fusion_param()
+    camera_delta_s = viz_data_for_market(fusion_param)
     for camera_delta in camera_delta_s:
         for delta_s in camera_delta:
             delta_s.sort()
@@ -107,7 +107,8 @@ def interval_scores():
 
 
 if __name__ == '__main__':
-    get_predict_tracks()
-    store_sorted_deltas()
+    fusion_param = get_fusion_param()
+    get_predict_tracks(fusion_param)
+    store_sorted_deltas(fusion_param)
 
     # scores = interval_scores()
