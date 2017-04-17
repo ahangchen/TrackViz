@@ -29,6 +29,8 @@ def get_predict_tracks(fusion_param):
     # person_ids = get_person_idx()
     safe_remove(predict_track_path)
     camera_cnt = 8
+    global predict_line_idx
+    predict_line_idx = 0
     for i in range(camera_cnt):
         safe_remove(fusion_param['predict_camera_path'] + str(i) + '.txt')
 
@@ -38,6 +40,8 @@ def get_predict_tracks(fusion_param):
         if line == '\n':
             predict_line_idx += 1
             return
+        if predict_line_idx >= 248:
+            print(predict_line_idx)
         if origin_tracks[predict_line_idx].startswith('-1'):
             tail = origin_tracks[predict_line_idx][2:-1]
         else:

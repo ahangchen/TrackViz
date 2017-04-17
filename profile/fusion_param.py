@@ -1,6 +1,6 @@
 ctrl_msg = {
-    'data_folder_path': 'top-m2g-std0-r-train',
-    'retrain_src_path': 'top-m2g-std0-r-train',
+    'data_folder_path': 'top-m2g-std1-train',
+    'retrain_src_path': 'top-m2g-std1-train',
 }
 
 

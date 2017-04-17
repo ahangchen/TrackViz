@@ -95,12 +95,12 @@ def pos_neg_shot_eval(target_pid_path, target_score_path):
                 if float(predict_scores[i][j]) <= 0.5:
                     # judge diff
                     neg_shot_cnt += 1
-    pos_shot_rate = float(pos_shot_cnt) / pos_sample_cnt
-    neg_shot_rate = float(neg_shot_cnt) / neg_sample_cnt
+    pos_shot_rate = 1 - float(pos_shot_cnt) / pos_sample_cnt
+    neg_shot_rate = 1 - float(neg_shot_cnt) / neg_sample_cnt
     print('positive shot error rate: 1-%d/%d=%f' %
-          (pos_shot_cnt, pos_sample_cnt, 1 - pos_shot_rate))
+          (pos_shot_cnt, pos_sample_cnt, pos_shot_rate))
     print('negative shot error rate: 1-%d/%d=%f' %
-          (neg_shot_cnt, neg_sample_cnt, 1 - neg_shot_rate))
+          (neg_shot_cnt, neg_sample_cnt, neg_shot_rate))
     return pos_shot_rate, neg_shot_rate
 
 
@@ -130,4 +130,5 @@ def eval_on_train_test(fusion_param):
 if __name__ == '__main__':
     # eval_on_train_test()
     fusion_param = get_fusion_param()
-    pos_neg_shot_eval(fusion_param['renew_pid_path'], fusion_param['renew_ac_path'])
+    # pos_neg_shot_eval(fusion_param['renew_pid_path'], fusion_param['renew_ac_path'])
+    eval_on_train_test(fusion_param)

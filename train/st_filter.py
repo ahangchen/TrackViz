@@ -172,17 +172,16 @@ def cross_st_img_ranker(fusion_param):
         write(renew_ac_path, '\n')
 
 
-def fusion_st_img_ranker(fusion_param):
+def fusion_st_img_ranker(fusion_param, pos_shot_rate, neg_shot_rate):
     # fusion_param = get_fusion_param()
     persons_ap_scores = predict_img_scores(fusion_param)
     persons_ap_pids = predict_pids(fusion_param)
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     persons_track_scores = predict_track_scores(camera_delta_s, fusion_param)
     rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
-    rand_deltas_s = predict_track_scores(rand_delta_s, fusion_param)
     ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_rand'
     fusion_param = get_fusion_param()
-    rand_track_scores = predict_track_scores(rand_deltas_s, fusion_param)
+    rand_track_scores = predict_track_scores(rand_delta_s, fusion_param)
 
     ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
     fusion_param = get_fusion_param()
@@ -204,13 +203,17 @@ def fusion_st_img_ranker(fusion_param):
     for i, person_ap_pids in enumerate(persons_ap_pids):
         cross_scores = list()
         for j, person_ap_pid in enumerate(person_ap_pids):
-            m1 = persons_ap_scores[i][j] * (1 - fusion_param['pos_shot_rate'] - fusion_param['neg_shot_rate']) + \
+            m1 = persons_ap_scores[i][j] * (1 - pos_shot_rate - neg_shot_rate) + \
                  fusion_param['neg_shot_rate']
             p = rand_track_scores[i][j]
-            m2 = (persons_track_scores[i][j] - p * fusion_param['pos_shot_rate'])/(1 - fusion_param['pos_shot_rate'])
+            m2 = (persons_track_scores[i][j] - p * pos_shot_rate)/(1 - neg_shot_rate)
 
             cross_score = m1*m2/(m1*m2+(1-m1)*p)
-            cross_scores.append(cross_score**0.5)
+            if cross_score < 0:
+                print('Sv:%f, Sst:%f, Srst:%f, Ep:%f, En:%f, m1:%f, m2:%f' % (
+                    persons_ap_scores[i][j], persons_track_scores[i][j], p,
+                    pos_shot_rate, neg_shot_rate, m1, m2))
+            cross_scores.append(cross_score)
         persons_cross_scores.append(cross_scores)
 
     max_score = max([max(predict_cross_scores) for predict_cross_scores in persons_cross_scores])
@@ -246,4 +249,5 @@ if __name__ == '__main__':
     # st_scissors()
     # st_img_ranker()
     fusion_param = get_fusion_param()
-    cross_st_img_ranker(fusion_param)
+    # cross_st_img_ranker(fusion_param)
+    fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
