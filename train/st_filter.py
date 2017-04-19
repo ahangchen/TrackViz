@@ -209,10 +209,10 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate, neg_shot_rate):
             m2 = (persons_track_scores[i][j] - p * pos_shot_rate)/(1 - neg_shot_rate)
 
             cross_score = m1*m2/(m1*m2+(1-m1)*p)
-            if cross_score < 0:
-                print('Sv:%f, Sst:%f, Srst:%f, Ep:%f, En:%f, m1:%f, m2:%f' % (
-                    persons_ap_scores[i][j], persons_track_scores[i][j], p,
-                    pos_shot_rate, neg_shot_rate, m1, m2))
+            # if cross_score < 0:
+            #     print('Sv:%f, Sst:%f, Srst:%f, Ep:%f, En:%f, m1:%f, m2:%f' % (
+            #         persons_ap_scores[i][j], persons_track_scores[i][j], p,
+            #         pos_shot_rate, neg_shot_rate, m1, m2))
             cross_scores.append(cross_score)
         persons_cross_scores.append(cross_scores)
 

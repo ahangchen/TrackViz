@@ -1,11 +1,15 @@
+from util.file_helper import write
+
 ctrl_msg = {
     'data_folder_path': 'top-m2g-std1-train',
     'retrain_src_path': 'top-m2g-std1-train',
 }
 
+update_msg = {}
+
 
 def get_fusion_param():
-    return {
+    origin_dict = {
         'renew_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_pid.log',
         'renew_ac_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_ac.log',
         'predict_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_pid.log',
@@ -30,5 +34,17 @@ def get_fusion_param():
         'pos_shot_rate': 0.003302,
         'neg_shot_rate': 0.001252,
     }
+
+    for (k, v) in update_msg.items():
+        origin_dict[k] = v
+    return origin_dict
+
+
+def update_fusion_param(key, value):
+    update_msg[key] = value
+
+
+def save_fusion_param():
+    write('data/fusion_param.json', fusion_param.__str__)
 
 fusion_param = get_fusion_param()
