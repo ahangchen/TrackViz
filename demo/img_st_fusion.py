@@ -54,6 +54,6 @@ def strict_img_st_fusion():
     eval_on_train_test(fusion_param)
 
 if __name__ == '__main__':
-    img_st_fusion()
+    # img_st_fusion()
     # retrain_fusion()
-    # strict_img_st_fusion()
+    strict_img_st_fusion()

@@ -227,15 +227,14 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate, neg_shot_rate):
         img_score_s = list()
         img_score_idx_s = list()
         for j in range(len(person_ap_pids)):
-            if j < line_log_cnt:
-                img_score_idx_s.append(person_ap_pids.index(person_ap_pids[person_score_idx_s[i][j]]))
-                img_score_s.append(persons_ap_scores[i][img_score_idx_s[j]])
+            img_score_idx_s.append(person_ap_pids.index(person_ap_pids[person_score_idx_s[i][j]]))
+            img_score_s.append(persons_ap_scores[i][img_score_idx_s[j]])
         sort_img_score_s = sorted(img_score_s, reverse=True)
         for j in range(len(person_ap_pids)):
-            if j < line_log_cnt:
-                write(map_score_path, '%f ' % sort_img_score_s[j])
-                write(score_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]] / max_score))
-                write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
+            write(map_score_path, '%f ' % sort_img_score_s[j])
+            write(score_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]] / max_score))
+            write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
+
             write(renew_ac_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]]))
             write(renew_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
         write(log_path, '\n')

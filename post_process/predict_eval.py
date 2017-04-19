@@ -104,6 +104,49 @@ def pos_neg_shot_eval(target_pid_path, target_score_path):
     return pos_shot_rate, neg_shot_rate
 
 
+def target_pos_neg_shot_eval(fusion_score_path, target_pid_path, target_score_path):
+    """
+    call after fusion done, get the positive shot rate and negative shot rate by:
+    Ep = E((1-pij)*boolean(Si==Sj))
+    En = E(pij*boolean(Si!=Sj))
+    :param fusion_score_path: target dataSet fusion predict scores
+    :param target_pid_path: target dataSet person ids
+    :param target_score_path: target dataSet vision predict scores
+    :return: 
+    """
+    predict_score_lines = read_lines(target_score_path)
+    predict_scores = [scores.split() for scores in predict_score_lines]
+
+    fusion_predict_score_lines = read_lines(fusion_score_path)
+    fusion_predict_scores = [scores.split() for scores in fusion_predict_score_lines]
+
+    predict_pid_lines = read_lines(target_pid_path)
+    predict_pids = [pids.split() for pids in predict_pid_lines]
+
+    ep_sum = 0.0
+    ep_cnt = 0
+    en_sum = 0.0
+    en_cnt = 0
+    for i in range(len(predict_pids)):
+        for j in range(len(predict_pids[i])):
+            if float(predict_scores[i][j]) > 0.5:
+                ep_sum += 1 - float(fusion_predict_scores[i][j])
+                ep_cnt += 1
+                pass
+            else:
+                en_sum += float(fusion_predict_scores[i][j])
+                en_cnt += 1
+                pass
+
+    pos_shot_rate = ep_sum / ep_cnt
+    neg_shot_rate = en_sum / en_cnt
+    print('positive shot error rate: %f/%f=%f' %
+          (ep_sum, ep_cnt, pos_shot_rate))
+    print('negative shot error rate: %f/%f=%f' %
+          (en_sum, en_cnt, neg_shot_rate))
+    return pos_shot_rate, neg_shot_rate
+
+
 def rand_predict():
     raw_path = 'grid_predict/predict_grid_rand.log'
 
@@ -131,4 +174,5 @@ if __name__ == '__main__':
     # eval_on_train_test()
     fusion_param = get_fusion_param()
     # pos_neg_shot_eval(fusion_param['renew_pid_path'], fusion_param['renew_ac_path'])
-    eval_on_train_test(fusion_param)
+    target_pos_neg_shot_eval(fusion_param['fusion_normal_score_path'], fusion_param['renew_pid_path'], fusion_param['renew_ac_path'])
+    # eval_on_train_test(fusion_param)
