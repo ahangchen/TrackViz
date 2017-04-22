@@ -56,13 +56,14 @@ def percent_shot_eval(target_path, top_cnt):
     global predict_line_cnt
     # print('all predict shot(ac1): %f' % (float(shot_cnt) / predict_cnt))
     valid_line_cnt = 250
-    print('top%d shot: %f' % (top_cnt, shot_line_cnt / float(valid_line_cnt)))
+    shot_rate = shot_line_cnt / float(valid_line_cnt)
+    print('top%d shot: %f' % (top_cnt, shot_rate))
     line_idx = 0
     shot_cnt = 0
     shot_line_cnt = 0
     predict_cnt = 0
     predict_line_cnt = 0
-    return shot_line_cnt/float(valid_line_cnt)
+    return shot_rate
 
 
 def pos_neg_shot_eval(target_pid_path, target_score_path):
