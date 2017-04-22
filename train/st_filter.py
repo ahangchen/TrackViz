@@ -24,9 +24,9 @@ def real_track(answer_path):
 
 def predict_track_scores(camera_delta_s, fusion_param):
     # fusion_param = get_fusion_param()
-    persons_deltas_score = pickle_load(fusion_param['persons_deltas_path'])
-    if pickle_load(fusion_param['persons_deltas_path']) is not None:
-        return persons_deltas_score
+    # persons_deltas_score = pickle_load(fusion_param['persons_deltas_path'])
+    # if pickle_load(fusion_param['persons_deltas_path']) is not None:
+    #     return persons_deltas_score
     predict_path = fusion_param['renew_pid_path']
     answer_path = fusion_param['answer_path']
     answer_lines = read_lines(answer_path)
@@ -41,6 +41,9 @@ def predict_track_scores(camera_delta_s, fusion_param):
             real_tracks.append([info[0], int(info[1][1]), int(info[2])])
     top_cnt = 10
     persons_deltas_score = list()
+
+    global track_score_idx
+    track_score_idx = 0
 
     def predict_judge(line):
         global track_score_idx
@@ -62,15 +65,15 @@ def predict_track_scores(camera_delta_s, fusion_param):
         persons_deltas_score.append(person_deltas_score)
 
     read_lines_and(predict_path, predict_judge)
-    pickle_save(fusion_param['persons_deltas_path'], persons_deltas_score)
+    # pickle_save(fusion_param['persons_deltas_path'], persons_deltas_score)
     return persons_deltas_score
 
 
 def predict_img_scores(fusion_param):
     # fusion_param = get_fusion_param()
-    final_persons_scores = pickle_load(fusion_param['persons_ap_path'])
-    if pickle_load(fusion_param['persons_ap_path']) is not None:
-        return final_persons_scores
+    # final_persons_scores = pickle_load(fusion_param['persons_ap_path'])
+    # if pickle_load(fusion_param['persons_ap_path']) is not None:
+    #     return final_persons_scores
     predict_score_path = fusion_param['renew_ac_path']
     final_persons_scores = list()
     persons_scores = read_lines(predict_score_path)
@@ -80,15 +83,15 @@ def predict_img_scores(fusion_param):
         for score in scores:
             res_score.append(float(score))
         final_persons_scores.append(res_score)
-    pickle_save(fusion_param['persons_ap_path'], final_persons_scores)
+    # pickle_save(fusion_param['persons_ap_path'], final_persons_scores)
     return final_persons_scores
 
 
 def predict_pids(fusion_param):
     # fusion_param = get_fusion_param()
-    predict_persons = pickle_load(fusion_param['predict_person_path'])
-    if pickle_load(fusion_param['predict_person_path']) is not None:
-        return predict_persons
+    # predict_persons = pickle_load(fusion_param['predict_person_path'])
+    # if pickle_load(fusion_param['predict_person_path']) is not None:
+    #     return predict_persons
     predict_person_path = fusion_param['renew_pid_path']
     predict_persons = list()
     persons_predicts = read_lines(predict_person_path)
@@ -98,7 +101,7 @@ def predict_pids(fusion_param):
         for pid in pids:
             res_pids.append(int(pid))
         predict_persons.append(res_pids)
-    pickle_save(fusion_param['predict_person_path'], predict_persons)
+    # pickle_save(fusion_param['predict_person_path'], predict_persons)
     return predict_persons
 
 
@@ -133,7 +136,6 @@ def cross_st_img_ranker(fusion_param):
     safe_remove(score_path)
     safe_remove(renew_path)
     safe_remove(renew_ac_path)
-    # not limit this count for logging all probability
     line_log_cnt = 10
 
     for i, person_ap_pids in enumerate(persons_ap_pids):
@@ -179,12 +181,12 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate, neg_shot_rate):
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     persons_track_scores = predict_track_scores(camera_delta_s, fusion_param)
     rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
-    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_rand'
-    fusion_param = get_fusion_param()
+    # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_rand'
+    # fusion_param = get_fusion_param()
     rand_track_scores = predict_track_scores(rand_delta_s, fusion_param)
 
-    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
-    fusion_param = get_fusion_param()
+    # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
+    # fusion_param = get_fusion_param()
 
     persons_cross_scores = list()
     log_path = fusion_param['eval_fusion_path']
