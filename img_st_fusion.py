@@ -1,5 +1,4 @@
 import shutil
-
 from feature.average_predict import write_rand_pid, gen_rand_st_model
 from feature.top10distribution import get_predict_tracks, store_sorted_deltas
 from post_process.predict_eval import eval_on_train_test, pos_neg_shot_eval, target_pos_neg_shot_eval
