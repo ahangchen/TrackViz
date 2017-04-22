@@ -74,7 +74,7 @@ def camera_distribute(fusion_param, camera_num):
     seq_s = [1, 2, 3, 4, 5, 6]
     for i in range(len(seq_s)):
         intervals = track_infos(fusion_param, camera_num, seq_s[i])
-        print('get intervals for c%d' % camera_num)
+        # print('get intervals for c%d' % camera_num)
 
         def shuffle_person(img_name):
             if '.' not in img_name:
