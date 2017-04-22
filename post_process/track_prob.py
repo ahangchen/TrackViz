@@ -46,12 +46,12 @@ def track_score(camera_delta_s, camera1, time1, camera2, time2):
     if len(delta_distribution) == 0:
         return 0.0
     # score = (right_index - left_index + 1) / float(len(camera_delta_s[camera1][2]))
-    if score > 0:
-        print(len(delta_distribution))
-        print('delta range %d ~ %d' % (delta_distribution[0], delta_distribution[-1]))
-        print(left_index)
-        print(right_index)
-        print('probablity: %f%%' % (score * 100))
+    # if score > 0:
+    #     print(len(delta_distribution))
+    #     print('delta range %d ~ %d' % (delta_distribution[0], delta_distribution[-1]))
+    #     print(left_index)
+    #     print(right_index)
+    #     print('probablity: %f%%' % (score * 100))
     return score
 
 
