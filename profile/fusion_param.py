@@ -19,8 +19,7 @@ def get_fusion_param():
         'predict_camera_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_c',
 
         'distribution_pickle_path': 'data/' + ctrl_msg['data_folder_path'] + '/sorted_deltas.pickle',
-        'src_distribution_pickle_path': 'data/' + ctrl_msg['data_folder_path'][:-3]+'rain' + '/sorted_deltas.pickle',
-        'rand_distribution_pickle_path': 'data/' + ctrl_msg['data_folder_path'] + '_rand/sorted_deltas.pickle',
+        'src_distribution_pickle_path': 'data/' + ctrl_msg['data_folder_path'].replace('test', 'train') + '/sorted_deltas.pickle',
         'interval_pickle_path': 'data/' + ctrl_msg['data_folder_path'] + '/interval_scores.pickle',
         'persons_deltas_path': 'data/' + ctrl_msg['data_folder_path'] + '/persons_deltas_score.pickle',
         'persons_ap_path': 'data/' + ctrl_msg['data_folder_path'] + '/persons_ap_scores.pickle',
@@ -33,6 +32,7 @@ def get_fusion_param():
         'pos_shot_rate': 0.003302,
         'neg_shot_rate': 0.001252,
     }
+    origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('train', 'train_rand')
 
     for (k, v) in update_msg.items():
         origin_dict[k] = v
