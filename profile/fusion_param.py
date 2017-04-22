@@ -1,8 +1,7 @@
 from util.file_helper import write
 
 ctrl_msg = {
-    'data_folder_path': 'top-m2g-std1-train',
-    'retrain_src_path': 'top-m2g-std1-train',
+    'data_folder_path': 'top-m2g-std1-train'
 }
 
 update_msg = {}
@@ -20,7 +19,7 @@ def get_fusion_param():
         'predict_camera_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_c',
 
         'distribution_pickle_path': 'data/' + ctrl_msg['data_folder_path'] + '/sorted_deltas.pickle',
-        'src_distribution_pickle_path': 'data/' + ctrl_msg['retrain_src_path'] + '/sorted_deltas.pickle',
+        'src_distribution_pickle_path': 'data/' + ctrl_msg['data_folder_path'][:-3]+'rain' + '/sorted_deltas.pickle',
         'rand_distribution_pickle_path': 'data/' + ctrl_msg['data_folder_path'] + '_rand/sorted_deltas.pickle',
         'interval_pickle_path': 'data/' + ctrl_msg['data_folder_path'] + '/interval_scores.pickle',
         'persons_deltas_path': 'data/' + ctrl_msg['data_folder_path'] + '/persons_deltas_score.pickle',
