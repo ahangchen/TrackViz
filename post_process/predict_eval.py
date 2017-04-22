@@ -1,6 +1,6 @@
 import random
 
-from profile.fusion_param import get_fusion_param
+from profile.fusion_param import get_fusion_param, ctrl_msg
 from util.file_helper import read_lines_and, write_line, read_lines
 from util.str_helper import folder
 
@@ -62,6 +62,7 @@ def percent_shot_eval(target_path, top_cnt):
     shot_line_cnt = 0
     predict_cnt = 0
     predict_line_cnt = 0
+    return shot_line_cnt/float(valid_line_cnt)
 
 
 def pos_neg_shot_eval(target_pid_path, target_score_path):
@@ -158,16 +159,24 @@ def rand_predict():
         write_line(raw_path, rand_output_str)
 
 
-def eval_on_train_test(fusion_param):
+def eval_on_train_test(fusion_param, pst=True):
     # fusion_param = get_fusion_param()
     print('\nMarket to GRID:')
-    percent_shot_eval(fusion_param['renew_pid_path'], 10)
-    percent_shot_eval(fusion_param['renew_pid_path'], 5)
-    percent_shot_eval(fusion_param['renew_pid_path'], 1)
+    top10_shot_pure = percent_shot_eval(fusion_param['renew_pid_path'], 10)
+    top5_shot_pure = percent_shot_eval(fusion_param['renew_pid_path'], 5)
+    top1_shot_pure = percent_shot_eval(fusion_param['renew_pid_path'], 1)
     print('\nMarket to GRID with track score:')
-    percent_shot_eval(fusion_param['eval_fusion_path'], 10)
-    percent_shot_eval(fusion_param['eval_fusion_path'], 5)
-    percent_shot_eval(fusion_param['eval_fusion_path'], 1)
+    top10_shot_fusion = percent_shot_eval(fusion_param['eval_fusion_path'], 10)
+    top5_shot_fusion = percent_shot_eval(fusion_param['eval_fusion_path'], 5)
+    top1_shot_fusion = percent_shot_eval(fusion_param['eval_fusion_path'], 1)
+
+    if pst:
+        write_line('data/predict_result.txt', ctrl_msg['data_folder_path'])
+        write_line(
+            'data/predict_result.txt',
+            '%f %f %f %f %f %f' % (top10_shot_pure, top5_shot_pure, top1_shot_pure,
+                                   top10_shot_fusion, top5_shot_fusion, top1_shot_fusion)
+        )
 
 
 if __name__ == '__main__':
