@@ -1,7 +1,7 @@
 from util.file_helper import write
 
 ctrl_msg = {
-    'data_folder_path': 'top-m2g-std1-train'
+    'data_folder_path': 'top-m2g-std0-train'
 }
 
 update_msg = {}
@@ -33,6 +33,9 @@ def get_fusion_param():
         'neg_shot_rate': 0.001252,
     }
     origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('train', 'train_rand')
+    if 'r-' in origin_dict['src_distribution_pickle_path']:
+        origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('r-train',
+                                                                                                           'train_rand')
 
     for (k, v) in update_msg.items():
         origin_dict[k] = v
