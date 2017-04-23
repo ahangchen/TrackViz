@@ -71,9 +71,10 @@ def init_strict_img_st_fusion():
     print('init fusion, try to get ep en')
     ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
     fusion_param = get_fusion_param()
-    # ep, en = pos_neg_shot_eval(fusion_param['renew_pid_path'], fusion_param['renew_ac_path'])
-    # fusion_st_img_ranker(fusion_param, ep, en)
-    # eval_on_train_test(fusion_param)
+    # need init ep, en to do first fusion and get first ep, en
+    ep, en = pos_neg_shot_eval(fusion_param['renew_pid_path'], fusion_param['renew_ac_path'])
+    fusion_st_img_ranker(fusion_param, ep, en)
+    eval_on_train_test(fusion_param)
 
     update_epen(fusion_param)
 
