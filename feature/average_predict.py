@@ -13,13 +13,14 @@ def write_rand_pid(fusion_param):
     rand_answer_path = fusion_param['answer_path'].replace(ctrl_msg['data_folder_path'], ctrl_msg['data_folder_path'] + '_rand')
     rand_folder_path = folder(rand_answer_path)
     safe_mkdir(rand_folder_path)
+    # although copy all info including pid info, but not use in later training
     shutil.copy(fusion_param['answer_path'], rand_answer_path)
     rand_path = rand_folder_path + '/renew_pid.log'
     safe_remove(rand_path)
 
     origin_tracks = get_tracks(fusion_param)
-    origin_pids = [track.split('_')[0] for track in origin_tracks]
-    pid_cnt = len(origin_pids)
+    pid_cnt = len(origin_tracks)
+    origin_pids = map(lambda x: x+1, range(5))
     persons_rand_predict_idx_s = [random.sample(origin_pids, pid_cnt) for _ in range(pid_cnt)]
     write_content = ''
     for rand_predict_idx_s in persons_rand_predict_idx_s:
