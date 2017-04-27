@@ -93,3 +93,4 @@ ENV/
 
 .idea/
 data/
+.DS_Store
