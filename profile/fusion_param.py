@@ -1,7 +1,7 @@
 from util.file_helper import write
 
 ctrl_msg = {
-    'data_folder_path': 'top-m2g-std0-train'
+    'data_folder_path': 'top-m2g-std1-train'
 }
 
 update_msg = {}
@@ -29,8 +29,10 @@ def get_fusion_param():
         'fusion_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_ac1.log',
         'fusion_normal_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_filter_score.log',
         'fusion_raw_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/raw_cross_filter_score.log',
-        'pos_shot_rate': 0.003302,
-        'neg_shot_rate': 0.001252,
+        'pos_shot_rate': 0.5,
+        # 'pos_shot_rate': 0.003302,
+        'neg_shot_rate': 0.01,
+        # 'neg_shot_rate': 0.001252,
     }
     origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('train', 'train_rand')
     if 'r-' in origin_dict['src_distribution_pickle_path']:

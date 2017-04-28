@@ -184,5 +184,5 @@ if __name__ == '__main__':
     # eval_on_train_test()
     fusion_param = get_fusion_param()
     # pos_neg_shot_eval(fusion_param['renew_pid_path'], fusion_param['renew_ac_path'])
-    target_pos_neg_shot_eval(fusion_param['fusion_normal_score_path'], fusion_param['renew_pid_path'], fusion_param['renew_ac_path'])
-    # eval_on_train_test(fusion_param)
+    # target_pos_neg_shot_eval(fusion_param['fusion_normal_score_path'], fusion_param['renew_pid_path'], fusion_param['renew_ac_path'])
+    eval_on_train_test(fusion_param)

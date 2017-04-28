@@ -1,7 +1,8 @@
+from post_process.predict_eval import eval_on_train_test
 from post_process.track_prob import track_score
-from profile.fusion_param import get_fusion_param, ctrl_msg
+from profile.fusion_param import get_fusion_param
 from util.file_helper import read_lines, read_lines_and, write, safe_remove
-from util.serialize import pickle_load, pickle_save
+from util.serialize import pickle_load
 
 line_idx = 0
 track_score_idx = 0
@@ -142,7 +143,7 @@ def cross_st_img_ranker(fusion_param):
         cross_scores = list()
         for j, person_ap_pid in enumerate(person_ap_pids):
             cross_score = (persons_track_scores[i][j] * 1) * (persons_ap_scores[i][j] * 1)
-            cross_scores.append(cross_score**0.5)
+            cross_scores.append(cross_score ** 0.5)
         persons_cross_scores.append(cross_scores)
 
     max_score = max([max(predict_cross_scores) for predict_cross_scores in persons_cross_scores])
@@ -175,18 +176,15 @@ def cross_st_img_ranker(fusion_param):
 
 
 def fusion_st_img_ranker(fusion_param, pos_shot_rate, neg_shot_rate):
-    # fusion_param = get_fusion_param()
     persons_ap_scores = predict_img_scores(fusion_param)
     persons_ap_pids = predict_pids(fusion_param)
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     persons_track_scores = predict_track_scores(camera_delta_s, fusion_param)
-    rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
-    # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_rand'
-    # fusion_param = get_fusion_param()
-    rand_track_scores = predict_track_scores(rand_delta_s, fusion_param)
+    # rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
+    ue_rand_deltas = pickle_load(fusion_param['rand_distribution_pickle_path'].replace('_rand', '_uerand'))
 
-    # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
-    # fusion_param = get_fusion_param()
+    # rand_track_scores = predict_track_scores(rand_delta_s, fusion_param)
+    uerand_track_scores = predict_track_scores(ue_rand_deltas, fusion_param)
 
     persons_cross_scores = list()
     log_path = fusion_param['eval_fusion_path']
@@ -205,12 +203,26 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate, neg_shot_rate):
     for i, person_ap_pids in enumerate(persons_ap_pids):
         cross_scores = list()
         for j, person_ap_pid in enumerate(person_ap_pids):
-            m1 = persons_ap_scores[i][j] * (1 - pos_shot_rate - neg_shot_rate) + \
-                 fusion_param['neg_shot_rate']
-            p = rand_track_scores[i][j]
-            m2 = (persons_track_scores[i][j] - p * pos_shot_rate)/(1 - neg_shot_rate)
-
-            cross_score = m1*m2/(m1*m2+(1-m1)*p)
+            # Pr(Pi=Pj|vi,vj)
+#            m1 = persons_ap_scores[i][j] * (1 - pos_shot_rate - neg_shot_rate) + \
+#                 fusion_param['neg_shot_rate']
+            m1 = persons_ap_scores[i][j]
+            pe = uerand_track_scores[i][j]
+            # Pr(Dij,Ci,Cj|Pi=Pj)
+            m2 = (
+                     (1 - neg_shot_rate) * persons_track_scores[i][j] - pos_shot_rate * pe
+                 ) / (1 - pos_shot_rate - neg_shot_rate)
+            # Pr(Dij,Ci,Cj|Pi=Pj)
+            m3 = (
+                     (1 - pos_shot_rate) * pe - neg_shot_rate * persons_track_scores[i][j]
+                 ) / (1 - pos_shot_rate - neg_shot_rate)
+            # v2 fusion score
+            # cross_score = m1*m2/(m1*m2+(1-m1)*p)
+            if persons_track_scores[i][j] == 0 and pe == 0:
+                # will divide by zero, directly set to zero
+                cross_score = 0
+            else:
+                cross_score = m1 * m2 / (m1 * m2 + (1 - m1) * m3)
             # if cross_score < 0:
             #     print('Sv:%f, Sst:%f, Srst:%f, Ep:%f, En:%f, m1:%f, m2:%f' % (
             #         persons_ap_scores[i][j], persons_track_scores[i][j], p,
@@ -252,3 +264,4 @@ if __name__ == '__main__':
     fusion_param = get_fusion_param()
     # cross_st_img_ranker(fusion_param)
     fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
+    eval_on_train_test(fusion_param)

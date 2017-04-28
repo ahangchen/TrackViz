@@ -1,5 +1,5 @@
 import shutil
-from feature.average_predict import write_rand_pid, gen_rand_st_model
+from feature.average_predict import write_rand_pid, gen_rand_st_model, write_unequal_rand_st_model
 from feature.top10distribution import get_predict_tracks, store_sorted_deltas
 from post_process.predict_eval import eval_on_train_test, pos_neg_shot_eval, target_pos_neg_shot_eval
 from pre_process.shot_rate import get_shot_rate
@@ -38,6 +38,16 @@ def train_fusion(fusion_param, ep, en):
     get_predict_tracks(fusion_param)
     # get distribution sorted list for probability compute
     store_sorted_deltas(fusion_param)
+
+    # need to update rand unequal info, but don't need to update all rand info
+    print('generate random predict')
+    write_unequal_rand_st_model(fusion_param)
+    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_uerand'
+    fusion_param = get_fusion_param()
+    gen_rand_st_model(fusion_param)
+
+    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-7]
+    fusion_param = get_fusion_param()
     fusion_st_img_ranker(fusion_param, ep, en)
     # evaluate
     eval_on_train_test(fusion_param)
@@ -55,24 +65,32 @@ def update_epen(fusion_param, pst=True):
 
 def init_strict_img_st_fusion():
     fusion_param = get_fusion_param()
-    print('init predict tracks into different class files')
+    # print('init predict tracks into different class files')
     # pick predict tracks into different class file
-    get_predict_tracks(fusion_param)
+    # get_predict_tracks(fusion_param)
     # get distribution sorted list for probability compute
-    store_sorted_deltas(fusion_param)
-    # only get rand model for train dataset
+    # store_sorted_deltas(fusion_param)
+
+    # # only get rand model for train dataset
+    # print('generate random predict')
+    # write_rand_pid(fusion_param)
+    # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_rand'
+    # fusion_param = get_fusion_param()
+    # gen_rand_st_model(fusion_param)
 
     print('generate random predict')
-    write_rand_pid(fusion_param)
-    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_rand'
+    write_unequal_rand_st_model(fusion_param)
+    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_uerand'
     fusion_param = get_fusion_param()
     gen_rand_st_model(fusion_param)
 
-    print('init fusion, try to get ep en')
-    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
+    # print('init fusion, try to get ep en')
+    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-7]
     fusion_param = get_fusion_param()
     # need init ep, en to do first fusion and get first ep, en
-    ep, en = pos_neg_shot_eval(fusion_param['renew_pid_path'], fusion_param['renew_ac_path'])
+    # ep, en = pos_neg_shot_eval(fusion_param['renew_pid_path'], fusion_param['renew_ac_path'])
+    ep = fusion_param['pos_shot_rate']
+    en = fusion_param['neg_shot_rate']
     fusion_st_img_ranker(fusion_param, ep, en)
     eval_on_train_test(fusion_param)
 
@@ -89,8 +107,8 @@ def init_strict_img_st_fusion():
 def iter_strict_img_st_fusion(on_test=False):
     """
     call after img classifier update, train with new vision score and ep en
-    :param on_test: 
-    :return: 
+    :param on_test:
+    :return:
     """
     fusion_param = get_fusion_param()
     ep, en = get_shot_rate()
