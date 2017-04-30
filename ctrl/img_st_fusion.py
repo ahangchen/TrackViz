@@ -4,8 +4,8 @@ from feature.top10distribution import get_predict_tracks, store_sorted_deltas
 from post_process.predict_eval import eval_on_train_test, pos_neg_shot_eval, target_pos_neg_shot_eval
 from pre_process.shot_rate import get_shot_rate
 from profile.fusion_param import get_fusion_param, ctrl_msg, update_fusion_param, save_fusion_param
-from train.st_filter import cross_st_img_ranker, fusion_st_img_ranker
-
+from train.delta_track import viz_fusion_curve
+from train.st_filter import cross_st_img_ranker, fusion_st_img_ranker, fusion_curve
 
 # need to run on src directory
 from util.file_helper import write_line
@@ -122,4 +122,21 @@ def iter_strict_img_st_fusion(on_test=False):
 if __name__ == '__main__':
     # img_st_fusion()
     # retrain_fusion()
-    init_strict_img_st_fusion()
+    # init_strict_img_st_fusion()
+    fusion_param = get_fusion_param()
+    get_predict_tracks(fusion_param)
+    store_sorted_deltas(fusion_param)
+
+    print('generate random predict')
+    write_unequal_rand_st_model(fusion_param)
+    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_uerand'
+    fusion_param = get_fusion_param()
+    gen_rand_st_model(fusion_param)
+
+    # print('init fusion, try to get ep en')
+    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-7]
+    fusion_param = get_fusion_param()
+
+    # viz_market_distribution(fusion_param)
+    delta_range, raw_probs, m2_probs, m3_probs = fusion_curve(fusion_param)
+    viz_fusion_curve(delta_range, raw_probs, m2_probs, m3_probs)

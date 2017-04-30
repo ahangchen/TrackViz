@@ -27,7 +27,7 @@ def binary_search(a, target):
     return low
 
 
-def track_score(camera_delta_s, camera1, time1, camera2, time2):
+def track_score(camera_delta_s, camera1, time1, camera2, time2, interval=100):
     camera1 -= 1
     camera2 -= 1
 
@@ -35,7 +35,6 @@ def track_score(camera_delta_s, camera1, time1, camera2, time2):
     delta_distribution = camera_delta_s[camera1][camera2]
     total_cnt = sum(map(len, camera_delta_s[camera1]))
     # 10 second
-    interval = 1 * 10 * 10
     left_bound = cur_delta - interval
     right_bound = cur_delta + interval
     left_index = binary_search(delta_distribution, left_bound)

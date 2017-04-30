@@ -4,6 +4,7 @@ from random import uniform
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+from numpy.linalg import LinAlgError
 
 from profile.fusion_param import get_fusion_param
 from util.file_helper import read_lines_and
@@ -13,6 +14,7 @@ from util.file_helper import read_lines_and
 # 2: grid true data, 3: grid predict data,
 # 4: grid rand data
 # 5: 3dpes data
+
 data_type = 1
 
 camera_cnt = 6
@@ -34,6 +36,7 @@ def track_infos(fusion_param, camera_num, s_num):
         seq_num = int(track_info[1][3])
         if seq_num == s_num:
             tracks.append([person_id, track_time])
+
     if data_type == 0:
         # read_lines_and('market_s1/track_c%ds1.txt' % camera_num, count_interval)
         read_lines_and(fusion_param['predict_camera_path'] + camera_num + '.txt', count_interval)
@@ -74,6 +77,7 @@ def camera_distribute(fusion_param, camera_num):
     seq_s = [1, 2, 3, 4, 5, 6]
     for i in range(len(seq_s)):
         intervals = track_infos(fusion_param, camera_num, seq_s[i])
+
         # print('get intervals for c%d' % camera_num)
 
         def shuffle_person(img_name):
@@ -95,6 +99,7 @@ def camera_distribute(fusion_param, camera_num):
                     # ignore large data
                     if abs(delta) < 1000000:
                         deltas[camera_id - 1].append(delta)
+
         if data_type == 0:
             # read_lines_and('market_s1/track_s1.txt', shuffle_person)
             read_lines_and(fusion_param['predict_track_path'], shuffle_person)
@@ -125,11 +130,15 @@ def distribute_in_cameras(data_s, subplot, camera_id):
         # if camera_id == i + 1:
         #     continue
         if len(data) == 0:
-            print('no data: %d - %d' %(camera_id, i))
+            print('no data: %d - %d' % (camera_id, i))
             continue
         print("camera %d to camera %d, record number: %d" % (camera_id, i + 1, len(data)))
         print(data)
-        sns.distplot(np.array(data), label='camera %d' % (i + 1), hist=False, ax=subplot, axlabel='Distribution for camera %d' % camera_id)
+        try:
+            sns.distplot(np.array(data), label='camera %d' % (i + 1), hist=False, ax=subplot,
+                         axlabel='Distribution for camera %d' % camera_id)
+        except LinAlgError:
+            print 'singular matrix'
 
 
 def viz_market_distribution(fusion_param):
@@ -186,9 +195,37 @@ def viz_market(fusion_param):
     for i in range(camera_cnt):
         # sns.plt.title('Appear distribution in cameras %d' % (i + 1))
         if len(viz_data[i][0]) == 0:
-            print('no data for camera %d' % (i+1))
+            print('no data for camera %d' % (i + 1))
             continue
         distribute_joint(viz_data[i], axes[i / 2, i % 2], i + 1)
+        print('viz camera %d' % (i + 1))
+    sns.plt.show()
+
+
+def prob_curve(x_s, y_s):
+    plt.plot(x_s, y_s)
+
+
+def viz_fusion_curve(delta_range, raw_probs, m2_probs, m3_probs):
+    for i in range(camera_cnt):
+        for j in range(camera_cnt):
+            plt.subplot(3, 2, i+1)
+            plt.plot(delta_range, raw_probs[i][j], label='camera%d' % (j+1))
+            plt.legend()
+        print('viz camera %d' % (i + 1))
+    sns.plt.show()
+    for i in range(camera_cnt):
+        for j in range(camera_cnt):
+            plt.subplot(3, 2, i+1)
+            plt.plot(delta_range, m2_probs[i][j], label='camera%d' % (j+1))
+            plt.legend()
+        print('viz camera %d' % (i + 1))
+    sns.plt.show()
+    for i in range(camera_cnt):
+        for j in range(camera_cnt):
+            plt.subplot(3, 2, i+1)
+            plt.plot(delta_range, m3_probs[i][j], label='camera%d' % (j+1))
+            plt.legend()
         print('viz camera %d' % (i + 1))
     sns.plt.show()
 

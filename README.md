@@ -13,6 +13,19 @@
  - script: 一些快捷脚本
  - MATLAB调度入口：
    - init_img_st_fusion.py
-   - iter_img_st_fusion.py  
+   - iter_img_st_fusion.py
+
+- GRID Predict Distribution
+
+![](viz_result/grid_predict_dist.png)
+
+- GRID M2 Distribution
+
+![](viz_result/grid_m2_dist.png)
+
+- GRID M3 Distribution
+
+![](viz_result/grid_m3_dist.png)
+
     
                       
