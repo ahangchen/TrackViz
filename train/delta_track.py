@@ -3,6 +3,7 @@ from random import uniform
 
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy
 import seaborn as sns
 from numpy.linalg import LinAlgError
 
@@ -211,7 +212,7 @@ def viz_fusion_curve(delta_range, raw_probs, m2_probs, m3_probs):
         for j in range(camera_cnt):
             plt.subplot(3, 2, i+1)
             plt.plot(delta_range, raw_probs[i][j], label='camera%d' % (j+1))
-            plt.legend()
+            plt.legend(loc=3)
         print('viz camera %d' % (i + 1))
     sns.plt.show()
     for i in range(camera_cnt):
