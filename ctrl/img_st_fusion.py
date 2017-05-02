@@ -25,7 +25,7 @@ def img_st_fusion():
     eval_on_train_test(fusion_param)
 
 
-def test_fusion(fusion_param, ep, en):
+def test_fusion(fusion_param, ep=0.5, en=0.01):
     # copy sort pickle
     shutil.copy(fusion_param['src_distribution_pickle_path'], fusion_param['distribution_pickle_path'])
     # merge visual probability and track distribution probability
@@ -34,20 +34,20 @@ def test_fusion(fusion_param, ep, en):
     eval_on_train_test(fusion_param)
 
 
-def train_fusion(fusion_param, ep, en):
+def train_fusion(fusion_param, ep=0.5, en=0.01):
     get_predict_tracks(fusion_param)
     # get distribution sorted list for probability compute
     store_sorted_deltas(fusion_param)
 
-    # need to update rand unequal info, but don't need to update all rand info
-    print('generate random predict')
-    write_unequal_rand_st_model(fusion_param)
-    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_uerand'
-    fusion_param = get_fusion_param()
-    gen_rand_st_model(fusion_param)
-
-    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-7]
-    fusion_param = get_fusion_param()
+    # # need to update rand unequal info, but don't need to update all rand info
+    # print('generate random predict')
+    # write_unequal_rand_st_model(fusion_param)
+    # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_uerand'
+    # fusion_param = get_fusion_param()
+    # gen_rand_st_model(fusion_param)
+    #
+    # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-7]
+    # fusion_param = get_fusion_param()
     fusion_st_img_ranker(fusion_param, ep, en)
     # evaluate
     eval_on_train_test(fusion_param)
@@ -65,36 +65,20 @@ def update_epen(fusion_param, pst=True):
 
 def init_strict_img_st_fusion():
     fusion_param = get_fusion_param()
-    # print('init predict tracks into different class files')
+    print('init predict tracks into different class files')
     # pick predict tracks into different class file
-    # get_predict_tracks(fusion_param)
+    get_predict_tracks(fusion_param)
     # get distribution sorted list for probability compute
-    # store_sorted_deltas(fusion_param)
+    store_sorted_deltas(fusion_param)
 
     # # only get rand model for train dataset
-    # print('generate random predict')
-    # write_rand_pid(fusion_param)
-    # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_rand'
-    # fusion_param = get_fusion_param()
-    # gen_rand_st_model(fusion_param)
-
     print('generate random predict')
-    write_unequal_rand_st_model(fusion_param)
-    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_uerand'
+    write_rand_pid(fusion_param)
+    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_rand'
     fusion_param = get_fusion_param()
     gen_rand_st_model(fusion_param)
 
-    # print('init fusion, try to get ep en')
-    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-7]
-    fusion_param = get_fusion_param()
-    # need init ep, en to do first fusion and get first ep, en
-    # ep, en = pos_neg_shot_eval(fusion_param['renew_pid_path'], fusion_param['renew_ac_path'])
-    ep = fusion_param['pos_shot_rate']
-    en = fusion_param['neg_shot_rate']
-    fusion_st_img_ranker(fusion_param, ep, en)
-    eval_on_train_test(fusion_param)
-
-    update_epen(fusion_param)
+    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
 
     # has prepared more accurate ep, en
     print('fusion on training dataset')
@@ -111,32 +95,32 @@ def iter_strict_img_st_fusion(on_test=False):
     :return:
     """
     fusion_param = get_fusion_param()
-    ep, en = get_shot_rate()
+    # ep, en = get_shot_rate()
     if on_test:
-        test_fusion(fusion_param, ep, en)
+        test_fusion(fusion_param)
     else:
-        train_fusion(fusion_param, ep, en)
-        update_epen(fusion_param, True)
+        train_fusion(fusion_param)
+        # update_epen(fusion_param, True)
 
 
 if __name__ == '__main__':
     # img_st_fusion()
     # retrain_fusion()
-    # init_strict_img_st_fusion()
-    fusion_param = get_fusion_param()
-    get_predict_tracks(fusion_param)
-    store_sorted_deltas(fusion_param)
-
-    print('generate random predict')
-    write_unequal_rand_st_model(fusion_param)
-    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_uerand'
-    fusion_param = get_fusion_param()
-    gen_rand_st_model(fusion_param)
-
-    # print('init fusion, try to get ep en')
-    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-7]
-    fusion_param = get_fusion_param()
-
-    # viz_market_distribution(fusion_param)
-    delta_range, raw_probs, m2_probs, m3_probs = fusion_curve(fusion_param)
-    viz_fusion_curve(delta_range, raw_probs, m2_probs, m3_probs)
+    init_strict_img_st_fusion()
+    # fusion_param = get_fusion_param()
+    # get_predict_tracks(fusion_param)
+    # store_sorted_deltas(fusion_param)
+    #
+    # print('generate random predict')
+    # write_unequal_rand_st_model(fusion_param)
+    # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_uerand'
+    # fusion_param = get_fusion_param()
+    # gen_rand_st_model(fusion_param)
+    #
+    # # print('init fusion, try to get ep en')
+    # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-7]
+    # fusion_param = get_fusion_param()
+    #
+    # # viz_market_distribution(fusion_param)
+    # delta_range, raw_probs, m2_probs, m3_probs = fusion_curve(fusion_param)
+    # viz_fusion_curve(delta_range, raw_probs, m2_probs, m3_probs)

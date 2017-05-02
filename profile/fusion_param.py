@@ -1,7 +1,7 @@
 from util.file_helper import write
 
 ctrl_msg = {
-    'data_folder_path': 'top-m2g-std1-train'
+    'data_folder_path': 'top-m2g-std0-train'
 }
 
 update_msg = {}

@@ -175,16 +175,14 @@ def cross_st_img_ranker(fusion_param):
         write(renew_ac_path, '\n')
 
 
-def fusion_st_img_ranker(fusion_param, pos_shot_rate, neg_shot_rate):
+def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
+    # fusion_param = get_fusion_param()
     persons_ap_scores = predict_img_scores(fusion_param)
     persons_ap_pids = predict_pids(fusion_param)
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
+    rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
     persons_track_scores = predict_track_scores(camera_delta_s, fusion_param)
-    # rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
-    ue_rand_deltas = pickle_load(fusion_param['rand_distribution_pickle_path'].replace('_rand', '_uerand'))
-
-    # rand_track_scores = predict_track_scores(rand_delta_s, fusion_param)
-    uerand_track_scores = predict_track_scores(ue_rand_deltas, fusion_param)
+    rand_track_scores = predict_track_scores(rand_delta_s, fusion_param)
 
     persons_cross_scores = list()
     log_path = fusion_param['eval_fusion_path']
@@ -197,36 +195,12 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate, neg_shot_rate):
     safe_remove(score_path)
     safe_remove(renew_path)
     safe_remove(renew_ac_path)
-    # not limit this count for logging all probability
     line_log_cnt = 10
 
     for i, person_ap_pids in enumerate(persons_ap_pids):
         cross_scores = list()
         for j, person_ap_pid in enumerate(person_ap_pids):
-            # Pr(Pi=Pj|vi,vj)
-            # m1 = persons_ap_scores[i][j] * (1 - pos_shot_rate - neg_shot_rate) + \
-            #     fusion_param['neg_shot_rate']
-            m1 = persons_ap_scores[i][j]
-            pe = uerand_track_scores[i][j]
-            # Pr(Dij,Ci,Cj|Pi=Pj)
-            m2 = (
-                     (1 - neg_shot_rate) * persons_track_scores[i][j] - pos_shot_rate * pe
-                 ) / (1 - pos_shot_rate - neg_shot_rate)
-            # Pr(Dij,Ci,Cj|Pi=Pj)
-            m3 = (
-                     (1 - pos_shot_rate) * pe - neg_shot_rate * persons_track_scores[i][j]
-                 ) / (1 - pos_shot_rate - neg_shot_rate)
-            # v2 fusion score
-            # cross_score = m1*m2/(m1*m2+(1-m1)*p)
-            if persons_track_scores[i][j] == 0 and pe == 0:
-                # will divide by zero, directly set to zero
-                cross_score = 0
-            else:
-                cross_score = m1 * m2 / (m1 * m2 + (1 - m1) * m3)
-            # if cross_score < 0:
-            #     print('Sv:%f, Sst:%f, Srst:%f, Ep:%f, En:%f, m1:%f, m2:%f' % (
-            #         persons_ap_scores[i][j], persons_track_scores[i][j], p,
-            #         pos_shot_rate, neg_shot_rate, m1, m2))
+            cross_score = (persons_track_scores[i][j] * 1) * (persons_ap_scores[i][j] * 1)
             cross_scores.append(cross_score)
         persons_cross_scores.append(cross_scores)
 
@@ -238,17 +212,16 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate, neg_shot_rate):
         person_score_idx_s.append(sort_score_idx_s)
 
     for i, person_ap_pids in enumerate(persons_ap_pids):
-        img_score_s = list()
-        img_score_idx_s = list()
+        # img_score_s = list()
+        # img_score_idx_s = list()
+        # for j in range(len(person_ap_pids)):
+        #     img_score_idx_s.append(person_ap_pids.index(person_ap_pids[person_score_idx_s[i][j]]))
+        #     img_score_s.append(persons_ap_scores[i][img_score_idx_s[j]])
+        # sort_img_score_s = sorted(img_score_s, reverse=True)
         for j in range(len(person_ap_pids)):
-            img_score_idx_s.append(person_ap_pids.index(person_ap_pids[person_score_idx_s[i][j]]))
-            img_score_s.append(persons_ap_scores[i][img_score_idx_s[j]])
-        sort_img_score_s = sorted(img_score_s, reverse=True)
-        for j in range(len(person_ap_pids)):
-            write(map_score_path, '%f ' % sort_img_score_s[j])
-            write(score_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]] / max_score))
+            # write(map_score_path, '%f ' % sort_img_score_s[j])
+            write(map_score_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]] / max_score))
             write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
-
             write(renew_ac_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]]))
             write(renew_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
         write(log_path, '\n')
