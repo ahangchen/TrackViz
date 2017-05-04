@@ -75,7 +75,7 @@ def write_unequal_rand_st_model(fusion_param):
 
 
 def gen_rand_st_model(fusion_param):
-    get_predict_tracks(fusion_param)
+    get_predict_tracks(fusion_param, useful_predict_cnt=250)
     # get distribution sorted list for probability compute
     store_sorted_deltas(fusion_param)
 

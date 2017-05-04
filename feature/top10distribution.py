@@ -20,7 +20,7 @@ def get_tracks(fusion_param):
 predict_line_idx = 0
 
 
-def get_predict_tracks(fusion_param):
+def get_predict_tracks(fusion_param, useful_predict_cnt=10):
     # fusion_param = get_fusion_param()
     renew_pid_path = fusion_param['renew_pid_path']
     predict_track_path = fusion_param['predict_track_path']
@@ -62,8 +62,9 @@ def get_predict_tracks(fusion_param):
                    ('%04d_c%ds%d_%d_n.jpg' % (int(predict_line_idx) + 1, int(camera), s_num, int(track_time))))
         write_line(fusion_param['predict_camera_path'] + str(camera) + '.txt',
                    ('%04d_c%ds%d_%d_n.jpg' % (int(predict_line_idx) + 1, int(camera), s_num, int(track_time))))
+
         for i, mid in enumerate(mids):
-            if i >= 10:
+            if i >= useful_predict_cnt:
                 break
             write_line(predict_track_path,
                        ('%04d_c%ds%d_%d_n.jpg' % (int(mid), int(camera), s_num, int(track_time))))
