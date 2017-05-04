@@ -235,27 +235,19 @@ def fusion_curve(fusion_param):
     neg_shot_rate = 0.008369
     pos_shot_rate = 0.146972
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
-    unmatch_camera_deltas = pickle_load(fusion_param['rand_distribution_pickle_path'].replace('_rand', '_uerand'))
+    rand_camera_deltas = pickle_load(fusion_param['rand_distribution_pickle_path'])
 
     delta_range = map(lambda x: x*30.0 - 15000.0, range(1000))
     raw_probs = [[list() for j in range(6)] for i in range(6)]
-    m2_probs = [[list() for j in range(6)] for i in range(6)]
-    m3_probs = [[list() for j in range(6)] for i in range(6)]
+    rand_probs = [[list() for j in range(6)] for i in range(6)]
     for i in range(6):
         for j in range(6):
             for k in range(len(delta_range)):
                 match_track_score = track_score(camera_delta_s, i + 1, 0, j + 1, delta_range[k], interval=100)
-                unmatch_track_score = track_score(unmatch_camera_deltas, i + 1, 0, j + 1, delta_range[k], interval=100)
-                m2 = (
-                         (1 - neg_shot_rate) * match_track_score - pos_shot_rate * unmatch_track_score
-                     ) / (1 - pos_shot_rate - neg_shot_rate)
-                m2_probs[i][j].append(m2)
-                m3 = (
-                         (1 - pos_shot_rate) * unmatch_track_score - neg_shot_rate * match_track_score
-                     ) / (1 - pos_shot_rate - neg_shot_rate)
-                m3_probs[i][j].append(m3)
+                rand_track_score = track_score(rand_camera_deltas, i + 1, 0, j + 1, delta_range[k], interval=100)
                 raw_probs[i][j].append(match_track_score)
-    return delta_range, raw_probs, m2_probs, m3_probs
+                rand_probs[i][j].append(match_track_score/rand_track_score)
+    return delta_range, raw_probs, rand_probs
 
 if __name__ == '__main__':
     # st_scissors()

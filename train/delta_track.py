@@ -207,28 +207,15 @@ def prob_curve(x_s, y_s):
     plt.plot(x_s, y_s)
 
 
-def viz_fusion_curve(delta_range, raw_probs, m2_probs, m3_probs):
-    for i in range(camera_cnt):
-        for j in range(camera_cnt):
-            plt.subplot(3, 2, i+1)
-            plt.plot(delta_range, raw_probs[i][j], label='camera%d' % (j+1))
-            plt.legend(loc=3)
-        print('viz camera %d' % (i + 1))
-    sns.plt.show()
-    for i in range(camera_cnt):
-        for j in range(camera_cnt):
-            plt.subplot(3, 2, i+1)
-            plt.plot(delta_range, m2_probs[i][j], label='camera%d' % (j+1))
-            plt.legend()
-        print('viz camera %d' % (i + 1))
-    sns.plt.show()
-    for i in range(camera_cnt):
-        for j in range(camera_cnt):
-            plt.subplot(3, 2, i+1)
-            plt.plot(delta_range, m3_probs[i][j], label='camera%d' % (j+1))
-            plt.legend()
-        print('viz camera %d' % (i + 1))
-    sns.plt.show()
+def viz_fusion_curve(delta_range, probs_s):
+    for probs in probs_s:
+        for i in range(camera_cnt):
+            for j in range(camera_cnt):
+                plt.subplot(3, 2, i+1)
+                plt.plot(delta_range, probs[i][j], label='camera%d' % (j+1))
+                plt.legend(loc=3)
+            print('viz camera %d' % (i + 1))
+        sns.plt.show()
 
 
 if __name__ == '__main__':
