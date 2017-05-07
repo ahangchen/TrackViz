@@ -200,7 +200,10 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
     for i, person_ap_pids in enumerate(persons_ap_pids):
         cross_scores = list()
         for j, person_ap_pid in enumerate(person_ap_pids):
-            cross_score = (persons_track_scores[i][j] * 1) * (persons_ap_scores[i][j] * 1)
+            if rand_track_scores[i][j] < 0.02:
+                cross_score = persons_track_scores[i][j] * persons_ap_scores[i][j] / 0.02
+            else:
+                cross_score = persons_track_scores[i][j] * persons_ap_scores[i][j] / rand_track_scores[i][j]
             cross_scores.append(cross_score)
         persons_cross_scores.append(cross_scores)
 
@@ -232,22 +235,29 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
 
 
 def fusion_curve(fusion_param):
-    neg_shot_rate = 0.008369
-    pos_shot_rate = 0.146972
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     rand_camera_deltas = pickle_load(fusion_param['rand_distribution_pickle_path'])
 
     delta_range = map(lambda x: x*30.0 - 15000.0, range(1000))
+    # delta_range = map(lambda x: x*1.0 - 60.0, range(120))
     raw_probs = [[list() for j in range(6)] for i in range(6)]
     rand_probs = [[list() for j in range(6)] for i in range(6)]
+    over_probs = [[list() for j in range(6)] for i in range(6)]
     for i in range(6):
         for j in range(6):
             for k in range(len(delta_range)):
                 match_track_score = track_score(camera_delta_s, i + 1, 0, j + 1, delta_range[k], interval=100)
                 rand_track_score = track_score(rand_camera_deltas, i + 1, 0, j + 1, delta_range[k], interval=100)
+                if rand_track_score < 0.01:
+                    # print rand_track_score
+                    rand_track_score = 0.01
+                else:
+                    print match_track_score/rand_track_score
+
                 raw_probs[i][j].append(match_track_score)
-                rand_probs[i][j].append(match_track_score/rand_track_score)
-    return delta_range, raw_probs, rand_probs
+                rand_probs[i][j].append(match_track_score)
+                over_probs[i][j].append(match_track_score/rand_track_score)
+    return delta_range, raw_probs, rand_probs, over_probs
 
 if __name__ == '__main__':
     # st_scissors()
