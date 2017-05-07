@@ -121,6 +121,8 @@ if __name__ == '__main__':
     # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
     # fusion_param = get_fusion_param()
 
-    viz_market_distribution(fusion_param)
-    delta_range, raw_probs, rand_probs = fusion_curve(fusion_param)
-    viz_fusion_curve(delta_range, [raw_probs, rand_probs])
+    delta_range, raw_probs, rand_probs, over_probs = fusion_curve(fusion_param)
+    viz_fusion_curve(delta_range, [raw_probs, rand_probs, over_probs])
+
+    # viz smooth dist
+    # viz_market_distribution(fusion_param)
