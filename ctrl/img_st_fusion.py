@@ -106,9 +106,9 @@ def iter_strict_img_st_fusion(on_test=False):
 if __name__ == '__main__':
     # img_st_fusion()
     # retrain_fusion()
-    # init_strict_img_st_fusion()
+    init_strict_img_st_fusion()
     # # viz fusion curve
-    fusion_param = get_fusion_param()
+    # fusion_param = get_fusion_param()
     # get_predict_tracks(fusion_param)
     # store_sorted_deltas(fusion_param)
     #
@@ -121,8 +121,8 @@ if __name__ == '__main__':
     # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
     # fusion_param = get_fusion_param()
 
-    delta_range, raw_probs, rand_probs, over_probs = fusion_curve(fusion_param)
-    viz_fusion_curve(delta_range, [raw_probs, rand_probs, over_probs])
+    # delta_range, raw_probs, rand_probs, over_probs = fusion_curve(fusion_param)
+    # viz_fusion_curve(delta_range, [raw_probs, rand_probs, over_probs])
 
     # viz smooth dist
     # viz_market_distribution(fusion_param)

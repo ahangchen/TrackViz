@@ -5,7 +5,7 @@ import seaborn as sns
 from util.file_helper import read_lines_and
 
 camera_cnt = 6
-train_track_path = 'market/training_track.txt'
+train_track_path = 'market/test_tracks.txt'
 
 
 def distribute_with_camera(persons_in_cameras):

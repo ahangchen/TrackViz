@@ -111,7 +111,7 @@ def camera_distribute(fusion_param, camera_num):
             # read_lines_and('grid_predict/grid_tracks.txt', shuffle_person)
             read_lines_and(fusion_param['predict_track_path'], shuffle_person)
         elif data_type == 5:
-            # read_lines_and('3dpes/training_track.txt', shuffle_person)
+            # read_lines_and('3dpes/test_tracks.txt', shuffle_person)
             read_lines_and(fusion_param['predict_track_path'], shuffle_person)
         else:
             read_lines_and(fusion_param['predict_track_path'], shuffle_person)

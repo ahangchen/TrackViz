@@ -39,7 +39,7 @@ def predict_track_scores(camera_delta_s, fusion_param):
         if len(info) > 4 and 'jpe' in info[6]:
             real_tracks.append([info[0], int(info[1][0]), int(info[2])])
         else:
-            real_tracks.append([info[0], int(info[1][1]), int(info[2])])
+            real_tracks.append([info[0], int(info[1][1]), int(info[2]), int(info[1][3])])
     top_cnt = 10
     persons_deltas_score = list()
 
@@ -54,6 +54,12 @@ def predict_track_scores(camera_delta_s, fusion_param):
         for i, predict_idx in enumerate(predict_idx_es):
             # if i >= top_cnt:
             #     break
+            if len(real_tracks[int(predict_idx) - 1]) > 3:
+                s1 = real_tracks[int(predict_idx) - 1][3]
+                s2 = real_tracks[track_score_idx][3]
+                if s1 != s2:
+                    person_deltas_score.append(-1.0)
+                    continue
             time1 = real_tracks[int(predict_idx) - 1][2]
             if track_score_idx == 3914:
                 print 'test'
@@ -208,6 +214,13 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
         persons_cross_scores.append(cross_scores)
 
     max_score = max([max(predict_cross_scores) for predict_cross_scores in persons_cross_scores])
+    for person_cross_scores in persons_cross_scores:
+        for person_cross_score in person_cross_scores:
+            if person_cross_score < 0:
+                print 'diff seq use img score'
+                person_cross_score *= 0.02
+            else:
+                person_cross_score /= max_score
     person_score_idx_s = list()
 
     for i, person_cross_scores in enumerate(persons_cross_scores):
@@ -223,15 +236,11 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
         # sort_img_score_s = sorted(img_score_s, reverse=True)
         for j in range(len(person_ap_pids)):
             # write(map_score_path, '%f ' % sort_img_score_s[j])
-            write(map_score_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]] / max_score))
+            write(map_score_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]]))
             write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
-            write(renew_ac_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]]))
-            write(renew_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
         write(log_path, '\n')
         write(score_path, '\n')
         write(map_score_path, '\n')
-        write(renew_path, '\n')
-        write(renew_ac_path, '\n')
 
 
 def fusion_curve(fusion_param):
