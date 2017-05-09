@@ -20,6 +20,10 @@ def percent_shot_eval(target_path, top_cnt):
     answer_lines = read_lines(answer_path)
     real_pids = [answer.split('_')[0] for answer in answer_lines]
 
+    cross_gallery_line = read_lines(answer_path)[ctrl_msg['cross_idx']]
+    gallery_idxs = cross_gallery_line.split(' ')
+    gallery_idxs = [gallery_idx for gallery_idx in gallery_idxs]
+
     def is_shot(line):
         global line_idx
         global shot_line_cnt

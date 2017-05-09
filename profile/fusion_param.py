@@ -1,6 +1,7 @@
 from util.file_helper import write
 
 ctrl_msg = {
+    'cross_idx': 3,
     'data_folder_path': 'top-m2g-std3-r-train'
 }
 
