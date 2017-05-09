@@ -30,6 +30,7 @@ def get_fusion_param():
         'fusion_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_ac1.log',
         'fusion_normal_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_filter_score.log',
         'fusion_raw_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/raw_cross_filter_score.log',
+        'cross_gallery_path': 'data/grid_gallery_idx.txt',
         'pos_shot_rate': 0.5,
         # 'pos_shot_rate': 0.003302,
         'neg_shot_rate': 0.01,

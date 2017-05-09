@@ -31,7 +31,7 @@ def test_fusion(fusion_param, ep=0.5, en=0.01):
     # merge visual probability and track distribution probability
     fusion_st_img_ranker(fusion_param, ep, en)
     # evaluate
-    eval_on_train_test(fusion_param)
+    eval_on_train_test(fusion_param, test_mode=True)
 
 
 def train_fusion(fusion_param, ep=0.5, en=0.01):
