@@ -24,7 +24,7 @@ def rename_3dpes():
         frame = int(infos[3])
         new_name = '%04d_c%ds1_%d.bmp' % (pid, cid, frame)
         write_line('3dpes/c%d_tracks.txt' % cid, new_name)
-        write_line('3dpes/training_track.txt', new_name)
+        write_line('3dpes/test_tracks.txt', new_name)
         # shutil.copy(path_3dpes + old_name, path_3dpes + 'format/' + new_name)
 
 
