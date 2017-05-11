@@ -15,17 +15,13 @@ shot_cnt = 0
 top_cnt = 10
 
 
-def percent_shot_eval(target_path, top_cnt, gallery_path='data/grid_gallery_idx.txt', test_mode=False):
+def percent_shot_eval(target_path, top_cnt, test_mode=False):
     global gallery_cnt
     gallery_cnt = 0
     answer_path = folder(target_path) + '/test_tracks.txt'
     predict_path = target_path
     answer_lines = read_lines(answer_path)
     real_pids = [int(answer.split('_')[0]) for answer in answer_lines]
-
-    cross_gallery_line = read_lines(gallery_path)[ctrl_msg['cross_idx']]
-    gallery_idxs = cross_gallery_line.split(' ')[0:-1]
-    gallery_idxs = [int(gallery_idx) % 2 for gallery_idx in gallery_idxs]
 
     def is_shot(line):
         global line_idx
@@ -47,9 +43,7 @@ def percent_shot_eval(target_path, top_cnt, gallery_path='data/grid_gallery_idx.
         # line_idx > 774 means label img,
         # gallery_idxs[(line_idx - 775)/2] means iseven in gallery,
         # if iseven is equal, means gallery img
-        if test_mode and line_idx > 774 and (line_idx - 774) % 2 == gallery_idxs[(line_idx - 775)/2]:
-            print line_idx
-            print gallery_idxs[(line_idx - 775)/2]
+        if test_mode and line_idx > 774 and (line_idx - 774) % 2 == 1:
             gallery_cnt += 1
             line_idx += 1
             return
