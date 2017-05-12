@@ -16,6 +16,7 @@ def get_fusion_param():
         'eval_fusion_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_filter_pid.log',
         'origin_answer_path': 'data/' + ctrl_msg['data_folder_path'] + '/test_track.txt',
         'answer_path': 'data/' + ctrl_msg['data_folder_path'] + '/test_tracks.txt',
+        'gallery_path': 'data/' + ctrl_msg['data_folder_path'] + '/gallery_tracks.txt',
         'predict_track_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_tracks.txt',
         'predict_camera_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_c',
 
