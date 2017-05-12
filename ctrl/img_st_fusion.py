@@ -86,9 +86,9 @@ def init_strict_img_st_fusion():
     # has prepared more accurate ep, en
     print('fusion on training dataset')
     iter_strict_img_st_fusion(on_test=False)
-    print('fusion on test dataset')
-    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-4] + 'est'
-    iter_strict_img_st_fusion(on_test=True)
+    # print('fusion on test dataset')
+    # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-4] + 'est'
+    # iter_strict_img_st_fusion(on_test=True)
 
 
 def iter_strict_img_st_fusion(on_test=False):
@@ -109,18 +109,18 @@ def iter_strict_img_st_fusion(on_test=False):
 if __name__ == '__main__':
     # img_st_fusion()
     # retrain_fusion()
-    # init_strict_img_st_fusion()
-    for i in range(10):
-        print('iteration %d' % i)
-        ctrl_msg['cross_idx'] = i
-        # ctrl_msg['data_folder_path'] = 'top-m2g-std%d-r-train' % i
-        # fusion_param = get_fusion_param()
-        # get_predict_tracks(fusion_param)
-        # store_sorted_deltas(fusion_param)
-        # ctrl_msg['data_folder_path'] = 'top-m2g-std%d-r-test' % i
-        # iter_strict_img_st_fusion(on_test=True)
-        ctrl_msg['data_folder_path'] = 'top-m2g-std%d-test' % i
-        iter_strict_img_st_fusion(on_test=True)
+    init_strict_img_st_fusion()
+    # for i in range(10):
+    #     print('iteration %d' % i)
+    #     ctrl_msg['cross_idx'] = i
+    #     # ctrl_msg['data_folder_path'] = 'top-m2g-std%d-r-train' % i
+    #     # fusion_param = get_fusion_param()
+    #     # get_predict_tracks(fusion_param)
+    #     # store_sorted_deltas(fusion_param)
+    #     # ctrl_msg['data_folder_path'] = 'top-m2g-std%d-r-test' % i
+    #     # iter_strict_img_st_fusion(on_test=True)
+    #     ctrl_msg['data_folder_path'] = 'top-m2g-std%d-test' % i
+    #     iter_strict_img_st_fusion(on_test=True)
     # # viz fusion curve
     # fusion_param = get_fusion_param()
     # get_predict_tracks(fusion_param)

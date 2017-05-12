@@ -218,6 +218,7 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
         for person_cross_score in person_cross_scores:
             if person_cross_score < 0:
                 print 'diff seq use img score'
+                # ignore delta(both)
                 person_cross_score *= 0.02
             else:
                 person_cross_score /= max_score
