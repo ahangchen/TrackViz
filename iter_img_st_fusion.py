@@ -9,4 +9,6 @@ if __name__ == '__main__':
         # ctrl_msg['cross_idx'] = int(sys.argv[1][11])
         print(ctrl_msg)
     if 'test' in sys.argv[1]:
-        iter_strict_img_st_fusion()
+        iter_strict_img_st_fusion(on_test=True)
+    else:
+        iter_strict_img_st_fusion(on_test=False)

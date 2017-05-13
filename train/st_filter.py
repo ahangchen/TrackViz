@@ -1,6 +1,6 @@
 from post_process.predict_eval import eval_on_train_test
 from post_process.track_prob import track_score
-from profile.fusion_param import get_fusion_param
+from profile.fusion_param import get_fusion_param, ctrl_msg
 from util.file_helper import read_lines, read_lines_and, write, safe_remove
 from util.serialize import pickle_load
 
@@ -188,7 +188,9 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
     persons_track_scores = predict_track_scores(camera_delta_s, fusion_param)
+    print 'above score ready'
     rand_track_scores = predict_track_scores(rand_delta_s, fusion_param)
+    print 'bellow score ready'
 
     persons_cross_scores = list()
     log_path = fusion_param['eval_fusion_path']
@@ -212,7 +214,7 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
                 cross_score = persons_track_scores[i][j] * persons_ap_scores[i][j] / rand_track_scores[i][j]
             cross_scores.append(cross_score)
         persons_cross_scores.append(cross_scores)
-
+    print 'img score ready'
     max_score = max([max(predict_cross_scores) for predict_cross_scores in persons_cross_scores])
     for person_cross_scores in persons_cross_scores:
         for person_cross_score in person_cross_scores:
@@ -223,7 +225,7 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
             else:
                 person_cross_score /= max_score
     person_score_idx_s = list()
-
+    print 'above person score ready'
     for i, person_cross_scores in enumerate(persons_cross_scores):
         sort_score_idx_s = sorted(range(len(person_cross_scores)), key=lambda k: -person_cross_scores[k])
         person_score_idx_s.append(sort_score_idx_s)
@@ -287,18 +289,19 @@ def gallery_track_scores(camera_delta_s, fusion_param):
         for i, predict_idx in enumerate(predict_idx_es):
             # if i >= top_cnt:
             #     break
-            if len(query_tracks[int(predict_idx) - 1]) > 3:
-                s1 = query_tracks[int(predict_idx) - 1][3]
-                s2 = gallery_tracks[track_score_idx][3]
+            if len(query_tracks[int(track_score_idx) - 1]) > 3:
+                s1 = query_tracks[int(track_score_idx) - 1][3]
+                # print predict_idx
+                s2 = gallery_tracks[int(predict_idx)-1][3]
                 if s1 != s2:
                     person_deltas_score.append(-1.0)
                     continue
-            time1 = query_tracks[int(predict_idx) - 1][2]
-            if track_score_idx == 3914:
-                print 'test'
-            time2 = gallery_tracks[track_score_idx][2]
-            c1 = query_tracks[int(predict_idx) - 1][1]
-            c2 = gallery_tracks[track_score_idx][1]
+            time1 = query_tracks[int(track_score_idx) - 1][2]
+            # if track_score_idx == 3914:
+            #     print 'test'
+            time2 = gallery_tracks[int(predict_idx)-1][2]
+            c1 = query_tracks[int(track_score_idx) - 1][1]
+            c2 = gallery_tracks[int(predict_idx)-1][1]
             score = track_score(camera_delta_s, c1, time1, c2, time2)
             person_deltas_score.append(score)
         track_score_idx += 1
@@ -363,8 +366,11 @@ def fusion_st_gallery_ranker(fusion_param):
         #     img_score_idx_s.append(person_ap_pids.index(person_ap_pids[person_score_idx_s[i][j]]))
         #     img_score_s.append(persons_ap_scores[i][img_score_idx_s[j]])
         # sort_img_score_s = sorted(img_score_s, reverse=True)
+        print(map_score_path)
+        print(len(person_ap_pids))
         for j in range(len(person_ap_pids)):
             # write(map_score_path, '%f ' % sort_img_score_s[j])
+
             write(map_score_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]]))
             write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
         write(log_path, '\n')
@@ -400,7 +406,8 @@ def fusion_curve(fusion_param):
 if __name__ == '__main__':
     # st_scissors()
     # st_img_ranker()
+    ctrl_msg['data_folder_path'] = 'market_test'
     fusion_param = get_fusion_param()
     # cross_st_img_ranker(fusion_param)
-    fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
-    eval_on_train_test(fusion_param)
+    fusion_st_gallery_ranker(fusion_param)
+    # eval_on_train_test(fusion_param)
