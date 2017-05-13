@@ -188,7 +188,9 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
     persons_track_scores = predict_track_scores(camera_delta_s, fusion_param)
+    print 'above score ready'
     rand_track_scores = predict_track_scores(rand_delta_s, fusion_param)
+    print 'bellow score ready'
 
     persons_cross_scores = list()
     log_path = fusion_param['eval_fusion_path']
@@ -212,7 +214,7 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
                 cross_score = persons_track_scores[i][j] * persons_ap_scores[i][j] / rand_track_scores[i][j]
             cross_scores.append(cross_score)
         persons_cross_scores.append(cross_scores)
-
+    print 'img score ready'
     max_score = max([max(predict_cross_scores) for predict_cross_scores in persons_cross_scores])
     for person_cross_scores in persons_cross_scores:
         for person_cross_score in person_cross_scores:
@@ -223,7 +225,7 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
             else:
                 person_cross_score /= max_score
     person_score_idx_s = list()
-
+    print 'above person score ready'
     for i, person_cross_scores in enumerate(persons_cross_scores):
         sort_score_idx_s = sorted(range(len(person_cross_scores)), key=lambda k: -person_cross_scores[k])
         person_score_idx_s.append(sort_score_idx_s)
@@ -402,5 +404,5 @@ if __name__ == '__main__':
     # st_img_ranker()
     fusion_param = get_fusion_param()
     # cross_st_img_ranker(fusion_param)
-    fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
+    fusion_st_img_ranker(fusion_param)
     eval_on_train_test(fusion_param)
