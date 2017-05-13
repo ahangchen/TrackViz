@@ -2,7 +2,7 @@ from util.file_helper import write
 
 ctrl_msg = {
     'cross_idx': 3,
-    'data_folder_path': 'market'
+    'data_folder_path': 'market_train'
 }
 
 update_msg = {}
@@ -14,7 +14,7 @@ def get_fusion_param():
         'renew_ac_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_ac.log',
         'predict_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_pid.log',
         'eval_fusion_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_filter_pid.log',
-        'origin_answer_path': 'data/' + ctrl_msg['data_folder_path'] + '/test_track.txt',
+        'origin_answer_path': 'data/' + ctrl_msg['data_folder_path'] + '/test_tracks.txt',
         'answer_path': 'data/' + ctrl_msg['data_folder_path'] + '/test_tracks.txt',
         'gallery_path': 'data/' + ctrl_msg['data_folder_path'] + '/gallery_tracks.txt',
         'predict_track_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_tracks.txt',
@@ -37,7 +37,10 @@ def get_fusion_param():
         'neg_shot_rate': 0.01,
         # 'neg_shot_rate': 0.001252,
     }
-    origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('train', 'train_rand')
+    if 'train' in origin_dict['src_distribution_pickle_path']:
+        origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('train', 'train_rand')
+    else:
+        origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('.pickle','_rand.pickle')
     if 'r-' in origin_dict['src_distribution_pickle_path']:
         origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('r-train',
                                                                                                            'train_rand')

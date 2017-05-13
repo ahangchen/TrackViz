@@ -161,7 +161,7 @@ def rand_predict():
 
 
 def eval_on_train_test(fusion_param, pst=True, test_mode=False):
-    # for market, only useful in training set, test set evaluate by standard method
+    # for market_train_rand, only useful in training set, test set evaluate by standard method
     # fusion_param = get_fusion_param()
     print('\nMarket to GRID:')
     top10_shot_pure = percent_shot_eval(fusion_param['renew_pid_path'], 10, test_mode=test_mode)
