@@ -8,7 +8,7 @@ from train.delta_track import viz_fusion_curve, viz_market_distribution
 from train.st_filter import cross_st_img_ranker, fusion_st_img_ranker, fusion_curve, fusion_st_gallery_ranker
 
 # need to run on src directory
-from util.file_helper import write_line
+from util.file_helper import write_line, safe_remove
 
 
 def img_st_fusion():
@@ -27,10 +27,8 @@ def img_st_fusion():
 
 def test_fusion(fusion_param, ep=0.5, en=0.01):
     # copy sort pickle
-    try:
-        shutil.copy(fusion_param['src_distribution_pickle_path'], fusion_param['distribution_pickle_path'])
-    except shutil.Error:
-        print 'pickle ready'
+    safe_remove(fusion_param['distribution_pickle_path'])
+    shutil.copy(fusion_param['src_distribution_pickle_path'], fusion_param['distribution_pickle_path'])
     # merge visual probability and track distribution probability
     fusion_st_gallery_ranker(fusion_param)
     # no evaluate on test, evaluate by matlab
@@ -87,7 +85,7 @@ def init_strict_img_st_fusion():
     print('fusion on training dataset')
     iter_strict_img_st_fusion(on_test=False)
     print('fusion on test dataset')
-    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_test'
+    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'].replace('train', 'test')
     iter_strict_img_st_fusion(on_test=True)
 
 

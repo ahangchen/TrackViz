@@ -41,9 +41,9 @@ def get_fusion_param():
         origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('train', 'train_rand')
     else:
         origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('.pickle','_rand.pickle')
-    if 'r-' in origin_dict['src_distribution_pickle_path']:
-        origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('r-train',
-                                                                                                           'train_rand')
+    # if 'r-' in origin_dict['src_distribution_pickle_path']:
+    #     origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('r-train',
+    #                                                                                                        'train_rand')
 
     for (k, v) in update_msg.items():
         origin_dict[k] = v
