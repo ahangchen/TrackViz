@@ -27,11 +27,14 @@ def img_st_fusion():
 
 def test_fusion(fusion_param, ep=0.5, en=0.01):
     # copy sort pickle
-    shutil.copy(fusion_param['src_distribution_pickle_path'], fusion_param['distribution_pickle_path'])
+    try:
+        shutil.copy(fusion_param['src_distribution_pickle_path'], fusion_param['distribution_pickle_path'])
+    except shutil.Error:
+        print 'pickle ready'
     # merge visual probability and track distribution probability
     fusion_st_img_ranker(fusion_param, ep, en)
     # evaluate
-    eval_on_train_test(fusion_param)
+    eval_on_train_test(fusion_param, test_mode=True)
 
 
 def train_fusion(fusion_param, ep=0.5, en=0.01):
@@ -107,8 +110,19 @@ if __name__ == '__main__':
     # img_st_fusion()
     # retrain_fusion()
     # init_strict_img_st_fusion()
+    for i in range(10):
+        print('iteration %d' % i)
+        ctrl_msg['cross_idx'] = i
+        # ctrl_msg['data_folder_path'] = 'top-m2g-std%d-r-train' % i
+        # fusion_param = get_fusion_param()
+        # get_predict_tracks(fusion_param)
+        # store_sorted_deltas(fusion_param)
+        # ctrl_msg['data_folder_path'] = 'top-m2g-std%d-r-test' % i
+        # iter_strict_img_st_fusion(on_test=True)
+        ctrl_msg['data_folder_path'] = 'top-m2g-std%d-test' % i
+        iter_strict_img_st_fusion(on_test=True)
     # # viz fusion curve
-    fusion_param = get_fusion_param()
+    # fusion_param = get_fusion_param()
     # get_predict_tracks(fusion_param)
     # store_sorted_deltas(fusion_param)
     #
@@ -121,8 +135,8 @@ if __name__ == '__main__':
     # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
     # fusion_param = get_fusion_param()
 
-    delta_range, raw_probs, rand_probs, over_probs = fusion_curve(fusion_param)
-    viz_fusion_curve(delta_range, [raw_probs, rand_probs, over_probs])
+    # delta_range, raw_probs, rand_probs, over_probs = fusion_curve(fusion_param)
+    # viz_fusion_curve(delta_range, [raw_probs, rand_probs, over_probs])
 
     # viz smooth dist
     # viz_market_distribution(fusion_param)
