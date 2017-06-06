@@ -66,7 +66,7 @@ def predict_track_scores(camera_delta_s, fusion_param):
             time2 = real_tracks[track_score_idx][2]
             c1 = real_tracks[int(predict_idx) - 1][1]
             c2 = real_tracks[track_score_idx][1]
-            score = track_score(camera_delta_s, c1, time1, c2, time2)
+            score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100)
             person_deltas_score.append(score)
         track_score_idx += 1
         persons_deltas_score.append(person_deltas_score)
@@ -206,10 +206,13 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
     for i, person_ap_pids in enumerate(persons_ap_pids):
         cross_scores = list()
         for j, person_ap_pid in enumerate(person_ap_pids):
-            if rand_track_scores[i][j] < 0.02:
-                cross_score = persons_track_scores[i][j] * persons_ap_scores[i][j] / 0.02
-            else:
-                cross_score = persons_track_scores[i][j] * persons_ap_scores[i][j] / rand_track_scores[i][j]
+            cur_track_score = persons_track_scores[i][j]
+            if cur_track_score < 0.02:
+                cur_track_score = 0
+            rand_track_score = rand_track_scores[i][j]
+            if rand_track_score < 0.02:
+                rand_track_score = 0.02
+            cross_score = cur_track_score * persons_ap_scores[i][j] /rand_track_score
             cross_scores.append(cross_score)
         persons_cross_scores.append(cross_scores)
 

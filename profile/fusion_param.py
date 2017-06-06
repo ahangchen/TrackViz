@@ -1,8 +1,7 @@
 from util.file_helper import write
 
 ctrl_msg = {
-    'cross_idx': 3,
-    'data_folder_path': 'top-m2g-std3-r-train'
+    'data_folder_path': 'top-m2g-std2-test'
 }
 
 update_msg = {}
@@ -30,17 +29,22 @@ def get_fusion_param():
         'fusion_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_ac1.log',
         'fusion_normal_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_filter_score.log',
         'fusion_raw_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/raw_cross_filter_score.log',
-        'cross_gallery_path': 'data/grid_gallery_idx.txt',
         'pos_shot_rate': 0.5,
         # 'pos_shot_rate': 0.003302,
         'neg_shot_rate': 0.01,
         # 'neg_shot_rate': 0.001252,
     }
-    origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('train', 'train_rand')
+
     if 'r-' in origin_dict['src_distribution_pickle_path']:
+        # use track info before increment
         origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('r-train',
                                                                                                            'train_rand')
-
+    else:
+        # use track info after increment
+        origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('train',
+                                                                                                          'train_rand')
+    origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('train',
+                                                                                                       'train_rand')
     for (k, v) in update_msg.items():
         origin_dict[k] = v
     return origin_dict
