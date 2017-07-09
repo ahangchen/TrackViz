@@ -2,7 +2,7 @@ from util.file_helper import write
 
 ctrl_msg = {
     'cross_idx': 3,
-    'data_folder_path': 'market_train'
+    'data_folder_path': 'market_test'
 }
 
 update_msg = {}
