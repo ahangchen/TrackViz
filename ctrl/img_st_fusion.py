@@ -11,20 +11,6 @@ from train.st_filter import cross_st_img_ranker, fusion_st_img_ranker, fusion_cu
 from util.file_helper import write_line, safe_remove
 
 
-def img_st_fusion():
-    # pick predict tracks into different class file
-    fusion_param = get_fusion_param()
-    get_predict_tracks(fusion_param)
-    # get distribution sorted list for probability compute
-    store_sorted_deltas(fusion_param)
-
-    # merge visual probability and track distribution probability
-    cross_st_img_ranker(fusion_param)
-
-    # evaluate
-    eval_on_train_test(fusion_param)
-
-
 def test_fusion(fusion_param, ep=0.5, en=0.01):
     # copy sort pickle
     safe_remove(fusion_param['distribution_pickle_path'])

@@ -14,6 +14,7 @@ def get_fusion_param():
         'renew_ac_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_ac.log',
         'predict_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_pid.log',
         'eval_fusion_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_filter_pid.log',
+        'mid_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_mid_score.log',
         'origin_answer_path': 'data/' + ctrl_msg['data_folder_path'] + '/test_tracks.txt',
         'answer_path': 'data/' + ctrl_msg['data_folder_path'] + '/test_tracks.txt',
         'gallery_path': 'data/' + ctrl_msg['data_folder_path'] + '/gallery_tracks.txt',
