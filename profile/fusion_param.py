@@ -26,6 +26,7 @@ def get_fusion_param():
         'predict_person_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_persons.pickle',
 
         'fusion_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_pid1.log',
+        'mid_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_mid_score.log',
         'fusion_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_ac1.log',
         'fusion_normal_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_filter_score.log',
         'fusion_raw_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/raw_cross_filter_score.log',

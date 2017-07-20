@@ -8,7 +8,7 @@ from train.delta_track import viz_fusion_curve, viz_market_distribution
 from train.st_filter import cross_st_img_ranker, fusion_st_img_ranker, fusion_curve
 
 # need to run on src directory
-from util.file_helper import write_line
+from util.file_helper import write_line, safe_remove
 
 
 def img_st_fusion():
@@ -27,8 +27,10 @@ def img_st_fusion():
 
 def test_fusion(fusion_param, ep=0.5, en=0.01):
     # copy sort pickle
+    safe_remove(fusion_param['distribution_pickle_path'])
     try:
         shutil.copy(fusion_param['src_distribution_pickle_path'], fusion_param['distribution_pickle_path'])
+        print 'copy train track distribute pickle done'
     except shutil.Error:
         print 'pickle ready'
     # merge visual probability and track distribution probability
@@ -110,17 +112,17 @@ if __name__ == '__main__':
     # img_st_fusion()
     # retrain_fusion()
     # init_strict_img_st_fusion()
-    for i in range(10):
-        print('iteration %d' % i)
-        ctrl_msg['cross_idx'] = i
-        # ctrl_msg['data_folder_path'] = 'top-m2g-std%d-r-train' % i
-        # fusion_param = get_fusion_param()
-        # get_predict_tracks(fusion_param)
-        # store_sorted_deltas(fusion_param)
-        # ctrl_msg['data_folder_path'] = 'top-m2g-std%d-r-test' % i
-        # iter_strict_img_st_fusion(on_test=True)
-        ctrl_msg['data_folder_path'] = 'top-m2g-std%d-test' % i
-        iter_strict_img_st_fusion(on_test=True)
+    # for i in range(10):
+    #     print('iteration %d' % i)
+    #     ctrl_msg['cross_idx'] = i
+    #     # ctrl_msg['data_folder_path'] = 'top-m2g-std%d-r-train' % i
+    #     # fusion_param = get_fusion_param()
+    #     # get_predict_tracks(fusion_param)
+    #     # store_sorted_deltas(fusion_param)
+    #     # ctrl_msg['data_folder_path'] = 'top-m2g-std%d-r-test' % i
+    #     # iter_strict_img_st_fusion(on_test=True)
+    #     ctrl_msg['data_folder_path'] = 'top-m2g-std%d-test' % i
+    #     iter_strict_img_st_fusion(on_test=True)
     # # viz fusion curve
     # fusion_param = get_fusion_param()
     # get_predict_tracks(fusion_param)
@@ -134,9 +136,10 @@ if __name__ == '__main__':
     #
     # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
     # fusion_param = get_fusion_param()
-
-    # delta_range, raw_probs, rand_probs, over_probs = fusion_curve(fusion_param)
-    # viz_fusion_curve(delta_range, [raw_probs, rand_probs, over_probs])
+    ctrl_msg['data_folder_path'] = 'top-m2g-std0-test'
+    fusion_param = get_fusion_param()
+    delta_range, raw_probs, rand_probs, over_probs = fusion_curve(fusion_param)
+    viz_fusion_curve(delta_range, [raw_probs, rand_probs, over_probs])
 
     # viz smooth dist
     # viz_market_distribution(fusion_param)

@@ -82,6 +82,7 @@ def store_sorted_deltas(fusion_param):
         for delta_s in camera_delta:
             delta_s.sort()
     # for python
+    safe_remove(fusion_param['distribution_pickle_path'])
     pickle_save(fusion_param['distribution_pickle_path'], camera_delta_s)
 
 
