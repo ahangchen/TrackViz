@@ -1,3 +1,5 @@
+#coding=utf-8
+
 import random
 import shutil
 
@@ -9,6 +11,8 @@ from util.str_helper import folder
 
 
 def write_rand_pid(fusion_param):
+    # 对每张左图, 随机生成250个右图的pid，相当于一个随机的renew_pid.log，rand_path也会每次都删除，所以不存在缓存
+    # todo 不一定需要生成250个右图
     # fusion_param = get_fusion_param()
     rand_answer_path = fusion_param['answer_path'].replace(ctrl_msg['data_folder_path'], ctrl_msg['data_folder_path'] + '_rand')
     rand_folder_path = folder(rand_answer_path)

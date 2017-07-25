@@ -1,3 +1,5 @@
+#coding=utf-8
+
 import math
 
 from post_process.predict_eval import eval_on_train_test
@@ -31,8 +33,10 @@ def predict_track_scores(camera_delta_s, fusion_param):
     # if pickle_load(fusion_param['persons_deltas_path']) is not None:
     #     return persons_deltas_score
     predict_path = fusion_param['renew_pid_path']
+    # test_tracks.txt
     answer_path = fusion_param['answer_path']
     answer_lines = read_lines(answer_path)
+    # 左图
     real_tracks = list()
     for answer in answer_lines:
         info = answer.split('_')
@@ -68,6 +72,7 @@ def predict_track_scores(camera_delta_s, fusion_param):
             time2 = real_tracks[track_score_idx][2]
             c1 = real_tracks[int(predict_idx) - 1][1]
             c2 = real_tracks[track_score_idx][1]
+            # 给定摄像头，时间，获取时空评分，这里camera_deltas如果是随机算出来的，则是随机评分
             score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100)
             person_deltas_score.append(score)
         track_score_idx += 1
@@ -249,11 +254,13 @@ def cross_st_img_ranker(fusion_param):
 
 
 def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
-    # fusion_param = get_fusion_param()
+    # 从renew_pid和renew_ac获取预测的人物id和图像分数
     persons_ap_scores = predict_img_scores(fusion_param)
     persons_ap_pids = predict_pids(fusion_param)
+    # 从磁盘获取之前建立的时空模型，以及随机时空模型
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
+    # 计算时空评分和随机时空评分
     persons_track_scores = predict_track_scores(camera_delta_s, fusion_param)
     rand_track_scores = predict_track_scores(rand_delta_s, fusion_param)
 
@@ -278,6 +285,7 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
             # if cur_track_score < 0.001:
             #     cur_track_score = 0
             rand_track_score = rand_track_scores[i][j]
+            # 平滑分母噪音，否则时空会失效
             if rand_track_score < 0.02:
                 rand_track_score = 0.02
             cross_score = cur_track_score * persons_ap_scores[i][j] / rand_track_score
@@ -286,6 +294,7 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
     for i, person_cross_scores in enumerate(persons_cross_scores):
         for j, person_cross_score in enumerate(person_cross_scores):
             if person_cross_score < 0:
+                # 不同序列，时空评分设为1，不过grid上没有这个问题
                 print 'diff seq use img score'
                 persons_cross_scores[i][j] *= -0.02
 
@@ -294,6 +303,7 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
         for j, person_cross_score in enumerate(person_cross_scores):
             # if j == 1:
                 # print('cur_rank1: %f, max: %f' % (person_cross_score, max_score))
+            # 归一化
             persons_cross_scores[i][j] /= max_score
             # if persons_cross_scores[i][j] > 0.9:
             #     print '%d,%d' % (i, j)
@@ -301,9 +311,12 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
     # top1 statics
     top1_scores = list()
     for i, person_cross_scores in enumerate(persons_cross_scores):
+        # 单个probe的预测结果中按score排序，得到index，用于对pid进行排序
         sort_score_idx_s = sorted(range(len(person_cross_scores)), key=lambda k: -person_cross_scores[k])
         person_score_idx_s.append(sort_score_idx_s)
+        # 统计top1分布，后面计算中位数用
         top1_scores.append(person_cross_scores[sort_score_idx_s[0]])
+    # 降序排，取前60%处的分数
     sorted_top1_scores = sorted(top1_scores, reverse=True)
     mid_score = sorted_top1_scores[int(len(sorted_top1_scores) * 0.6)]
     mid_score_path = fusion_param['mid_score_path']
@@ -319,6 +332,7 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
         # sort_img_score_s = sorted(img_score_s, reverse=True)
         for j in range(len(person_ap_pids)):
             # write(map_score_path, '%f ' % sort_img_score_s[j])
+            # 按score排序得到的index对pid进行排序
             write(map_score_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]]))
             write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
         write(log_path, '\n')

@@ -1,3 +1,4 @@
+#coding=utf-8
 from profile.fusion_param import get_fusion_param
 from train.delta_track import viz_data_for_market
 from util.file_helper import read_lines_and, safe_remove
@@ -6,7 +7,8 @@ from util.serialize import pickle_save
 
 
 def get_tracks(fusion_param):
-    # fusion_param = get_fusion_param()
+    # 这个函数是用来获取probe图片列表的，training的probe和gallery相同
+    # answer_path: data/top-m2g-std0-train/test_track.txt
     test_path = fusion_param['answer_path']
     tracks = list()
 
@@ -21,12 +23,21 @@ predict_line_idx = 0
 
 
 def get_predict_tracks(fusion_param, useful_predict_cnt=10):
-    # fusion_param = get_fusion_param()
+    # 这个函数根据预测的pid，生成更多的图片名，从而构造时空模型，
+    # 例如，左图1_c1_t2的匹配图片id是2_c2_t3,3_c3_t3,6_c4_t1,
+    # 则生成1_c2_t3, 1_c3_t3, 1_c4_t1，用于构造时空概率模型
+    # useful_predcit_cnt为10,实际上会对每张左图的名字产生10个右图的名字，加上原图就是11个新的名字
+    # 为了加快后续检索速度，将生成的图片名中，摄像头相同的，写到同一个文件里，即predict_camera_path: predict_c%d.txt
+    # 每次运行这个函数都会删除predict_c%d.txt和predict_tracks.txt，所以不会有缓存旧结果的情况
+    # todo: 实际上可以在这一步直接生成cameras_deltas,之前是出于重用可视化代码考虑才使用了delta_track.py中的代码
+
+    # renew_pid_path: data/top-m2g-std0-train/renew_pid.log'，包含左图预测的图片id, 250*249
     renew_pid_path = fusion_param['renew_pid_path']
+    # predict_track_path：data/top-m2g-std0-train/predict_tracks.txt，存储get predict tracks结果
     predict_track_path = fusion_param['predict_track_path']
-    # renew_tracks()
+    # 获取左图列表
     origin_tracks = get_tracks(fusion_param)
-    # person_ids = get_person_idx()
+    #
     safe_remove(predict_track_path)
     camera_cnt = 8
     global predict_line_idx
@@ -58,6 +69,7 @@ def get_predict_tracks(fusion_param, useful_predict_cnt=10):
             camera = tail[2]
         track_time = tail.split('_')[2]
         mids = line.split()
+        # 这里写入的是predict_line_idx，而非原来的person id，保证了无监督无标签
         write_line(predict_track_path,
                    ('%04d_c%ds%d_%d_n.jpg' % (int(predict_line_idx) + 1, int(camera), s_num, int(track_time))))
         write_line(fusion_param['predict_camera_path'] + str(camera) + '.txt',
@@ -76,8 +88,12 @@ def get_predict_tracks(fusion_param, useful_predict_cnt=10):
 
 
 def store_sorted_deltas(fusion_param):
-    # fusion_param = get_fusion_param()
+    # 时空模型构建核心函数，
+    # 存储每对摄像头的时间差分布，
+    # 共6×6个数组，每个数组长度为该对摄像头统计到的时间差数目
+    # 这个函数运行前会删除distribution_pickle_path： sorted_deltas.pickle，因此也不会有缓存问题
     camera_delta_s = viz_data_for_market(fusion_param)
+    # 对时间差做排序，在预测的时候能快速定位时间差位置，得到时间差的概率
     for camera_delta in camera_delta_s:
         for delta_s in camera_delta:
             delta_s.sort()

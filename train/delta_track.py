@@ -1,3 +1,5 @@
+#coding=utf-8
+
 import os
 from random import uniform
 
@@ -29,6 +31,7 @@ def track_infos(fusion_param, camera_num, s_num):
     tracks = list()
 
     def count_interval(img_name):
+        # 字符串转track信息，包含person id（即图片id），seq num，track time（时间点，不是时间差）
         if '.' not in img_name:
             return
         track_info = img_name.split('.')[0].split('_')
@@ -37,7 +40,7 @@ def track_infos(fusion_param, camera_num, s_num):
         seq_num = int(track_info[1][3])
         if seq_num == s_num:
             tracks.append([person_id, track_time])
-
+    # 现在data_type 1已经能处理所有情况了
     if data_type == 0:
         # read_lines_and('market_s1/track_c%ds1.txt' % camera_num, count_interval)
         read_lines_and(fusion_param['predict_camera_path'] + camera_num + '.txt', count_interval)
@@ -66,6 +69,7 @@ def find_id_delta(intervals, id, frame):
     deltas = list()
     for interval in intervals:
         if interval[0] == id:
+            # 首先要person id一致，然后计算时间差
             deltas.append(frame - interval[1])
         else:
             continue
@@ -73,10 +77,13 @@ def find_id_delta(intervals, id, frame):
 
 
 def camera_distribute(fusion_param, camera_num):
-    # fusion_param = get_fusion_param()
+    # 左图中的人在右图可能出现在6个摄像头中
     deltas = [list() for i in range(camera_cnt)]
+    # market1501数据集有六个序列，只有同一个序列才能计算delta
     seq_s = [1, 2, 3, 4, 5, 6]
+    # 每个序列统计一遍deltas，合并到总的deltas中
     for i in range(len(seq_s)):
+        # 得到右图的时空信息和人物信息6×[time, pid]*n
         intervals = track_infos(fusion_param, camera_num, seq_s[i])
 
         # print('get intervals for c%d' % camera_num)
@@ -86,6 +93,7 @@ def camera_distribute(fusion_param, camera_num):
                 return
             track_info = img_name.split('.')[0].split('_')
             person_id = track_info[0]
+            # 每个左图统计一遍deltas，合并到总的deltas中
             track_deltas = find_id_delta(intervals, person_id, int(track_info[2]))
             if data_type == 2 or data_type == 3 or data_type == 4:
                 camera_id = int(track_info[1])
@@ -100,7 +108,8 @@ def camera_distribute(fusion_param, camera_num):
                     # ignore large data
                     if abs(delta) < 1000000:
                         deltas[camera_id - 1].append(delta)
-
+        # data type为1足够应对所有情况，
+        # shuffle person实际上是根据person id是否对应来决定是否计算时间差，并最终返回6串时间差
         if data_type == 0:
             # read_lines_and('market_s1/track_s1.txt', shuffle_person)
             read_lines_and(fusion_param['predict_track_path'], shuffle_person)
@@ -120,6 +129,7 @@ def camera_distribute(fusion_param, camera_num):
 
 def viz_data_for_market(fusion_param):
     track_distribute = list()
+    # 当左图是camera i时，右图为各个camera的分布
     for i in range(camera_cnt):
         track_distribute.append(camera_distribute(fusion_param, i + 1))
     return track_distribute
