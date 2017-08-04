@@ -1,7 +1,8 @@
 from util.file_helper import write
 
 ctrl_msg = {
-    'data_folder_path': 'top-m2g-std2-test'
+    'cross_idx': 3,
+    'data_folder_path': 'market_test'
 }
 
 update_msg = {}
@@ -13,8 +14,10 @@ def get_fusion_param():
         'renew_ac_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_ac.log',
         'predict_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_pid.log',
         'eval_fusion_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_filter_pid.log',
-        'origin_answer_path': 'data/' + ctrl_msg['data_folder_path'] + '/test_track.txt',
+        'mid_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_mid_score.log',
+        'origin_answer_path': 'data/' + ctrl_msg['data_folder_path'] + '/test_tracks.txt',
         'answer_path': 'data/' + ctrl_msg['data_folder_path'] + '/test_tracks.txt',
+        'gallery_path': 'data/' + ctrl_msg['data_folder_path'] + '/gallery_tracks.txt',
         'predict_track_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_tracks.txt',
         'predict_camera_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_c',
 
@@ -26,26 +29,23 @@ def get_fusion_param():
         'predict_person_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_persons.pickle',
 
         'fusion_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_pid1.log',
-        'mid_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_mid_score.log',
         'fusion_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_ac1.log',
         'fusion_normal_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_filter_score.log',
         'fusion_raw_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/raw_cross_filter_score.log',
+        'cross_gallery_path': 'data/grid_gallery_idx.txt',
         'pos_shot_rate': 0.5,
         # 'pos_shot_rate': 0.003302,
         'neg_shot_rate': 0.01,
         # 'neg_shot_rate': 0.001252,
     }
-
-    if 'r-' in origin_dict['src_distribution_pickle_path']:
-        # use track info before increment
-        origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('r-train',
-                                                                                                           'train_rand')
+    if 'train' in origin_dict['src_distribution_pickle_path']:
+        origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('train', 'train_rand')
     else:
-        # use track info after increment
-        origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('train',
-                                                                                                          'train_rand')
-    origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('train',
-                                                                                                       'train_rand')
+        origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('.pickle','_rand.pickle')
+    # if 'r-' in origin_dict['src_distribution_pickle_path']:
+    #     origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('r-train',
+    #                                                                                                        'train_rand')
+
     for (k, v) in update_msg.items():
         origin_dict[k] = v
     return origin_dict

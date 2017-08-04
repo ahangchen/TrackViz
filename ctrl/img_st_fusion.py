@@ -4,10 +4,11 @@ import shutil
 from train.st_estim import get_predict_delta_tracks
 from post_process.predict_eval import eval_on_train_test, target_pos_neg_shot_eval
 from profile.fusion_param import get_fusion_param, ctrl_msg, update_fusion_param
-from train.st_filter import fusion_st_img_ranker, fusion_curve
+from train.st_filter import fusion_st_img_ranker, fusion_curve, fusion_st_gallery_ranker
 # need to run on src directory
 from util.file_helper import write_line, safe_remove
 from viz.delta_track import viz_fusion_curve
+from util.file_helper import write_line, safe_remove
 
 
 def test_fusion(fusion_param, ep=0.5, en=0.01):
@@ -20,9 +21,9 @@ def test_fusion(fusion_param, ep=0.5, en=0.01):
     except shutil.Error:
         print 'pickle ready'
     # merge visual probability and track distribution probability
-    fusion_st_img_ranker(fusion_param, ep, en)
-    # evaluate
-    eval_on_train_test(fusion_param, test_mode=True)
+    fusion_st_gallery_ranker(fusion_param)
+    # no evaluate on test, evaluate by matlab
+    # eval_on_train_test(fusion_param, test_mode=True)
 
 
 def train_fusion(fusion_param, ep=0.5, en=0.01):
@@ -62,7 +63,7 @@ def init_strict_img_st_fusion():
     iter_strict_img_st_fusion(on_test=False)
     # 改成测试目录
     print('fusion on test dataset')
-    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-4] + 'est'
+    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'].replace('train', 'test')
     iter_strict_img_st_fusion(on_test=True)
 
 
@@ -138,7 +139,7 @@ if __name__ == '__main__':
     #
     # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
     # fusion_param = get_fusion_param()
-    ctrl_msg['data_folder_path'] = 'top-m2g-std0-train'
+    ctrl_msg['data_folder_path'] = 'viper-train'
     fusion_param = get_fusion_param()
     init_strict_img_st_fusion()
     # delta_range, raw_probs, rand_probs, over_probs = fusion_curve(fusion_param)
