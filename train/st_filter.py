@@ -1,8 +1,5 @@
 #coding=utf-8
 
-import math
-
-from post_process.predict_eval import eval_on_train_test
 from post_process.track_prob import track_score
 from profile.fusion_param import get_fusion_param, ctrl_msg
 from util.file_helper import read_lines, read_lines_and, write, safe_remove
@@ -228,16 +225,14 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
         persons_cross_scores.append(cross_scores)
     print 'img score ready'
     max_score = max([max(predict_cross_scores) for predict_cross_scores in persons_cross_scores])
-    for i, person_cross_scores in enumerate(persons_cross_scores):
-        for j, person_cross_score in enumerate(person_cross_scores):
-            if person_cross_score < 0:
-                print 'diff seq use img score'
-                # ignore delta(both)
-                persons_cross_scores[i][j] *= -0.02
 
     for i, person_cross_scores in enumerate(persons_cross_scores):
         for j, person_cross_score in enumerate(person_cross_scores):
-            persons_cross_scores[i][j] /= max_score
+            if person_cross_score > 0:
+                # diff seq not sort and not normalize
+                persons_cross_scores[i][j] /= max_score
+            else:
+                person_cross_score *= -0.02
     person_score_idx_s = list()
     top1_scores = list()
     print 'above person score ready'
@@ -414,66 +409,57 @@ def gallery_smooth_track_scores(camera_delta_s, fusion_param):
 
 
 def fusion_st_gallery_ranker(fusion_param):
-    # fusion_param = get_fusion_param()
-    persons_ap_scores = predict_img_scores(fusion_param)
-    persons_ap_pids = predict_pids(fusion_param)
-    # 从磁盘获取之前建立的时空模型，以及随机时空模型
-    camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
-    rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
-    persons_track_scores = gallery_smooth_track_scores(camera_delta_s, fusion_param)
-    rand_track_scores = gallery_smooth_track_scores(rand_delta_s, fusion_param)
+    persons_ap_pids = None  # pickle_load(ctrl_msg['data_folder_path'] + 'viper_r-testpersons_ap_pids.pick')
+    persons_cross_scores = None  # pickle_load(ctrl_msg['data_folder_path'] + 'viper_r-testpersons_cross_scores.pick')
 
-    persons_cross_scores = list()
+    line_log_cnt = 149
+    score_path = fusion_param['fusion_raw_score_path']
     log_path = fusion_param['eval_fusion_path']
     map_score_path = fusion_param['fusion_normal_score_path']
-    score_path = fusion_param['fusion_raw_score_path']
-    renew_path = fusion_param['fusion_pid_path']
-    renew_ac_path = fusion_param['fusion_score_path']
-    safe_remove(map_score_path)
-    safe_remove(log_path)
-    safe_remove(score_path)
-    safe_remove(renew_path)
-    safe_remove(renew_ac_path)
-    line_log_cnt = 10
+    if persons_ap_pids is None:
+        # fusion_param = get_fusion_param()
+        persons_ap_scores = predict_img_scores(fusion_param)
+        persons_ap_pids = predict_pids(fusion_param)
+        camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
+        rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
+        persons_track_scores = gallery_smooth_track_scores(camera_delta_s, fusion_param)
+        rand_track_scores = gallery_smooth_track_scores(rand_delta_s, fusion_param)
 
-    for i, person_ap_pids in enumerate(persons_ap_pids):
-        cross_scores = list()
-        for j, person_ap_pid in enumerate(person_ap_pids):
-            cur_track_score = persons_track_scores[i][j]
-            # if cur_track_score < 0.02:
-            #     cur_track_score = cur_track_score
-            rand_track_score = rand_track_scores[i][j]
-            if rand_track_score < 0.02:
-                rand_track_score = 0.02
-            cross_score = cur_track_score * persons_ap_scores[i][j] / rand_track_score
-            cur_track_score = persons_track_scores[i][j]
-            # if cur_track_score < 0.001:
-            #     cur_track_score = 0
-            rand_track_score = rand_track_scores[i][j]
-            # 平滑分母噪音，否则时空会失效
-            if rand_track_score < 0.02:
-                rand_track_score = 0.02
-            cross_score = cur_track_score * persons_ap_scores[i][j] / rand_track_score
-            cross_scores.append(cross_score)
-        persons_cross_scores.append(cross_scores)
+        persons_cross_scores = list()
+        renew_path = fusion_param['fusion_pid_path']
+        renew_ac_path = fusion_param['fusion_score_path']
+        safe_remove(map_score_path)
+        safe_remove(log_path)
+        safe_remove(score_path)
+        safe_remove(renew_path)
+        safe_remove(renew_ac_path)
 
-    for i, person_cross_scores in enumerate(persons_cross_scores):
-        for j, person_cross_score in enumerate(person_cross_scores):
-            if person_cross_score < 0:
-                # 不同序列，时空评分设为1，不过grid上没有这个问题
-                print 'diff seq use img score'
-                # ignore delta(both)
-                # revert track score, only image score remain
-                persons_cross_scores[i][j] *= -0.02
-                print persons_cross_scores[i][j]
+        for i, person_ap_pids in enumerate(persons_ap_pids):
+            cross_scores = list()
+            for j, person_ap_pid in enumerate(person_ap_pids):
+                cur_track_score = persons_track_scores[i][j]
+                # if cur_track_score < 0.02:
+                #     cur_track_score = cur_track_score
+                rand_track_score = rand_track_scores[i][j]
+                if rand_track_score < 0.02:
+                    rand_track_score = 0.02
+                cross_score = cur_track_score * persons_ap_scores[i][j] / rand_track_score
+                cross_scores.append(cross_score)
+            persons_cross_scores.append(cross_scores)
+        # pickle_save(ctrl_msg['data_folder_path']+'viper_r-testpersons_cross_scores.pick', persons_cross_scores)
+        # pickle_save(ctrl_msg['data_folder_path']+'viper_r-testpersons_ap_pids.pick', persons_ap_pids)
+
     max_score = max([max(predict_cross_scores) for predict_cross_scores in persons_cross_scores])
 
     for i, person_cross_scores in enumerate(persons_cross_scores):
         for j, person_cross_score in enumerate(person_cross_scores):
-            persons_cross_scores[i][j] /= max_score
-            if persons_cross_scores[i][j] > 1:
-                print persons_cross_scores[i][j]
-                print max_score
+            if persons_cross_scores[i][j] >= 0:
+                # diff seq not sort, not rank for max, and not normalize
+                persons_cross_scores[i][j] /= max_score
+            else:
+                # so diff seq is negative
+                persons_cross_scores[i][j] *= 0.02
+                # print persons_cross_scores[i][j]
     person_score_idx_s = list()
 
     for i, person_cross_scores in enumerate(persons_cross_scores):
@@ -490,8 +476,8 @@ def fusion_st_gallery_ranker(fusion_param):
         # sort_img_score_s = sorted(img_score_s, reverse=True)
         for j in range(len(person_ap_pids)):
             # write(map_score_path, '%f ' % sort_img_score_s[j])
-
-            # 按score排序得到的index对pid进行排序
+            if j > line_log_cnt:
+                break
             write(map_score_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]]))
             write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
         write(log_path, '\n')
@@ -525,9 +511,25 @@ def fusion_curve(fusion_param):
     return delta_range, raw_probs, rand_probs, over_probs
 
 if __name__ == '__main__':
-    # st_scissors()
-    # st_img_ranker()
+    # # st_scissors()
+    # # st_img_ranker()
+    # ctrl_msg['data_folder_path'] = 'viper-s1_r-test'
+    # fusion_param = get_fusion_param()
+    # # cross_st_img_ranker(fusion_param)
+    # fusion_st_gallery_ranker(fusion_param)
+    # # eval_on_train_test(fusion_param)
     ctrl_msg['data_folder_path'] = 'viper_train'
     fusion_param = get_fusion_param()
-    fusion_st_img_ranker(fusion_param)
-    eval_on_train_test(fusion_param)
+    # cross_st_img_ranker(fusion_param)
+    fusion_st_gallery_ranker(fusion_param)
+    # eval_on_train_test(fusion_param)
+
+    # ctrl_msg['data_folder_path'] = 'viper_train'
+    # fusion_param = get_fusion_param()
+    # fusion_st_img_ranker(fusion_param)
+    # eval_on_train_test(fusion_param)
+
+    # ctrl_msg['data_folder_path'] = 'viper_r-train'
+    # fusion_param = get_fusion_param()
+    # fusion_st_img_ranker(fusion_param)
+    # eval_on_train_test(fusion_param)
