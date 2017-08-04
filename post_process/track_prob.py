@@ -37,10 +37,12 @@ def track_score(camera_delta_s, camera1, time1, camera2, time2, interval=100):
     # 10 second
     left_bound = cur_delta - interval
     right_bound = cur_delta + interval
+    # 二分查找位置，得到容错区间内时空点数量
     left_index = binary_search(delta_distribution, left_bound)
     right_index = binary_search(delta_distribution, right_bound)
     if total_cnt == 0:
         return 0.0
+    # 这里除以total_cnt而非len(camera_delta_s[camera1][2])，体现空间概率
     score = (right_index - left_index + 1) / float(total_cnt)
     if len(delta_distribution) == 0:
         return 0.0

@@ -1,14 +1,17 @@
+#coding=utf-8
+
 import random
 import shutil
 
-from feature.top10distribution import get_tracks, get_predict_tracks, store_sorted_deltas
 from profile.fusion_param import get_fusion_param, ctrl_msg
-from train.st_filter import predict_track_scores
 from util.file_helper import write, safe_mkdir, safe_remove, read_lines
 from util.str_helper import folder
+from viz.top10distribution import get_tracks, get_predict_tracks, store_sorted_deltas
 
 
 def write_rand_pid(fusion_param):
+    # 对每张左图, 随机生成250个右图的pid，相当于一个随机的renew_pid.log，rand_path也会每次都删除，所以不存在缓存
+    # todo 不一定需要生成250个右图
     # fusion_param = get_fusion_param()
     rand_answer_path = fusion_param['answer_path'].replace(ctrl_msg['data_folder_path'], ctrl_msg['data_folder_path'] + '_rand')
     rand_folder_path = folder(rand_answer_path)
