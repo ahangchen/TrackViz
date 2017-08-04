@@ -53,7 +53,8 @@ def find_id_delta(intervals, id, frame):
 
 
 def camera_distribute(camera_num):
-    intervals = camera_intervals(camera_num)
+    fusion_param = get_fusion_param()
+    intervals = camera_intervals(fusion_param, camera_num)
     print('get intervals for c%d' % camera_num)
     deltas = [list() for i in range(6)]
     cur_delta = {'id': 0, 'delta': 1000000, 'camera': -1}

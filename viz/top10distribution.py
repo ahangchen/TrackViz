@@ -1,9 +1,10 @@
+# coding=utf-8
 #coding=utf-8
 from profile.fusion_param import get_fusion_param
-from train.delta_track import viz_data_for_market
 from util.file_helper import read_lines_and, safe_remove
 from util.file_helper import write_line
 from util.serialize import pickle_save
+from viz.delta_track import viz_data_for_market
 
 
 def get_tracks(fusion_param):
