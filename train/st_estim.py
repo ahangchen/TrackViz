@@ -38,7 +38,7 @@ def get_predict_delta_tracks(fusion_param, useful_predict_cnt=10, random=False):
             if j > useful_predict_cnt:
                 break
             if random:
-                predict_pid = randint(0, person_cnt)
+                predict_pid = randint(0, person_cnt - 1)
             else:
                 predict_pid = int(predict_pid) - 1
             # same seq
@@ -52,10 +52,7 @@ def get_predict_delta_tracks(fusion_param, useful_predict_cnt=10, random=False):
             delta_s.sort()
     print 'deltas sorted'
     # for python
-    if random:
-        safe_remove(fusion_param['distribution_pickle_path'])
-        pickle_save(fusion_param['distribution_pickle_path'], camera_delta_s)
-        print 'deltas saved'
-    else:
-        print 'not random, nothing saved'
+    safe_remove(fusion_param['distribution_pickle_path'])
+    pickle_save(fusion_param['distribution_pickle_path'], camera_delta_s)
+    print 'deltas saved'
     return camera_delta_s

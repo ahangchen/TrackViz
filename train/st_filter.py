@@ -317,4 +317,4 @@ if __name__ == '__main__':
     fusion_param = get_fusion_param()
     # cross_st_img_ranker(fusion_param)
     fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
-    eval_on_train_test(fusion_param)
+    eval_on_train_test(fusion_param, test_mode=True)
