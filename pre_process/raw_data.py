@@ -5,7 +5,7 @@ import seaborn as sns
 from util.file_helper import read_lines_and
 
 camera_cnt = 6
-train_track_path = 'market_train/test_tracks.txt'
+train_track_path = 'market/test_tracks.txt'
 
 
 def distribute_with_camera(persons_in_cameras):
@@ -33,7 +33,7 @@ def count_person_in_camera(camera_num):
         if person_id not in persons:
             persons.append(person_id)
 
-    read_lines_and('market_train/c%d_tracks.txt' % (camera_num + 1), count_person)
+    read_lines_and('market/c%d_tracks.txt' % (camera_num + 1), count_person)
     # print(persons)
     return persons
 

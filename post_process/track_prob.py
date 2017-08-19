@@ -30,6 +30,7 @@ def binary_search(a, target):
 def track_score(camera_delta_s, camera1, time1, camera2, time2, interval=100):
     camera1 -= 1
     camera2 -= 1
+
     cur_delta = time2 - time1
     delta_distribution = camera_delta_s[camera1][camera2]
     total_cnt = sum(map(len, camera_delta_s[camera1]))

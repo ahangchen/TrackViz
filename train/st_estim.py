@@ -1,30 +1,11 @@
 #coding=utf-8
 from random import randint
 
-import shutil
-
 from util.file_helper import read_lines, safe_remove
 from util.serialize import pickle_save
-from os.path import exists
 
 
 def get_predict_delta_tracks(fusion_param, useful_predict_cnt=10, random=False):
-    if 'r-' in fusion_param['renew_pid_path']:
-        print 'incremental process, copy origin distribution pickle'
-        # 在增量前去做删除
-        # safe_remove(fusion_param['distribution_pickle_path'])
-        try:
-            if not exists(fusion_param['distribution_pickle_path']):
-                # 直接使用增量前的时空模型
-                shutil.copy(fusion_param['distribution_pickle_path'].replace('r-', ''), fusion_param['distribution_pickle_path'])
-                print 'copy train track distribute pickle done'
-            else:
-                # 多次增量
-                print 'already exists'
-        except shutil.Error:
-            print 'copy error'
-        return None
-
     # 获取左图列表
     answer_path = fusion_param['answer_path']
     answer_lines = read_lines(answer_path)
@@ -70,8 +51,8 @@ def get_predict_delta_tracks(fusion_param, useful_predict_cnt=10, random=False):
         for delta_s in camera_delta:
             delta_s.sort()
     print 'deltas sorted'
+    # for python
     safe_remove(fusion_param['distribution_pickle_path'])
-    safe_remove(fusion_param['rand_distribution_pickle_path'])
     pickle_save(fusion_param['distribution_pickle_path'], camera_delta_s)
     print 'deltas saved'
     return camera_delta_s

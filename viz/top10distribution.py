@@ -52,8 +52,8 @@ def get_predict_tracks(fusion_param, useful_predict_cnt=10):
         if line == '\n':
             predict_line_idx += 1
             return
-        # if predict_line_idx >= 248:
-        #     print(predict_line_idx)
+        if predict_line_idx >= 248:
+            print(predict_line_idx)
         if origin_tracks[predict_line_idx].startswith('-1'):
             tail = origin_tracks[predict_line_idx][2:-1]
         else:
@@ -62,8 +62,8 @@ def get_predict_tracks(fusion_param, useful_predict_cnt=10):
             s_num = int(tail[4])
         else:
             s_num = 1
-        # if predict_line_idx == 499:
-        #     print(predict_line_idx)
+        if predict_line_idx == 499:
+            print(predict_line_idx)
         if 'jpe' in tail:
             camera = tail[1]
         else:
