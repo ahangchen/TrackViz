@@ -1,5 +1,5 @@
 #coding=utf-8
-
+from post_process.map_rank_eval import map_rank_eval
 from post_process.track_prob import track_score
 from profile.fusion_param import get_fusion_param, ctrl_msg
 from util.file_helper import read_lines, read_lines_and, write, safe_remove
@@ -478,11 +478,12 @@ def fusion_st_gallery_ranker(fusion_param):
             # write(map_score_path, '%f ' % sort_img_score_s[j])
             if j > line_log_cnt:
                 break
-            write(map_score_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]]))
+            # write(map_score_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]]))
             write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
         write(log_path, '\n')
         write(score_path, '\n')
         write(map_score_path, '\n')
+    return person_score_idx_s
 
 
 def fusion_curve(fusion_param):
@@ -518,10 +519,10 @@ if __name__ == '__main__':
     # # cross_st_img_ranker(fusion_param)
     # fusion_st_gallery_ranker(fusion_param)
     # # eval_on_train_test(fusion_param)
-    ctrl_msg['data_folder_path'] = 'viper_train'
+    ctrl_msg['data_folder_path'] = 'viper_test'
     fusion_param = get_fusion_param()
     # cross_st_img_ranker(fusion_param)
-    fusion_st_gallery_ranker(fusion_param)
+    sorted_predicts = fusion_st_gallery_ranker(fusion_param)
     # eval_on_train_test(fusion_param)
 
     # ctrl_msg['data_folder_path'] = 'viper_train'
