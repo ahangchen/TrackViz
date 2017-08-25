@@ -92,10 +92,5 @@ ENV/
 .ropeproject
 
 .idea/
-data/
-.DS_Store
-!*/test_track.txt
-!*/*/test_tracks.txt
-!*/*/probe.txt
-!*/*/gallery.txt
+
 
