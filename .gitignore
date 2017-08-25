@@ -95,7 +95,7 @@ ENV/
 data/
 .DS_Store
 !*/test_track.txt
-!*/test_tracks.txt
-!*/probe.txt
-!*/gallery.txt
+!*/*/test_tracks.txt
+!*/*/probe.txt
+!*/*/gallery.txt
 
