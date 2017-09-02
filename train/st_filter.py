@@ -209,7 +209,7 @@ def get_person_pids(predict_path):
     return predict_persons
 
 
-def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
+def fusion_st_img_ranker(fusion_param):
     # 从renew_pid和renew_ac获取预测的人物id和图像分数
     persons_ap_scores = predict_img_scores(fusion_param)
     persons_ap_pids = predict_pids(fusion_param)
@@ -223,14 +223,8 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
     persons_cross_scores = list()
     log_path = fusion_param['eval_fusion_path']
     map_score_path = fusion_param['fusion_normal_score_path']
-    score_path = fusion_param['fusion_raw_score_path']
-    renew_path = fusion_param['fusion_pid_path']
-    renew_ac_path = fusion_param['fusion_score_path']
     safe_remove(map_score_path)
     safe_remove(log_path)
-    safe_remove(score_path)
-    safe_remove(renew_path)
-    safe_remove(renew_ac_path)
     line_log_cnt = 10
 
     # print(sum([sum(persons_track_scores[j]) for j in range(len(persons_track_scores))])/len(persons_track_scores)/len(persons_track_scores[0]))
@@ -292,7 +286,6 @@ def fusion_st_img_ranker(fusion_param, pos_shot_rate=0.5, neg_shot_rate=0.01):
             write(map_score_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]]))
             write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
         write(log_path, '\n')
-        write(score_path, '\n')
         write(map_score_path, '\n')
 
 
@@ -364,7 +357,6 @@ def gallery_track_scores(camera_delta_s, fusion_param):
 
 
 def fusion_st_gallery_ranker(fusion_param):
-    score_path = fusion_param['fusion_raw_score_path']
     log_path = fusion_param['eval_fusion_path']
     map_score_path = fusion_param['fusion_normal_score_path']  # fusion_param = get_fusion_param()
     persons_ap_scores = predict_img_scores(fusion_param)
@@ -375,13 +367,8 @@ def fusion_st_gallery_ranker(fusion_param):
     rand_track_scores = gallery_track_scores(rand_delta_s, fusion_param)
 
     persons_cross_scores = list()
-    renew_path = fusion_param['fusion_pid_path']
-    renew_ac_path = fusion_param['fusion_score_path']
     safe_remove(map_score_path)
     safe_remove(log_path)
-    safe_remove(score_path)
-    safe_remove(renew_path)
-    safe_remove(renew_ac_path)
 
     for i, person_ap_pids in enumerate(persons_ap_pids):
         cross_scores = list()
@@ -420,7 +407,6 @@ def fusion_st_gallery_ranker(fusion_param):
         for j in range(len(person_ap_pids)):
             write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
         write(log_path, '\n')
-        write(score_path, '\n')
         write(map_score_path, '\n')
     return person_score_idx_s
 

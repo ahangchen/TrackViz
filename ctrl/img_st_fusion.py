@@ -1,13 +1,12 @@
 #coding=utf-8
 import shutil
 
+from post_process.predict_eval import eval_on_train_test
+from profile.fusion_param import get_fusion_param, ctrl_msg
 from train.st_estim import get_predict_delta_tracks
-from post_process.predict_eval import eval_on_train_test, target_pos_neg_shot_eval
-from profile.fusion_param import get_fusion_param, ctrl_msg, update_fusion_param
-from train.st_filter import fusion_st_img_ranker, fusion_curve
+from train.st_filter import fusion_st_img_ranker
 # need to run on src directory
-from util.file_helper import write_line, safe_remove
-from viz.delta_track import viz_fusion_curve
+from util.file_helper import safe_remove, safe_mkdir
 
 
 def test_fusion(fusion_param, ep=0.5, en=0.01):
@@ -20,7 +19,7 @@ def test_fusion(fusion_param, ep=0.5, en=0.01):
     except shutil.Error:
         print 'pickle ready'
     # merge visual probability and track distribution probability
-    fusion_st_img_ranker(fusion_param, ep, en)
+    fusion_st_img_ranker(fusion_param)
     # evaluate
     eval_on_train_test(fusion_param, test_mode=True)
 
@@ -30,27 +29,19 @@ def train_fusion(fusion_param, ep=0.5, en=0.01):
     # get_predict_tracks(fusion_param)
     # get distribution sorted list for probability compute
     # store_sorted_deltas(fusion_param)
-    fusion_st_img_ranker(fusion_param, ep, en)
+    fusion_st_img_ranker(fusion_param)
     # evaluate
     eval_on_train_test(fusion_param)
-
-
-def update_epen(fusion_param, pst=True):
-    ep, en = target_pos_neg_shot_eval(fusion_param['fusion_normal_score_path'], fusion_param['renew_pid_path'],
-                                      fusion_param['renew_ac_path'])
-    if pst:
-        write_line('data/ep_en.txt', ctrl_msg['data_folder_path'])
-        write_line('data/ep_en.txt', '%f %f' % (ep, en))
-    update_fusion_param('pos_shot_rate', ep)
-    update_fusion_param('neg_shot_rate', en)
 
 
 def init_strict_img_st_fusion():
     # 全局调度入口，会同时做训练集和测试集上的融合与评分
     fusion_param = get_fusion_param()
+    safe_mkdir(ctrl_msg['data_folder_path'])
     get_predict_delta_tracks(fusion_param)
     # # only get rand model for train dataset
     ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_rand'
+    safe_mkdir(ctrl_msg['data_folder_path'])
     fusion_param = get_fusion_param()
     # 生成随机时空点的时空模型
     get_predict_delta_tracks(fusion_param, random=True)
@@ -63,6 +54,7 @@ def init_strict_img_st_fusion():
     # 改成测试目录
     print('fusion on test dataset')
     ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-4] + 'est'
+    safe_mkdir(ctrl_msg['data_folder_path'])
     iter_strict_img_st_fusion(on_test=True)
 
 
