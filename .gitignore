@@ -92,5 +92,5 @@ ENV/
 .ropeproject
 
 .idea/
-data/
-.DS_Store
+
+

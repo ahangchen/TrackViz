@@ -1,7 +1,8 @@
 from util.file_helper import write
 
 ctrl_msg = {
-    'data_folder_path': 'top-m2g-std2-test'
+    'data_folder_path': 'top-m2g-std2-test',
+    'cv_num': 0
 }
 
 update_msg = {}
@@ -9,12 +10,16 @@ update_msg = {}
 
 def get_fusion_param():
     origin_dict = {
+        'train_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_pid.log',
+        'train_score_path': '',
+        'test_pid_path': '',
+        'test_score_path': '',
         'renew_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_pid.log',
         'renew_ac_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_ac.log',
         'predict_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_pid.log',
-        'eval_fusion_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_filter_pid.log',
         'origin_answer_path': 'data/' + ctrl_msg['data_folder_path'] + '/test_track.txt',
         'answer_path': 'data/' + ctrl_msg['data_folder_path'] + '/test_tracks.txt',
+
         'predict_track_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_tracks.txt',
         'predict_camera_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_c',
 
@@ -25,17 +30,19 @@ def get_fusion_param():
         'persons_ap_path': 'data/' + ctrl_msg['data_folder_path'] + '/persons_ap_scores.pickle',
         'predict_person_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_persons.pickle',
 
-        'fusion_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_pid1.log',
         'mid_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_mid_score.log',
-        'fusion_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_ac1.log',
+        'eval_fusion_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_filter_pid.log',
         'fusion_normal_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_filter_score.log',
-        'fusion_raw_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/raw_cross_filter_score.log',
-        'pos_shot_rate': 0.5,
-        # 'pos_shot_rate': 0.003302,
-        'neg_shot_rate': 0.01,
-        # 'neg_shot_rate': 0.001252,
     }
 
+    if '_grid' in ctrl_msg['data_folder_path']:
+        origin_dict['probe_path'] = 'data/grid/grid-cv' + str(ctrl_msg['cv_num']) + '-probe.txt'
+        origin_dict['train_path'] = 'data/grid/grid-cv' + str(ctrl_msg['cv_num']) + '-train.txt',
+        origin_dict['gallery_path'] = 'data/grid/grid-cv' + str(ctrl_msg['cv_num']) + '-gallery.txt'
+    elif '_market' in ctrl_msg['data_folder_path']:
+        origin_dict['probe_path'] = 'data/market/probe.txt'
+        origin_dict['train_path'] = 'data/market/train.txt',
+        origin_dict['gallery_path'] = 'data/market/gallery.txt'
     if 'r-' in origin_dict['src_distribution_pickle_path']:
         # use track info before increment
         origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('r-train',
@@ -43,7 +50,7 @@ def get_fusion_param():
     else:
         # use track info after increment
         origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('train',
-                                                                                                          'train_rand')
+                                                                                                           'train_rand')
     origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('train',
                                                                                                        'train_rand')
     for (k, v) in update_msg.items():
