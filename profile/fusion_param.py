@@ -10,15 +10,15 @@ update_msg = {}
 
 def get_fusion_param():
     origin_dict = {
-        'train_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_pid.log',
-        'train_score_path': '',
-        'test_pid_path': '',
-        'test_score_path': '',
         'renew_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_pid.log',
         'renew_ac_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_ac.log',
         'predict_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_pid.log',
         'origin_answer_path': 'data/' + ctrl_msg['data_folder_path'] + '/test_track.txt',
         'answer_path': 'data/' + ctrl_msg['data_folder_path'] + '/test_tracks.txt',
+
+        'probe_path': '',
+        'train_path': '',
+        'gallery_path': '',
 
         'predict_track_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_tracks.txt',
         'predict_camera_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_c',
@@ -37,12 +37,16 @@ def get_fusion_param():
 
     if '_grid' in ctrl_msg['data_folder_path']:
         origin_dict['probe_path'] = 'data/grid/grid-cv' + str(ctrl_msg['cv_num']) + '-probe.txt'
-        origin_dict['train_path'] = 'data/grid/grid-cv' + str(ctrl_msg['cv_num']) + '-train.txt',
+        origin_dict['train_path'] = 'data/grid/grid-cv' + str(ctrl_msg['cv_num']) + '-train.txt'
         origin_dict['gallery_path'] = 'data/grid/grid-cv' + str(ctrl_msg['cv_num']) + '-gallery.txt'
     elif '_market' in ctrl_msg['data_folder_path']:
         origin_dict['probe_path'] = 'data/market/probe.txt'
-        origin_dict['train_path'] = 'data/market/train.txt',
+        origin_dict['train_path'] = 'data/market/train.txt'
         origin_dict['gallery_path'] = 'data/market/gallery.txt'
+    if 'train' in ctrl_msg['data_folder_path']:
+        origin_dict['answer_path'] = origin_dict['train_path']
+    else:
+        origin_dict['answer_path'] = origin_dict['probe_path']
     if 'r-' in origin_dict['src_distribution_pickle_path']:
         # use track info before increment
         origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('r-train',

@@ -1,8 +1,21 @@
 #coding=utf-8
 from random import randint
 
-from util.file_helper import read_lines, safe_remove
+import shutil
+
+from profile.fusion_param import ctrl_msg
+from util.file_helper import read_lines, safe_remove, safe_mkdir
 from util.serialize import pickle_save
+from util.str_helper import folder
+
+
+def prepare_rand_folder(fusion_param):
+    rand_predict_path = fusion_param['renew_pid_path'].replace(ctrl_msg['data_folder_path'],
+                                                           ctrl_msg['data_folder_path'] + '_rand')
+    rand_folder_path = folder(rand_predict_path)
+    safe_mkdir(rand_folder_path)
+    # although copy all info including pid info, but not use in later training
+    shutil.copy(fusion_param['renew_pid_path'], rand_predict_path)
 
 
 def get_predict_delta_tracks(fusion_param, useful_predict_cnt=10, random=False):
@@ -40,7 +53,8 @@ def get_predict_delta_tracks(fusion_param, useful_predict_cnt=10, random=False):
             if random:
                 predict_pid = randint(0, person_cnt - 1)
             else:
-                predict_pid = int(predict_pid) - 1
+                # todo transfer: if predict by python, start from 0, needn't minus 1
+                predict_pid = int(predict_pid)
             # same seq
             if real_tracks[i][3] == real_tracks[predict_pid][3]:
                 delta = real_tracks[i][2] - real_tracks[predict_pid][2]
