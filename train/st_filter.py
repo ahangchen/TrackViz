@@ -244,7 +244,7 @@ def fusion_st_img_ranker(fusion_param):
             # 平滑分母噪音，否则时空会失效
             if rand_track_score < 0.02:
                 rand_track_score = 0.02
-            print '%d, %d' % (i, j)
+            # print '%d, %d' % (i, j)
             cross_score = cur_track_score * persons_ap_scores[i][j] / rand_track_score
             cross_scores.append(cross_score)
         persons_cross_scores.append(cross_scores)
@@ -341,20 +341,21 @@ def gallery_track_scores(camera_delta_s, fusion_param):
             # if i >= top_cnt:
             #     break
             predict_idx = int(predict_idx)
+            track_score_idx = int(track_score_idx)
             # todo transfer: if predict by python, start from 0, needn't minus 1
             # predict_idx = predict_idx - 1
-            if len(query_tracks[predict_idx]) > 3:
-                s1 = query_tracks[predict_idx][3]
+            if len(query_tracks[track_score_idx]) > 3:
+                s1 = query_tracks[track_score_idx][3]
                 # print predict_idx
                 s2 = gallery_tracks[predict_idx][3]
                 if s1 != s2:
                     person_deltas_score.append(-1.0)
                     continue
-            time1 = query_tracks[int(track_score_idx) - 1][2]
+            time1 = query_tracks[track_score_idx][2]
             # if track_score_idx == 3914:
             #     print 'test'
             time2 = gallery_tracks[predict_idx][2]
-            c1 = query_tracks[predict_idx][1]
+            c1 = query_tracks[track_score_idx][1]
             c2 = gallery_tracks[predict_idx][1]
             score = track_score(camera_delta_s, c1, time1, c2, time2)
             person_deltas_score.append(score)

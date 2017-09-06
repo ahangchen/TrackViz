@@ -4,7 +4,7 @@ import shutil
 from post_process.predict_eval import eval_on_train_test
 from profile.fusion_param import get_fusion_param, ctrl_msg
 from train.st_estim import get_predict_delta_tracks, prepare_rand_folder
-from train.st_filter import fusion_st_img_ranker
+from train.st_filter import fusion_st_img_ranker, fusion_st_gallery_ranker
 # need to run on src directory
 from util.file_helper import safe_remove, safe_mkdir
 
@@ -19,7 +19,7 @@ def test_fusion(fusion_param, ep=0.5, en=0.01):
     except shutil.Error:
         print 'pickle ready'
     # merge visual probability and track distribution probability
-    fusion_st_img_ranker(fusion_param)
+    fusion_st_gallery_ranker(fusion_param)
     # evaluate
     # todo transfer: no eval by fusion code
     # eval_on_train_test(fusion_param, test_mode=True)
