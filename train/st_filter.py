@@ -67,8 +67,8 @@ def predict_track_scores(camera_delta_s, fusion_param, smooth=False):
                     person_deltas_score.append(-1.0)
                     continue
             time1 = real_tracks[predict_idx][2]
-            if track_score_idx == 3914:
-                print 'test'
+            # if track_score_idx == 3914:
+            #    print 'test'
             time2 = real_tracks[track_score_idx][2]
             c1 = real_tracks[predict_idx][1]
             c2 = real_tracks[track_score_idx][1]
@@ -139,8 +139,8 @@ def predict_smooth_track_scores(camera_delta_s, fusion_param):
                     person_deltas_score.append(-1.0)
                     continue
             time1 = real_tracks[predict_idx][2]
-            if track_score_idx == 3914:
-                print 'test'
+            # if track_score_idx == 3914:
+            #     print 'test'
             time2 = real_tracks[track_score_idx][2]
             c1 = real_tracks[predict_idx][1]
             c2 = real_tracks[track_score_idx][1]
