@@ -32,6 +32,8 @@ def vision_rank(source, target):
 
 
 def dataset_eval(source, target, rank_pids_path):
+    if 'market' in target:
+        return
     os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
     os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
               + target + ' ' + rank_pids_path)
@@ -102,12 +104,19 @@ def fusion_transfer(source, target):
     dataset_eval(source, target, fusion_test_rank_pids_path)
 
 
-def grid_fusion_transfer():
-    for i in range(10):
-        fusion_transfer('market', 'grid-cv%d' % i)
+def dataset_fusion_transfer():
+    # sources = ['market', 'cuhk', 'viper', 'grid']
+    # sources = ['market']
+    # for source in sources:
+    #     for i in range(0, 10):
+    #        fusion_transfer(source, 'grid-cv%d' % i)
+    sources = ['grid', 'cuhk', 'viper', 'market']
+    # sources = ['market']
+    for source in sources:
+        fusion_transfer(source, 'market')
 
 
 if __name__ == '__main__':
-    grid_fusion_transfer()
+    dataset_fusion_transfer()
     # dataset_eval('market', 'grid-cv1', '/home/cwh/coding/TrackViz/data/market_grid-cv1-r-test/renew_pid.log')
     # dataset_eval('market', 'grid-cv1', '/home/cwh/coding/TrackViz/data/market_grid-cv1-r-test/cross_filter_pid.log')
