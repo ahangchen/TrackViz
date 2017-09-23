@@ -4,6 +4,10 @@ from post_process.track_prob import track_score
 from profile.fusion_param import get_fusion_param, ctrl_msg
 from util.file_helper import read_lines, read_lines_and, write, safe_remove
 from util.serialize import pickle_load
+import seaborn as sns
+import numpy as np
+
+from viz.delta_track import viz_fusion_curve
 
 line_idx = 0
 track_score_idx = 0
@@ -464,15 +468,20 @@ def fusion_st_gallery_ranker(fusion_param):
         # pickle_save(ctrl_msg['data_folder_path']+'viper_r-testpersons_cross_scores.pick', persons_cross_scores)
         # pickle_save(ctrl_msg['data_folder_path']+'viper_r-testpersons_ap_pids.pick', persons_ap_pids)
 
-    max_score = max([max(predict_cross_scores) for predict_cross_scores in persons_cross_scores])
+    max_score_s = [max(predict_cross_scores) for predict_cross_scores in persons_cross_scores]
+    min_score_s = [min(predict_cross_scores) for predict_cross_scores in persons_cross_scores]
 
     for i, person_cross_scores in enumerate(persons_cross_scores):
         for j, person_cross_score in enumerate(person_cross_scores):
             if persons_cross_scores[i][j] >= 0:
                 # diff seq not sort, not rank for max, and not normalize
-                persons_cross_scores[i][j] /= max_score
+                persons_cross_scores[i][j] /= max_score_s[i]
+                # if persons_cross_scores[i][j] > 0.5:
+                #     print 'same'
+                #     print persons_cross_scores[i][j]
             else:
-                # so diff seq is negative
+                # so diff seq is negative, normalize by minimum
+                # persons_cross_scores[i][j] /= min_score_s[i]
                 persons_cross_scores[i][j] *= -0.02
                 # print persons_cross_scores[i][j]
     person_score_idx_s = list()
@@ -485,6 +494,7 @@ def fusion_st_gallery_ranker(fusion_param):
     for i, person_ap_pids in enumerate(persons_ap_pids):
         for j in range(len(person_ap_pids)):
             write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
+            write(map_score_path, '%.3f ' % persons_cross_scores[i][person_score_idx_s[i][j]])
         write(log_path, '\n')
         write(map_score_path, '\n')
     return person_score_idx_s
@@ -511,15 +521,16 @@ def fusion_curve(fusion_param):
                     print match_track_score/rand_track_score
 
                 raw_probs[i][j].append(match_track_score)
-                rand_probs[i][j].append(match_track_score)
+                rand_probs[i][j].append(rand_track_score)
                 over_probs[i][j].append(match_track_score/rand_track_score)
     return delta_range, raw_probs, rand_probs, over_probs
 
 if __name__ == '__main__':
-    ctrl_msg['data_folder_path'] = 'market_grid-cv0-test'
+    ctrl_msg['data_folder_path'] = 'market_market-test'
     # fusion_param = get_fusion_param()
     # fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
     # eval_on_train_test(fusion_param, test_mode=True)
     fusion_param = get_fusion_param()
-
     fusion_st_gallery_ranker(fusion_param)
+    # delta_range, raw_probs, rand_probs, over_probs = fusion_curve(fusion_param)
+    # viz_fusion_curve(delta_range, [raw_probs, rand_probs, over_probs])

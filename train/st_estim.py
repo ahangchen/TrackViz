@@ -18,7 +18,7 @@ def prepare_rand_folder(fusion_param):
     shutil.copy(fusion_param['renew_pid_path'], rand_predict_path)
 
 
-def get_predict_delta_tracks(fusion_param, useful_predict_cnt=10, random=False):
+def get_predict_delta_tracks(fusion_param, useful_predict_limit=10, random=False):
     # 获取左图列表
     answer_path = fusion_param['answer_path']
     answer_lines = read_lines(answer_path)
@@ -45,10 +45,12 @@ def get_predict_delta_tracks(fusion_param, useful_predict_cnt=10, random=False):
     camera_delta_s = [[list() for j in range(camera_cnt)] for i in range(camera_cnt)]
     person_cnt = len(answer_lines)
     # market1501数据集有六个序列，只有同一个序列才能计算delta
+
     for i, line in enumerate(predict_lines):
         predict_pids = line.split(' ')
+        useful_cnt = 0
         for j, predict_pid in enumerate(predict_pids):
-            if j > useful_predict_cnt:
+            if useful_cnt > useful_predict_limit:
                 break
             if random:
                 predict_pid = randint(0, person_cnt - 1)
@@ -56,7 +58,9 @@ def get_predict_delta_tracks(fusion_param, useful_predict_cnt=10, random=False):
                 # todo transfer: if predict by python, start from 0, needn't minus 1
                 predict_pid = int(predict_pid)
             # same seq
-            if real_tracks[i][3] == real_tracks[predict_pid][3]:
+            # todo ignore same camera track
+            if real_tracks[i][3] == real_tracks[predict_pid][3]: #and real_tracks[i][1] != real_tracks[predict_pid][1]:
+                useful_cnt += 1
                 delta = real_tracks[i][2] - real_tracks[predict_pid][2]
                 if abs(delta) < 1000000:
                     camera_delta_s[real_tracks[i][1] - 1][real_tracks[predict_pid][1] - 1].append(delta)

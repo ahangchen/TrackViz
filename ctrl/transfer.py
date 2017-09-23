@@ -110,13 +110,14 @@ def dataset_fusion_transfer():
     # for source in sources:
     #     for i in range(0, 10):
     #        fusion_transfer(source, 'grid-cv%d' % i)
-    sources = ['grid', 'cuhk', 'viper', 'market']
-    # sources = ['market']
+    sources = ['cuhk', 'viper', 'market']
+    # sources = ['grid']
     for source in sources:
         fusion_transfer(source, 'market')
 
 
 if __name__ == '__main__':
     dataset_fusion_transfer()
+    # vision_rank('grid', 'market')
     # dataset_eval('market', 'grid-cv1', '/home/cwh/coding/TrackViz/data/market_grid-cv1-r-test/renew_pid.log')
     # dataset_eval('market', 'grid-cv1', '/home/cwh/coding/TrackViz/data/market_grid-cv1-r-test/cross_filter_pid.log')

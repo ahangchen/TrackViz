@@ -5,7 +5,6 @@ from random import uniform
 
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy
 import seaborn as sns
 from numpy.linalg import LinAlgError
 
