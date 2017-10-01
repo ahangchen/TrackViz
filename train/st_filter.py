@@ -4,6 +4,7 @@ from post_process.track_prob import track_score
 from profile.fusion_param import get_fusion_param, ctrl_msg
 from util.file_helper import read_lines, read_lines_and, write, safe_remove
 from util.serialize import pickle_load
+from viz.delta_track import viz_fusion_curve
 
 line_idx = 0
 track_score_idx = 0
@@ -502,7 +503,7 @@ def fusion_curve(fusion_param):
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     rand_camera_deltas = pickle_load(fusion_param['rand_distribution_pickle_path'])
 
-    delta_range = map(lambda x: x*30.0 - 15000.0, range(1000))
+    delta_range = map(lambda x: x*6. - 3000.0, range(1000))
     # delta_range = map(lambda x: x*1.0 - 60.0, range(120))
     raw_probs = [[list() for j in range(6)] for i in range(6)]
     rand_probs = [[list() for j in range(6)] for i in range(6)]
@@ -529,6 +530,6 @@ if __name__ == '__main__':
     # fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
     # eval_on_train_test(fusion_param, test_mode=True)
     fusion_param = get_fusion_param()
-    fusion_st_gallery_ranker(fusion_param)
-    # delta_range, raw_probs, rand_probs, over_probs = fusion_curve(fusion_param)
-    # viz_fusion_curve(delta_range, [raw_probs, rand_probs, over_probs])
+    # fusion_st_gallery_ranker(fusion_param)
+    delta_range, raw_probs, rand_probs, over_probs = fusion_curve(fusion_param)
+    viz_fusion_curve(delta_range, [raw_probs, rand_probs, over_probs])
