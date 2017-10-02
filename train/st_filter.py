@@ -422,7 +422,7 @@ def gallery_smooth_track_scores(camera_delta_s, fusion_param):
             # filter
             for j in range(smooth_window_size):
                 if smooth_scores[j] < 0.01:
-                    smooth_scores[j] = 0.005
+                    smooth_scores[j] = 0.0
             # smooth
             score = sum(smooth_scores) / len(smooth_scores)
             # if score < 0.001:
@@ -530,6 +530,6 @@ if __name__ == '__main__':
     # fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
     # eval_on_train_test(fusion_param, test_mode=True)
     fusion_param = get_fusion_param()
-    # fusion_st_gallery_ranker(fusion_param)
-    delta_range, raw_probs, rand_probs, over_probs = fusion_curve(fusion_param)
-    viz_fusion_curve(delta_range, [raw_probs, rand_probs, over_probs])
+    fusion_st_gallery_ranker(fusion_param)
+    # delta_range, raw_probs, rand_probs, over_probs = fusion_curve(fusion_param)
+    # viz_fusion_curve(delta_range, [raw_probs, rand_probs, over_probs])
