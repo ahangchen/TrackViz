@@ -45,21 +45,23 @@ def get_predict_delta_tracks(fusion_param, useful_predict_limit=10, random=False
     camera_delta_s = [[list() for j in range(camera_cnt)] for i in range(camera_cnt)]
     person_cnt = len(answer_lines)
     # market1501数据集有六个序列，只有同一个序列才能计算delta
-
+    if random:
+        useful_predict_limit = len(predict_lines)
     for i, line in enumerate(predict_lines):
         predict_pids = line.split(' ')
         useful_cnt = 0
         for j, predict_pid in enumerate(predict_pids):
             if useful_cnt > useful_predict_limit:
                 break
-            if random:
-                predict_pid = randint(0, person_cnt - 1)
-            else:
-                # todo transfer: if predict by python, start from 0, needn't minus 1
-                predict_pid = int(predict_pid)
+            # if random:
+            #     predict_pid = randint(0, person_cnt - 1)
+            # else:
+            #     # todo transfer: if predict by python, start from 0, needn't minus 1
+            #     predict_pid = int(predict_pid)
+            predict_pid = int(predict_pid)
             # same seq
             # todo ignore same camera track
-            if real_tracks[i][3] == real_tracks[predict_pid][3]: #and real_tracks[i][1] != real_tracks[predict_pid][1]:
+            if real_tracks[i][3] == real_tracks[predict_pid][3]:  # and real_tracks[i][1] != real_tracks[predict_pid][1]:
                 useful_cnt += 1
                 delta = real_tracks[i][2] - real_tracks[predict_pid][2]
                 if abs(delta) < 1000000:

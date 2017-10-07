@@ -425,7 +425,7 @@ def gallery_smooth_track_scores(camera_delta_s, fusion_param):
             # filter
             for j in range(smooth_window_size):
                 if smooth_scores[j] < 0.01:
-                    smooth_scores[j] = 0
+                    smooth_scores[j] = 0.005
             # smooth
             score = sum(smooth_scores) / len(smooth_scores)
             # if score < 0.001:
@@ -470,12 +470,13 @@ def fusion_st_gallery_ranker(fusion_param):
 
     max_score_s = [max(predict_cross_scores) for predict_cross_scores in persons_cross_scores]
     min_score_s = [min(predict_cross_scores) for predict_cross_scores in persons_cross_scores]
-
+    max_score = max(max_score_s)
     for i, person_cross_scores in enumerate(persons_cross_scores):
         for j, person_cross_score in enumerate(person_cross_scores):
             if persons_cross_scores[i][j] >= 0:
                 # diff seq not sort, not rank for max, and not normalize
                 persons_cross_scores[i][j] /= max_score_s[i]
+                # persons_cross_scores[i][j] /= max_score
                 # if persons_cross_scores[i][j] > 0.5:
                 #     print 'same'
                 #     print persons_cross_scores[i][j]

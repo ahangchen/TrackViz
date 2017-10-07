@@ -132,7 +132,7 @@ if __name__ == '__main__':
     #
     # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
     # fusion_param = get_fusion_param()
-    ctrl_msg['data_folder_path'] = 'grid_market-train'
+    ctrl_msg['data_folder_path'] = 'market_market-train'
     fusion_param = get_fusion_param()
     init_strict_img_st_fusion()
     # delta_range, raw_probs, rand_probs, over_probs = fusion_curve(fusion_param)

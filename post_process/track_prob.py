@@ -27,10 +27,11 @@ def binary_search(a, target):
     return low
 
 
-def track_score(camera_delta_s, camera1, time1, camera2, time2, interval=100):
+def track_score(camera_delta_s, camera1, time1, camera2, time2, interval=100, test=True):
     camera1 -= 1
     camera2 -= 1
-
+    if test and camera1 == camera2:
+        return 0.0
     cur_delta = time2 - time1
     delta_distribution = camera_delta_s[camera1][camera2]
     total_cnt = sum(map(len, camera_delta_s[camera1]))
@@ -42,8 +43,10 @@ def track_score(camera_delta_s, camera1, time1, camera2, time2, interval=100):
     right_index = binary_search(delta_distribution, right_bound)
     if total_cnt == 0:
         return 0.0
-    # 这里除以total_cnt而非len(camera_delta_s[camera1][2])，体现空间概率
+    # 这里除以total_cnt而非len(camera_delta_s[camera1][camera2])，体现空间概率
     score = (right_index - left_index + 1) / float(total_cnt)
+    # 训练集中同摄像头概率很高,但评估又不要同摄像头的,体现空间概率很不划算
+    score = (right_index - left_index + 1) / float(len(camera_delta_s[camera1][camera2]))
     if len(delta_distribution) == 0:
         return 0.0
     # score = (right_index - left_index + 1) / float(len(camera_delta_s[camera1][2]))
