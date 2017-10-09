@@ -446,8 +446,8 @@ def fusion_st_gallery_ranker(fusion_param):
     persons_ap_pids = predict_pids(fusion_param)
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
-    persons_track_scores = gallery_track_scores(camera_delta_s, fusion_param)
-    rand_track_scores = gallery_track_scores(rand_delta_s, fusion_param)
+    persons_track_scores = gallery_smooth_track_scores(camera_delta_s, fusion_param)
+    rand_track_scores = gallery_smooth_track_scores(rand_delta_s, fusion_param)
 
     persons_cross_scores = list()
     safe_remove(map_score_path)
