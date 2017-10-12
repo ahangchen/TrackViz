@@ -458,7 +458,7 @@ def fusion_st_gallery_ranker(fusion_param):
             rand_track_score = rand_track_scores[i][j]
             if rand_track_score < 0.02:
                 rand_track_score = 0.02
-            cross_score = cur_track_score * persons_ap_scores[i][j]  # / rand_track_score
+            cross_score = cur_track_score * persons_ap_scores[i][j]  / rand_track_score
             cross_scores.append(cross_score)
         persons_cross_scores.append(cross_scores)
         # pickle_save(ctrl_msg['data_folder_path']+'viper_r-testpersons_cross_scores.pick', persons_cross_scores)
@@ -479,8 +479,8 @@ def fusion_st_gallery_ranker(fusion_param):
             else:
                 # so diff seq is negative, normalize by minimum
                 # persons_cross_scores[i][j] /= min_score_s[i]
-                persons_cross_scores[i][j] *= 1.0
-                # persons_cross_scores[i][j] *= -0.02
+                # persons_cross_scores[i][j] *= 1.0
+                persons_cross_scores[i][j] *= -0.02
                 # print persons_cross_scores[i][j]
     person_score_idx_s = list()
 
