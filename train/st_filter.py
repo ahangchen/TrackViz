@@ -396,22 +396,25 @@ def gallery_smooth_track_scores(camera_delta_s, fusion_param):
 
         predict_idx_es = line.split()
         person_deltas_score = list()
+
         for i, predict_idx in enumerate(predict_idx_es):
             # if i >= top_cnt:
             #     break
-            if len(query_tracks[int(track_score_idx) - 1]) > 3:
-                s1 = query_tracks[int(track_score_idx) - 1][3]
+            track_score_idx = int(track_score_idx)
+            predict_idx = int(predict_idx)
+            if len(query_tracks[track_score_idx - 1]) > 3:
+                s1 = query_tracks[track_score_idx - 1][3]
                 # print predict_idx
-                s2 = gallery_tracks[int(predict_idx)-1][3]
+                s2 = gallery_tracks[predict_idx][3]
                 if s1 != s2:
                     person_deltas_score.append(-1.0)
                     continue
-            time1 = query_tracks[int(track_score_idx) - 1][2]
+            time1 = query_tracks[track_score_idx - 1][2]
             # if track_score_idx == 3914:
             #     print 'test'
-            time2 = gallery_tracks[int(predict_idx)-1][2]
-            c1 = query_tracks[int(track_score_idx) - 1][1]
-            c2 = gallery_tracks[int(predict_idx)-1][1]
+            time2 = gallery_tracks[predict_idx][2]
+            c1 = query_tracks[track_score_idx - 1][1]
+            c2 = gallery_tracks[predict_idx][1]
             track_interval = 20
             smooth_window_size = 10
             smooth_scores = [
@@ -420,9 +423,9 @@ def gallery_smooth_track_scores(camera_delta_s, fusion_param):
                             interval=track_interval)
                 for j in range(smooth_window_size)]
             # filter
-            for j in range(smooth_window_size):
-                if smooth_scores[j] < 0.01:
-                    smooth_scores[j] = 0.0
+            # for j in range(smooth_window_size):
+            #     if smooth_scores[j] < 0.01:
+            #         smooth_scores[j] = 0.0
             # smooth
             score = sum(smooth_scores) / len(smooth_scores)
             # if score < 0.001:
@@ -472,6 +475,8 @@ def fusion_st_gallery_ranker(fusion_param):
         for j, person_cross_score in enumerate(person_cross_scores):
             if persons_cross_scores[i][j] >= 0:
                 # diff seq not sort, not rank for max, and not normalize
+                if max_score_s[i] == 0:
+                    print i
                 persons_cross_scores[i][j] /= max_score_s[i]
                 # persons_cross_scores[i][j] /= max_score
                 # if persons_cross_scores[i][j] > 0.5:
