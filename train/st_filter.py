@@ -7,7 +7,7 @@ from util.serialize import pickle_load
 from viz.delta_track import viz_fusion_curve
 
 line_idx = 0
-track_score_idx = 0
+probe_i = 0
 data_type = 1
 
 
@@ -47,11 +47,11 @@ def predict_track_scores(camera_delta_s, fusion_param, smooth=False):
     top_cnt = 10
     persons_deltas_score = list()
 
-    global track_score_idx
-    track_score_idx = 0
+    global probe_i
+    probe_i = 0
 
     def predict_judge(line):
-        global track_score_idx
+        global probe_i
 
         predict_idx_es = line.split()
         person_deltas_score = list()
@@ -63,16 +63,16 @@ def predict_track_scores(camera_delta_s, fusion_param, smooth=False):
             # predict_idx = predict_idx - 1
             if len(real_tracks[predict_idx]) > 3:
                 s1 = real_tracks[predict_idx][3]
-                s2 = real_tracks[track_score_idx][3]
+                s2 = real_tracks[probe_i][3]
                 if s1 != s2:
                     person_deltas_score.append(-1.0)
                     continue
             time1 = real_tracks[predict_idx][2]
             # if track_score_idx == 3914:
             #    print 'test'
-            time2 = real_tracks[track_score_idx][2]
+            time2 = real_tracks[probe_i][2]
             c1 = real_tracks[predict_idx][1]
-            c2 = real_tracks[track_score_idx][1]
+            c2 = real_tracks[probe_i][1]
             if smooth:
                 track_interval = 20
                 smooth_window_size = 10
@@ -91,7 +91,7 @@ def predict_track_scores(camera_delta_s, fusion_param, smooth=False):
                 # 给定摄像头，时间，获取时空评分，这里camera_deltas如果是随机算出来的，则是随机评分
                 score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100)
             person_deltas_score.append(score)
-        track_score_idx += 1
+        probe_i += 1
         persons_deltas_score.append(person_deltas_score)
 
     read_lines_and(predict_path, predict_judge)
@@ -119,11 +119,11 @@ def predict_smooth_track_scores(camera_delta_s, fusion_param):
     top_cnt = 10
     persons_deltas_score = list()
 
-    global track_score_idx
-    track_score_idx = 0
+    global probe_i
+    probe_i = 0
 
     def predict_judge(line):
-        global track_score_idx
+        global probe_i
 
         predict_idx_es = line.split()
         person_deltas_score = list()
@@ -135,16 +135,16 @@ def predict_smooth_track_scores(camera_delta_s, fusion_param):
             # predict_idx = predict_idx - 1
             if len(real_tracks[predict_idx]) > 3:
                 s1 = real_tracks[predict_idx][3]
-                s2 = real_tracks[track_score_idx][3]
+                s2 = real_tracks[probe_i][3]
                 if s1 != s2:
                     person_deltas_score.append(-1.0)
                     continue
             time1 = real_tracks[predict_idx][2]
             # if track_score_idx == 3914:
             #     print 'test'
-            time2 = real_tracks[track_score_idx][2]
+            time2 = real_tracks[probe_i][2]
             c1 = real_tracks[predict_idx][1]
-            c2 = real_tracks[track_score_idx][1]
+            c2 = real_tracks[probe_i][1]
             track_interval = 20
             smooth_window_size = 10
             smooth_scores = [
@@ -159,7 +159,7 @@ def predict_smooth_track_scores(camera_delta_s, fusion_param):
             # if score < 0.001:
             #     score = 0
             person_deltas_score.append(score)
-        track_score_idx += 1
+        probe_i += 1
         persons_deltas_score.append(person_deltas_score)
 
     read_lines_and(predict_path, predict_judge)
@@ -318,11 +318,11 @@ def gallery_track_scores(camera_delta_s, fusion_param):
 
     persons_deltas_score = list()
 
-    global track_score_idx
-    track_score_idx = 0
+    global probe_i
+    probe_i = 0
 
     def predict_judge(line):
-        global track_score_idx
+        global probe_i
 
         predict_idx_es = line.split()
         person_deltas_score = list()
@@ -330,25 +330,25 @@ def gallery_track_scores(camera_delta_s, fusion_param):
             # if i >= top_cnt:
             #     break
             predict_idx = int(predict_idx)
-            track_score_idx = int(track_score_idx)
+            probe_i_tmp = probe_i
             # todo transfer: if predict by python, start from 0, needn't minus 1
             # predict_idx = predict_idx - 1
-            if len(query_tracks[track_score_idx]) > 3:
-                s1 = query_tracks[track_score_idx][3]
+            if len(query_tracks[probe_i_tmp]) > 3:
+                s1 = query_tracks[probe_i_tmp][3]
                 # print predict_idx
                 s2 = gallery_tracks[predict_idx][3]
                 if s1 != s2:
                     person_deltas_score.append(-1.0)
                     continue
-            time1 = query_tracks[track_score_idx][2]
+            time1 = query_tracks[probe_i_tmp][2]
             # if track_score_idx == 3914:
             #     print 'test'
             time2 = gallery_tracks[predict_idx][2]
-            c1 = query_tracks[track_score_idx][1]
+            c1 = query_tracks[probe_i_tmp][1]
             c2 = gallery_tracks[predict_idx][1]
             score = track_score(camera_delta_s, c1, time1, c2, time2)
             person_deltas_score.append(score)
-        track_score_idx += 1
+        probe_i += 1
         persons_deltas_score.append(person_deltas_score)
 
     read_lines_and(predict_path, predict_judge)
@@ -388,11 +388,11 @@ def gallery_smooth_track_scores(camera_delta_s, fusion_param):
 
     persons_deltas_score = list()
 
-    global track_score_idx
-    track_score_idx = 0
+    global probe_i
+    probe_i = 0
 
     def predict_judge(line):
-        global track_score_idx
+        global probe_i
 
         predict_idx_es = line.split()
         person_deltas_score = list()
@@ -400,20 +400,20 @@ def gallery_smooth_track_scores(camera_delta_s, fusion_param):
         for i, predict_idx in enumerate(predict_idx_es):
             # if i >= top_cnt:
             #     break
-            track_score_idx = int(track_score_idx)
+            probe_i = int(probe_i)
             predict_idx = int(predict_idx)
-            if len(query_tracks[track_score_idx - 1]) > 3:
-                s1 = query_tracks[track_score_idx - 1][3]
+            if len(query_tracks[probe_i - 1]) > 3:
+                s1 = query_tracks[probe_i - 1][3]
                 # print predict_idx
                 s2 = gallery_tracks[predict_idx][3]
                 if s1 != s2:
                     person_deltas_score.append(-1.0)
                     continue
-            time1 = query_tracks[track_score_idx - 1][2]
+            time1 = query_tracks[probe_i - 1][2]
             # if track_score_idx == 3914:
             #     print 'test'
             time2 = gallery_tracks[predict_idx][2]
-            c1 = query_tracks[track_score_idx - 1][1]
+            c1 = query_tracks[probe_i - 1][1]
             c2 = gallery_tracks[predict_idx][1]
             track_interval = 20
             smooth_window_size = 10
@@ -431,7 +431,7 @@ def gallery_smooth_track_scores(camera_delta_s, fusion_param):
             # if score < 0.001:
             #     score = 0
             person_deltas_score.append(score)
-        track_score_idx += 1
+        probe_i += 1
         persons_deltas_score.append(person_deltas_score)
 
     read_lines_and(predict_path, predict_judge)
@@ -446,8 +446,8 @@ def fusion_st_gallery_ranker(fusion_param):
     persons_ap_pids = predict_pids(fusion_param)
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
-    persons_track_scores = gallery_smooth_track_scores(camera_delta_s, fusion_param)
-    rand_track_scores = gallery_smooth_track_scores(rand_delta_s, fusion_param)
+    persons_track_scores = gallery_track_scores(camera_delta_s, fusion_param)
+    rand_track_scores = gallery_track_scores(rand_delta_s, fusion_param)
 
     persons_cross_scores = list()
     safe_remove(map_score_path)
