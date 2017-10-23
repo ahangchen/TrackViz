@@ -25,6 +25,22 @@ def real_track(answer_path):
     return real_tracks
 
 
+def smooth_score(c1, c2, time1, time2, camera_delta_s):
+    track_interval = 20
+    smooth_window_size = 10
+    smooth_scores = [
+        track_score(camera_delta_s, c1,
+                    time1 - (smooth_window_size / 2 - 1) * track_interval + j * track_interval, c2, time2,
+                    interval=track_interval)
+        for j in range(smooth_window_size)]
+    # filter
+    for j in range(smooth_window_size):
+        if smooth_scores[j] < 0.01:
+            smooth_scores[j] = 0
+    # smooth
+    score = sum(smooth_scores) / len(smooth_scores)
+    return score
+
 def predict_track_scores(camera_delta_s, fusion_param, smooth=False):
     # fusion_param = get_fusion_param()
     # persons_deltas_score = pickle_load(fusion_param['persons_deltas_path'])
@@ -74,19 +90,7 @@ def predict_track_scores(camera_delta_s, fusion_param, smooth=False):
             c1 = real_tracks[predict_idx][1]
             c2 = real_tracks[probe_i][1]
             if smooth:
-                track_interval = 20
-                smooth_window_size = 10
-                smooth_scores = [
-                    track_score(camera_delta_s, c1,
-                                time1 - (smooth_window_size / 2 - 1) * track_interval + j * track_interval, c2, time2,
-                                interval=track_interval)
-                    for j in range(smooth_window_size)]
-                # filter
-                for j in range(smooth_window_size):
-                    if smooth_scores[j] < 0.01:
-                        smooth_scores[j] = 0
-                # smooth
-                score = sum(smooth_scores) / len(smooth_scores)
+                score = smooth_score(c1, c2, time1, time2, camera_delta_s)
             else:
                 # 给定摄像头，时间，获取时空评分，这里camera_deltas如果是随机算出来的，则是随机评分
                 score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100)
@@ -285,7 +289,7 @@ def fusion_st_img_ranker(fusion_param):
         write(map_score_path, '\n')
 
 
-def gallery_track_scores(camera_delta_s, fusion_param):
+def gallery_track_scores(camera_delta_s, fusion_param, smooth=False):
     # fusion_param = get_fusion_param()
     # persons_deltas_score = pickle_load(fusion_param['persons_deltas_path'])
     # if pickle_load(fusion_param['persons_deltas_path']) is not None:
@@ -346,7 +350,11 @@ def gallery_track_scores(camera_delta_s, fusion_param):
             time2 = gallery_tracks[predict_idx][2]
             c1 = query_tracks[probe_i_tmp][1]
             c2 = gallery_tracks[predict_idx][1]
-            score = track_score(camera_delta_s, c1, time1, c2, time2)
+            if smooth:
+                score = smooth_score(c1, c2, time1, time2, camera_delta_s)
+            else:
+                # 给定摄像头，时间，获取时空评分，这里camera_deltas如果是随机算出来的，则是随机评分
+                score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100)
             person_deltas_score.append(score)
         probe_i += 1
         persons_deltas_score.append(person_deltas_score)
