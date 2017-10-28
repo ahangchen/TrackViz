@@ -65,6 +65,7 @@ def predict_track_scores(camera_delta_s, fusion_param, smooth=False):
         person_deltas_score = list()
         for pid4probe in pids4probe:
             # todo transfer: if predict by python, start from 0, needn't minus 1
+            pid4probe = int(pid4probe)
             # predict_idx = predict_idx - 1
             if len(real_tracks[pid4probe]) > 3:
                 s1 = real_tracks[pid4probe][3]
@@ -243,7 +244,7 @@ def gallery_track_scores(camera_delta_s, fusion_param, smooth=False):
             # if i >= top_cnt:
             #     break
             pid4probe = int(pid4probe)
-            probe_i_tmp = probe_i
+            probe_i_tmp = probe_i - 1# (probe_i + 1) % len(pids4probes)
             # todo transfer: if predict by python, start from 0, needn't minus 1
             # predict_idx = predict_idx - 1
             if len(query_tracks[probe_i_tmp]) > 3:
@@ -362,7 +363,7 @@ def fusion_curve(fusion_param):
     return delta_range, raw_probs, rand_probs, over_probs
 
 if __name__ == '__main__':
-    ctrl_msg['data_folder_path'] = 'market_grid-cv0-test'
+    ctrl_msg['data_folder_path'] = 'market_market-test'
     # fusion_param = get_fusion_param()
     # fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
     # eval_on_train_test(fusion_param, test_mode=True)

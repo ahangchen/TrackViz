@@ -105,18 +105,18 @@ def fusion_transfer(source, target):
 
 
 def dataset_fusion_transfer():
-    sources = ['market', 'cuhk', 'viper', 'grid']
-    # sources = ['grid-cv']
-    for source in sources:
-        for i in range(0, 10):
-            if 'grid' in source:
-                fusion_transfer('grid-cv-%d' % i, 'grid-cv%d' % i)
-            else:
-                fusion_transfer(source, 'grid-cv%d' % i)
-    # sources = ['market', 'grid', 'cuhk', 'viper']
-    # sources = ['market']
+    # sources = ['market', 'cuhk', 'viper', 'grid']
+    # sources = ['grid']
     # for source in sources:
-    #     fusion_transfer(source, 'market')
+    #     for i in range(0, 10):
+    #         if 'grid' in source:
+    #             fusion_transfer('grid-cv-%d' % i, 'grid-cv%d' % i)
+    #         else:
+    #             fusion_transfer(source, 'grid-cv%d' % i)
+    sources = ['market', 'grid', 'cuhk', 'viper']
+    # sources = ['market']
+    for source in sources:
+        fusion_transfer(source, 'market')
 
 
 if __name__ == '__main__':

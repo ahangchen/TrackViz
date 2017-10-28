@@ -32,7 +32,7 @@ def avg_acc(grid_eval_path):
 
 
 if __name__ == '__main__':
-    # avg_acc('market_grid.txt')
-    # avg_acc('cuhk_grid.txt')
-    # avg_acc('viper_grid.txt')
+    avg_acc('market_grid.txt')
+    avg_acc('cuhk_grid.txt')
+    avg_acc('viper_grid.txt')
     avg_acc('grid_grid.txt')
