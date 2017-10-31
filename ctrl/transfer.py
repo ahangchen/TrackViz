@@ -91,29 +91,32 @@ def fusion_transfer(source, target):
     fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion(source, target)
     dataset_eval(source, target, fusion_test_rank_pids_path)
 
+    for i in range(10):
     # rank transfer, rank and eval
-    transfer_train_rank_pids_path, transfer_train_rank_scores_path, \
-    transfer_test_rank_pids_path, transfer_test_rank_scores_path \
-        = rank_transfer(source, target, fusion_train_rank_pids_path, fusion_train_rank_scores_path)
+        transfer_train_rank_pids_path, transfer_train_rank_scores_path, \
+        transfer_test_rank_pids_path, transfer_test_rank_scores_path \
+            = rank_transfer(source, target, fusion_train_rank_pids_path, fusion_train_rank_scores_path)
+        transfer_target = target + '-r'
+        # fusion rank and eval
 
-    # fusion rank and eval
-    target = target + '-r'
-    fusion_train_rank_pids_path, fusion_train_rank_scores_path, \
-    fusion_test_rank_pids_path, fusion_test_rank_scores_path \
-        = st_fusion(source, target)
-    dataset_eval(source, target, fusion_test_rank_pids_path)
+        fusion_train_rank_pids_path, fusion_train_rank_scores_path, \
+        fusion_test_rank_pids_path, fusion_test_rank_scores_path \
+            = st_fusion(source, transfer_target)
+        dataset_eval(source, transfer_target, fusion_test_rank_pids_path)
 
 
 def dataset_fusion_transfer():
     # sources = ['market', 'cuhk', 'viper', 'grid']
     # sources = ['grid']
-    # for source in sources:
-    #     for i in range(0, 10):
-    #         if 'grid' in source:
-    #             fusion_transfer('grid-cv-%d' % i, 'grid-cv%d' % i)
-    #         else:
-    #             fusion_transfer(source, 'grid-cv%d' % i)
-    sources = ['market', 'grid', 'cuhk', 'viper']
+    sources = ['market']
+    for source in sources:
+        for i in range(1, 10):
+            if 'grid' in source:
+                fusion_transfer('grid-cv-%d' % i, 'grid-cv%d' % i)
+            else:
+                fusion_transfer(source, 'grid-cv%d' % i)
+    # sources = ['market', 'grid', 'cuhk', 'viper']
+    sources = ['grid']
     # sources = ['market']
     for source in sources:
         fusion_transfer(source, 'market')

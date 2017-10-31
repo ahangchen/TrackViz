@@ -1,12 +1,13 @@
-#coding=utf-8
+# coding=utf-8
 
 from post_process.track_prob import track_score
 from profile.fusion_param import get_fusion_param, ctrl_msg
 from util.file_helper import read_lines, read_lines_and, write, safe_remove
 from util.serialize import pickle_load
-from viz.delta_track import viz_fusion_curve
+from viz.delta_track import viz_fusion_curve, viz_heat_map
 
 import numpy as np
+import pandas as pd
 
 
 def real_track(answer_path):
@@ -38,6 +39,7 @@ def smooth_score(c1, c2, time1, time2, camera_delta_s):
     # smooth
     score = sum(smooth_scores) / len(smooth_scores)
     return score
+
 
 def predict_track_scores(camera_delta_s, fusion_param, smooth=False):
     # fusion_param = get_fusion_param()
@@ -244,7 +246,7 @@ def gallery_track_scores(camera_delta_s, fusion_param, smooth=False):
             # if i >= top_cnt:
             #     break
             pid4probe = int(pid4probe)
-            probe_i_tmp = probe_i - 1# (probe_i + 1) % len(pids4probes)
+            probe_i_tmp = probe_i - 1  # (probe_i + 1) % len(pids4probes)
             # todo transfer: if predict by python, start from 0, needn't minus 1
             # predict_idx = predict_idx - 1
             if len(query_tracks[probe_i_tmp]) > 3:
@@ -295,7 +297,7 @@ def fusion_st_gallery_ranker(fusion_param):
             rand_track_score = rand_track_scores[i][j]
             if rand_track_score < 0.02:
                 rand_track_score = 0.02
-            cross_score = cur_track_score * persons_ap_scores[i][j]  / rand_track_score
+            cross_score = cur_track_score * persons_ap_scores[i][j] / rand_track_score
             cross_scores.append(cross_score)
         persons_cross_scores.append(cross_scores)
         # pickle_save(ctrl_msg['data_folder_path']+'viper_r-testpersons_cross_scores.pick', persons_cross_scores)
@@ -340,27 +342,64 @@ def fusion_st_gallery_ranker(fusion_param):
 def fusion_curve(fusion_param):
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     rand_camera_deltas = pickle_load(fusion_param['rand_distribution_pickle_path'])
-
-    delta_range = map(lambda x: x*6. - 3000.0, range(1000))
+    delta_width = 6000.0
+    delta_cnt = 30
+    interval_width = delta_width/ delta_cnt
+    delta_stripe = delta_width / delta_cnt
+    delta_range = map(lambda x: x * delta_stripe - delta_width/2, range(delta_cnt))
     # delta_range = map(lambda x: x*1.0 - 60.0, range(120))
-    raw_probs = [[list() for j in range(6)] for i in range(6)]
-    rand_probs = [[list() for j in range(6)] for i in range(6)]
     over_probs = [[list() for j in range(6)] for i in range(6)]
     for i in range(6):
-        for j in range(6):
+        for j in range(i+1, 6):
             for k in range(len(delta_range)):
-                match_track_score = track_score(camera_delta_s, i + 1, 0, j + 1, delta_range[k], interval=100)
-                rand_track_score = track_score(rand_camera_deltas, i + 1, 0, j + 1, delta_range[k], interval=100)
+                match_track_score = track_score(camera_delta_s, i + 1, 0, j + 1, delta_range[k], interval=interval_width)
+                rand_track_score = track_score(rand_camera_deltas, i + 1, 0, j + 1, delta_range[k], interval=interval_width)
                 if rand_track_score < 0.02:
                     # print rand_track_score
                     rand_track_score = 0.02
                 else:
-                    print match_track_score/rand_track_score
+                    print match_track_score / rand_track_score
 
-                raw_probs[i][j].append(match_track_score)
-                rand_probs[i][j].append(rand_track_score)
-                over_probs[i][j].append(match_track_score/rand_track_score)
-    return delta_range, raw_probs, rand_probs, over_probs
+                # raw_probs[i][j].append(match_track_score)
+                # rand_probs[i][j].append(rand_track_score)
+                over_probs[i][j].append(match_track_score / rand_track_score)
+    return delta_range, over_probs
+
+
+def fusion_heat(fusion_param):
+    camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
+    rand_camera_deltas = pickle_load(fusion_param['rand_distribution_pickle_path'])
+    delta_width = 3000.0
+    delta_cnt = 15
+    interval_width = delta_width/ delta_cnt
+    delta_stripe = delta_width / delta_cnt
+    delta_range = map(lambda x: x * delta_stripe - delta_width/2, range(delta_cnt))
+    # delta_range = map(lambda x: x*1.0 - 60.0, range(120))
+    viz_deltas = list()
+    viz_camera_pairs = list()
+    viz_values = list()
+    for i in range(6):
+        for j in range(i+1, 6):
+            for k in range(len(delta_range)):
+                match_track_score = track_score(camera_delta_s, i + 1, 0, j + 1, delta_range[k], interval=interval_width)
+                rand_track_score = track_score(rand_camera_deltas, i + 1, 0, j + 1, delta_range[k], interval=interval_width)
+                if rand_track_score < 0.02:
+                    # print rand_track_score
+                    rand_track_score = 0.02
+                else:
+                    print match_track_score / rand_track_score
+
+                # raw_probs[i][j].append(match_track_score)
+                # rand_probs[i][j].append(rand_track_score)
+                viz_deltas.append(delta_range[k])
+                viz_camera_pairs.append('c%d-c%d' % (i + 1, j + 1))
+                viz_values.append(match_track_score)
+        break
+    df = pd.DataFrame({'transfer_time': viz_deltas,
+                       'camera_pair': viz_camera_pairs,
+                       'values': viz_values})
+    pt = df.pivot_table(index='camera_pair', columns='transfer_time', values='values', aggfunc=np.sum)
+    return pt
 
 if __name__ == '__main__':
     ctrl_msg['data_folder_path'] = 'market_market-test'
@@ -368,6 +407,8 @@ if __name__ == '__main__':
     # fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
     # eval_on_train_test(fusion_param, test_mode=True)
     fusion_param = get_fusion_param()
-    fusion_st_gallery_ranker(fusion_param)
-    # delta_range, raw_probs, rand_probs, over_probs = fusion_curve(fusion_param)
-    # viz_fusion_curve(delta_range, [raw_probs, rand_probs, over_probs])
+    # fusion_st_gallery_ranker(fusion_param)
+    # delta_range, over_probs = fusion_curve(fusion_param)
+    # viz_fusion_curve(delta_range, [over_probs])
+    pt = fusion_heat(fusion_param)
+    viz_heat_map(pt)

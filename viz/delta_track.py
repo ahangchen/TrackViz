@@ -1,6 +1,7 @@
 #coding=utf-8
 
 import os
+import pandas as pd
 from random import uniform
 
 import matplotlib.pyplot as plt
@@ -220,6 +221,8 @@ def viz_fusion_curve(delta_range, probs_s):
     for probs in probs_s:
         for i in range(camera_cnt):
             for j in range(camera_cnt):
+                if len(probs[i][j]) == 0:
+                    continue
                 plt.subplot(3, 2, i+1)
                 plt.plot(delta_range, probs[i][j], label='camera%d' % (j+1))
                 plt.legend(loc=3)
@@ -227,8 +230,22 @@ def viz_fusion_curve(delta_range, probs_s):
         sns.plt.show()
 
 
+def viz_heat_map(pt):
+    # f, ax = plt.subplots(figsize=(15, 15))
+    f, ax = plt.subplots()
+    # cmap = sns.color_palette("coolwarm", 7)
+    cmap = sns.cubehelix_palette(n_colors=8, start=3, rot=0.7, dark=0.4, light=0.92, gamma=1.0, hue=2.5, as_cmap=True)
+    sns.heatmap(pt, cmap=cmap, linewidths=0.0, ax=ax, annot=True, fmt='.3f')
+    ax.set_title('Transfer heat map on Market1501')
+    ax.set_xlabel('transfer time')
+    ax.set_ylabel('camera_pair')
+    sns.plt.show()
+    f.savefig('sns_heatmap_normal.jpg', bbox_inches='tight')
+
 if __name__ == '__main__':
     # print(camera_distribute(1))
-    fusion_param = get_fusion_param()
-    viz_market_distribution(fusion_param)
+    # fusion_param = get_fusion_param()
+    # viz_market_distribution(fusion_param)
     # viz_market()
+    sns.palplot(sns.cubehelix_palette(n_colors=8, start=3, rot=0.7, dark=0.4, light=0.8, gamma=1.0, hue=2.5))
+    sns.plt.show()
