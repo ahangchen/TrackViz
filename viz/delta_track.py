@@ -242,10 +242,36 @@ def viz_heat_map(pt):
     sns.plt.show()
     f.savefig('sns_heatmap_normal.jpg', bbox_inches='tight')
 
+
+def viz_gray_map(pt):
+    f, ax = plt.subplots()
+    # cmap = sns.color_palette("coolwarm", 7)
+    sns.set(font_scale=1.5)
+    cmap = sns.cubehelix_palette(n_colors=8, start=3, rot=0.7, dark=0.4, light=0.92, gamma=1.0, hue=0, as_cmap=True)
+    sns.heatmap(pt, cmap=cmap, linewidths=0.0, ax=ax, annot=True, fmt='.2f')
+    ax.set_title('')
+    ax.set_xlabel('a', fontsize=16)
+    ax.set_ylabel('b', fontsize=16)
+    ax.invert_yaxis()
+    plt.yticks(fontsize=16)
+    plt.xticks(fontsize=16)
+    sns.plt.show()
+    f.savefig('sns_gray.jpg', bbox_inches='tight')
+
+
+def gray_data():
+    df = pd.DataFrame({'a': [0.0, 0.0, 0.0, 0.0, 0.25, 0.25, 0.25, 0.5, 0.5, 0.75],
+                       'b': [0.0, 0.25, 0.5, 0.75, 0.0, 0.25, 0.5, 0.0, 0.25, 0.0],
+                       'values': np.random.uniform(0.6, 0.8, 10)})
+    pt = df.pivot_table(index='a', columns='b', values='values', aggfunc=np.sum)
+    return pt
+
+
 if __name__ == '__main__':
     # print(camera_distribute(1))
     # fusion_param = get_fusion_param()
     # viz_market_distribution(fusion_param)
     # viz_market()
-    sns.palplot(sns.cubehelix_palette(n_colors=8, start=3, rot=0.7, dark=0.4, light=0.8, gamma=1.0, hue=2.5))
-    sns.plt.show()
+    # sns.palplot(sns.cubehelix_palette(n_colors=8, start=3, rot=0.7, dark=0.4, light=0.8, gamma=1.0, hue=0))
+    # sns.plt.show()
+    viz_gray_map(gray_data())

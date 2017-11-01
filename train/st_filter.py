@@ -342,15 +342,17 @@ def fusion_st_gallery_ranker(fusion_param):
 def fusion_curve(fusion_param):
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     rand_camera_deltas = pickle_load(fusion_param['rand_distribution_pickle_path'])
-    delta_width = 6000.0
-    delta_cnt = 30
+    delta_width = 3000.0
+    delta_cnt = 20
     interval_width = delta_width/ delta_cnt
     delta_stripe = delta_width / delta_cnt
     delta_range = map(lambda x: x * delta_stripe - delta_width/2, range(delta_cnt))
     # delta_range = map(lambda x: x*1.0 - 60.0, range(120))
     over_probs = [[list() for j in range(6)] for i in range(6)]
+    probs = list()
     for i in range(6):
         for j in range(i+1, 6):
+            cur_prob = list()
             for k in range(len(delta_range)):
                 match_track_score = track_score(camera_delta_s, i + 1, 0, j + 1, delta_range[k], interval=interval_width)
                 rand_track_score = track_score(rand_camera_deltas, i + 1, 0, j + 1, delta_range[k], interval=interval_width)
@@ -359,10 +361,13 @@ def fusion_curve(fusion_param):
                     rand_track_score = 0.02
                 else:
                     print match_track_score / rand_track_score
-
+                cur_prob.append(match_track_score)
                 # raw_probs[i][j].append(match_track_score)
                 # rand_probs[i][j].append(rand_track_score)
-                over_probs[i][j].append(match_track_score / rand_track_score)
+                # over_probs[i][j].append(match_track_score / rand_track_score)
+            probs.append(cur_prob)
+    np_probs = np.array(probs)
+    np.savetxt('probs.txt', np_probs, fmt='%.6f\t')
     return delta_range, over_probs
 
 
@@ -402,13 +407,13 @@ def fusion_heat(fusion_param):
     return pt
 
 if __name__ == '__main__':
-    ctrl_msg['data_folder_path'] = 'market_market-test'
+    ctrl_msg['data_folder_path'] = 'grid-cv-1_grid-cv1-test'
     # fusion_param = get_fusion_param()
     # fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
     # eval_on_train_test(fusion_param, test_mode=True)
     fusion_param = get_fusion_param()
     # fusion_st_gallery_ranker(fusion_param)
-    # delta_range, over_probs = fusion_curve(fusion_param)
-    # viz_fusion_curve(delta_range, [over_probs])
-    pt = fusion_heat(fusion_param)
-    viz_heat_map(pt)
+    delta_range, over_probs = fusion_curve(fusion_param)
+    viz_fusion_curve(delta_range, [over_probs])
+    # pt = fusion_heat(fusion_param)
+    # viz_heat_map(pt)
