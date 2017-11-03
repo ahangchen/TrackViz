@@ -1,9 +1,10 @@
 #coding=utf-8
 import shutil
 
-from post_process.predict_eval import eval_on_train_test
+import os
+
 from profile.fusion_param import get_fusion_param, ctrl_msg
-from train.st_estim import get_predict_delta_tracks, prepare_rand_folder
+from train.st_estim import get_predict_delta_tracks, prepare_rand_folder, prepare_diff_folder
 from train.st_filter import fusion_st_img_ranker, fusion_st_gallery_ranker
 # need to run on src directory
 from util.file_helper import safe_remove, safe_mkdir
@@ -43,10 +44,17 @@ def init_strict_img_st_fusion():
     get_predict_delta_tracks(fusion_param)
     # # only get rand model for train dataset
     prepare_rand_folder(fusion_param)
+    prepare_diff_folder(fusion_param)
+
     ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_rand'
     fusion_param = get_fusion_param()
     # 生成随机时空点的时空模型
     get_predict_delta_tracks(fusion_param, random=True)
+
+    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'].replace('rand', 'diff')
+    fusion_param = get_fusion_param()
+    get_predict_delta_tracks(fusion_param, diff_person=True)
+
     # 改回非随机的train目录
     ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
 
@@ -132,9 +140,32 @@ if __name__ == '__main__':
     #
     # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
     # fusion_param = get_fusion_param()
-    ctrl_msg['data_folder_path'] = 'market_market-train'
-    fusion_param = get_fusion_param()
-    init_strict_img_st_fusion()
+
+    # for i in range(0, 4):
+    #     for j in range(0, 4 - i):
+    #         ctrl_msg['ep'] = i * 0.25
+    #         ctrl_msg['en'] = j * 0.25
+    #         ctrl_msg['data_folder_path'] = 'grid_market-train'
+    #         fusion_param = get_fusion_param()
+    #         init_strict_img_st_fusion()
+    #         ctrl_msg['data_folder_path'] = 'grid_market-test'
+    #         fusion_param = get_fusion_param()
+    #         os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
+    #         os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
+    #                   + 'market' + ' ' + fusion_param['eval_fusion_path'])
+    for cv_num in range(10):
+        for i in range(0, 4):
+            for j in range(0, 4 - i):
+                ctrl_msg['ep'] = i * 0.25
+                ctrl_msg['en'] = j * 0.25
+                ctrl_msg['data_folder_path'] = 'market_grid-cv%d-train' % cv_num
+                fusion_param = get_fusion_param()
+                init_strict_img_st_fusion()
+                ctrl_msg['data_folder_path'] = 'market_grid-cv%d-test' % cv_num
+                fusion_param = get_fusion_param()
+                os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
+                os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
+                          + ('grid-cv%d' % cv_num) + ' ' + fusion_param['eval_fusion_path'])
     # delta_range, raw_probs, rand_probs, over_probs = fusion_curve(fusion_param)
     # viz_fusion_curve(delta_range, [raw_probs, rand_probs, over_probs])
 

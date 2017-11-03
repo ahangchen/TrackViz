@@ -2,7 +2,9 @@ from util.file_helper import write
 
 ctrl_msg = {
     'data_folder_path': 'top-m2g-std2-test',
-    'cv_num': 0
+    'cv_num': 0,
+    'ep': 0,
+    'en': 0
 }
 
 update_msg = {}
@@ -33,6 +35,8 @@ def get_fusion_param():
         'mid_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_mid_score.log',
         'eval_fusion_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_filter_pid.log',
         'fusion_normal_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_filter_score.log',
+        'ep': ctrl_msg['ep'],
+        'en': ctrl_msg['en']
     }
 
     if '_grid' in ctrl_msg['data_folder_path']:

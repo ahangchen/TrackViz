@@ -143,15 +143,20 @@ def get_person_pids(predict_path):
 
 
 def fusion_st_img_ranker(fusion_param):
+    ep = fusion_param['ep']
+    en = fusion_param['en']
     # 从renew_pid和renew_ac获取预测的人物id和图像分数
     persons_ap_scores = predict_img_scores(fusion_param)
     persons_ap_pids = predict_pids(fusion_param)
     # 从磁盘获取之前建立的时空模型，以及随机时空模型
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
+    diff_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'].replace('rand', 'diff'))
+
     # 计算时空评分和随机时空评分
     persons_track_scores = predict_track_scores(camera_delta_s, fusion_param)
     rand_track_scores = predict_track_scores(rand_delta_s, fusion_param)
+    diff_track_scores = predict_track_scores(diff_delta_s, fusion_param)
 
     persons_cross_scores = list()
     log_path = fusion_param['eval_fusion_path']
@@ -164,9 +169,10 @@ def fusion_st_img_ranker(fusion_param):
         cross_scores = list()
         for j, person_ap_pid in enumerate(person_ap_pids):
             if rand_track_scores[i][j] < 0.02:
-                cross_score = persons_track_scores[i][j] * persons_ap_scores[i][j] / 0.02
+                cross_score = (persons_track_scores[i][j]*(1-ep) - en*diff_track_scores[i][j]) * (persons_ap_scores[i][j]+ep/(1-ep-en)) / 0.02
             else:
-                cross_score = persons_track_scores[i][j] * persons_ap_scores[i][j] / rand_track_scores[i][j]
+                cross_score = (persons_track_scores[i][j] * (1 - ep) - en * diff_track_scores[i][j]) * (
+                persons_ap_scores[i][j] + ep / (1 - ep - en)) / rand_track_scores[i][j]
             cross_scores.append(cross_score)
         persons_cross_scores.append(cross_scores)
     print 'img score ready'
@@ -246,7 +252,11 @@ def gallery_track_scores(camera_delta_s, fusion_param, smooth=False):
             # if i >= top_cnt:
             #     break
             pid4probe = int(pid4probe)
-            probe_i_tmp = probe_i - 1  # (probe_i + 1) % len(pids4probes)
+            if len(query_tracks[0]) > 3:
+                # market index minus 1
+                probe_i_tmp = probe_i - 1  # (probe_i + 1) % len(pids4probes)
+            else:
+                probe_i_tmp = probe_i
             # todo transfer: if predict by python, start from 0, needn't minus 1
             # predict_idx = predict_idx - 1
             if len(query_tracks[probe_i_tmp]) > 3:
@@ -275,14 +285,18 @@ def gallery_track_scores(camera_delta_s, fusion_param, smooth=False):
 
 
 def fusion_st_gallery_ranker(fusion_param):
+    ep = fusion_param['ep']
+    en = fusion_param['en']
     log_path = fusion_param['eval_fusion_path']
     map_score_path = fusion_param['fusion_normal_score_path']  # fusion_param = get_fusion_param()
     persons_ap_scores = predict_img_scores(fusion_param)
     persons_ap_pids = predict_pids(fusion_param)
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
+    diff_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'].replace('rand', 'diff'))
     persons_track_scores = gallery_track_scores(camera_delta_s, fusion_param)
     rand_track_scores = gallery_track_scores(rand_delta_s, fusion_param)
+    diff_track_scores = gallery_track_scores(rand_delta_s, fusion_param)
 
     persons_cross_scores = list()
     safe_remove(map_score_path)
@@ -295,9 +309,11 @@ def fusion_st_gallery_ranker(fusion_param):
             # if cur_track_score < 0.02:
             #     cur_track_score = cur_track_score
             rand_track_score = rand_track_scores[i][j]
+            diff_track_score = diff_track_scores[i][j]
             if rand_track_score < 0.02:
                 rand_track_score = 0.02
-            cross_score = cur_track_score * persons_ap_scores[i][j] / rand_track_score
+            cross_score = (cur_track_score * (1 - ep) - en * diff_track_scores[i][j]) * (
+                persons_ap_scores[i][j] + ep / (1 - ep - en)) / rand_track_score
             cross_scores.append(cross_score)
         persons_cross_scores.append(cross_scores)
         # pickle_save(ctrl_msg['data_folder_path']+'viper_r-testpersons_cross_scores.pick', persons_cross_scores)
@@ -407,13 +423,14 @@ def fusion_heat(fusion_param):
     return pt
 
 if __name__ == '__main__':
-    ctrl_msg['data_folder_path'] = 'grid-cv-1_grid-cv1-test'
+    ctrl_msg['data_folder_path'] = 'market_market-test'
     # fusion_param = get_fusion_param()
     # fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
     # eval_on_train_test(fusion_param, test_mode=True)
     fusion_param = get_fusion_param()
     # fusion_st_gallery_ranker(fusion_param)
-    delta_range, over_probs = fusion_curve(fusion_param)
-    viz_fusion_curve(delta_range, [over_probs])
-    # pt = fusion_heat(fusion_param)
-    # viz_heat_map(pt)
+    # elta_range, over_probs = fusion_curve(fusion_param)
+    # viz_fusion_curve(delta_range, [over_probs])
+    pt = fusion_heat(fusion_param)
+    viz_heat_map(pt)
+

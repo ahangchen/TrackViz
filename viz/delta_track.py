@@ -1,4 +1,4 @@
-#coding=utf-8
+# coding=utf-8
 
 import os
 import pandas as pd
@@ -7,16 +7,18 @@ from random import uniform
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+import sys
 from numpy.linalg import LinAlgError
 
 from profile.fusion_param import get_fusion_param
-from util.file_helper import read_lines_and
+from util.file_helper import read_lines_and, read_lines
 
 # data type :
 # 0: market1501 real data, 1: market1501 predict top10 data,
 # 2: grid true data, 3: grid predict data,
 # 4: grid rand data
 # 5: 3dpes data
+from util.viz import draw_line
 
 data_type = 1
 
@@ -40,6 +42,7 @@ def track_infos(fusion_param, camera_num, s_num):
         seq_num = int(track_info[1][3])
         if seq_num == s_num:
             tracks.append([person_id, track_time])
+
     # 现在data_type 1已经能处理所有情况了
     if data_type == 0:
         # read_lines_and('market_s1/track_c%ds1.txt' % camera_num, count_interval)
@@ -108,6 +111,7 @@ def camera_distribute(fusion_param, camera_num):
                     # ignore large data
                     if abs(delta) < 1000000:
                         deltas[camera_id - 1].append(delta)
+
         # data type为1足够应对所有情况，
         # shuffle person实际上是根据person id是否对应来决定是否计算时间差，并最终返回6串时间差
         if data_type == 0:
@@ -223,8 +227,8 @@ def viz_fusion_curve(delta_range, probs_s):
             for j in range(camera_cnt):
                 if len(probs[i][j]) == 0:
                     continue
-                plt.subplot(3, 2, i+1)
-                plt.plot(delta_range, probs[i][j], label='camera%d' % (j+1))
+                plt.subplot(3, 2, i + 1)
+                plt.plot(delta_range, probs[i][j], label='camera%d' % (j + 1))
                 plt.legend(loc=3)
             print('viz camera %d' % (i + 1))
         sns.plt.show()
@@ -248,10 +252,13 @@ def viz_gray_map(pt):
     # cmap = sns.color_palette("coolwarm", 7)
     sns.set(font_scale=1.5)
     cmap = sns.cubehelix_palette(n_colors=8, start=3, rot=0.7, dark=0.4, light=0.92, gamma=1.0, hue=0, as_cmap=True)
-    sns.heatmap(pt, cmap=cmap, linewidths=0.0, ax=ax, annot=True, fmt='.2f')
+    sns.heatmap(pt, cmap=cmap, linewidths=0.0, ax=ax, annot=True, fmt='.3f')
     ax.set_title('')
-    ax.set_xlabel('a', fontsize=16)
-    ax.set_ylabel('b', fontsize=16)
+    print sys.getdefaultencoding()
+    reload(sys)
+    sys.setdefaultencoding('utf8')
+    ax.set_xlabel('α', fontsize=16)
+    ax.set_ylabel('β', fontsize=16)
     ax.invert_yaxis()
     plt.yticks(fontsize=16)
     plt.xticks(fontsize=16)
@@ -259,12 +266,52 @@ def viz_gray_map(pt):
     f.savefig('sns_gray.jpg', bbox_inches='tight')
 
 
-def gray_data():
+def gray_data(values):
+    # market
     df = pd.DataFrame({'a': [0.0, 0.0, 0.0, 0.0, 0.25, 0.25, 0.25, 0.5, 0.5, 0.75],
                        'b': [0.0, 0.25, 0.5, 0.75, 0.0, 0.25, 0.5, 0.0, 0.25, 0.0],
-                       'values': np.random.uniform(0.6, 0.8, 10)})
+                       'values': values})
     pt = df.pivot_table(index='a', columns='b', values='values', aggfunc=np.sum)
     return pt
+
+
+def iter_acc_data(data_path):
+    lines = read_lines(data_path)
+    cv_accs = list()
+    acc_cnt = 0
+    cv_cnt = -1
+    for i, line in enumerate(lines):
+        if i % 2 == 0:
+            continue
+        if (i - 1) % 44 == 0:
+            cv_cnt += 1
+            cv_accs.append([list(), list()])
+        if acc_cnt % 2 == 0:
+            cv_accs[cv_cnt][0].append(float(line.split()[0]))
+        else:
+            cv_accs[cv_cnt][1].append(float(line.split()[0]))
+        acc_cnt += 1
+
+    avg_accs = np.array(cv_accs).mean(axis=0)
+    return avg_accs
+
+
+def sensitivity_eval():
+    grid_sensity_values = list()
+    lines = read_lines('../post_process/grid_sense.txt')
+    rank1_accs = list()
+    cur_cv = -1
+    for i, line in enumerate(lines):
+        if i % 20 == 0:
+            rank1_accs.append(list())
+            cur_cv += 1
+        if i % 2 == 0:
+            continue
+        rank1_accs[cur_cv].append(float(line.split()[0]))
+    grid_avg_accs = np.array(rank1_accs).mean(axis=0)
+    market_values = [0.740202, 0.746437, 0.746140, 0.745843, 0.739311, 0.745843, 0.746140, 0.739905,
+                     0.746734, 0.739311]
+    viz_gray_map(gray_data(grid_avg_accs))
 
 
 if __name__ == '__main__':
@@ -274,4 +321,7 @@ if __name__ == '__main__':
     # viz_market()
     # sns.palplot(sns.cubehelix_palette(n_colors=8, start=3, rot=0.7, dark=0.4, light=0.8, gamma=1.0, hue=0))
     # sns.plt.show()
-    viz_gray_map(gray_data())
+    # accs = iter_acc_data('../post_process/grid_market_iter.txt')
+    # accs = iter_acc_data('../post_process/market_grid_iter.txt')
+    # draw_line(accs, np.arange(0, len(accs[0])), 'Rank1_acc', 'iteration times', ['vision', 'fusion'], title='')
+    sensitivity_eval()

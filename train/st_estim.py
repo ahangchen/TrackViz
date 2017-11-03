@@ -18,7 +18,16 @@ def prepare_rand_folder(fusion_param):
     shutil.copy(fusion_param['renew_pid_path'], rand_predict_path)
 
 
-def get_predict_delta_tracks(fusion_param, useful_predict_limit=10, random=False):
+def prepare_diff_folder(fusion_param):
+    diff_predict_path = fusion_param['renew_pid_path'].replace(ctrl_msg['data_folder_path'],
+                                                           ctrl_msg['data_folder_path'] + '_diff')
+    diff_folder_path = folder(diff_predict_path)
+    safe_mkdir(diff_folder_path)
+    # although copy all info including pid info, but not use in later training
+    shutil.copy(fusion_param['renew_pid_path'], diff_predict_path)
+
+
+def get_predict_delta_tracks(fusion_param, useful_predict_limit=10, random=False, diff_person=False):
     # 获取左图列表
     answer_path = fusion_param['answer_path']
     answer_lines = read_lines(answer_path)
@@ -53,11 +62,13 @@ def get_predict_delta_tracks(fusion_param, useful_predict_limit=10, random=False
         for j, predict_pid in enumerate(predict_pids):
             if useful_cnt > useful_predict_limit:
                 break
-            # if random:
-            #     predict_pid = randint(0, person_cnt - 1)
-            # else:
-            #     # todo transfer: if predict by python, start from 0, needn't minus 1
-            #     predict_pid = int(predict_pid)
+            if random:
+                predict_pid = randint(0, person_cnt - 1)
+            elif diff_person:
+                predict_pid = randint(10, person_cnt - 1)
+            else:
+                # todo transfer: if predict by python, start from 0, needn't minus 1
+                predict_pid = int(predict_pid)
             predict_pid = int(predict_pid)
             # same seq
             # todo ignore same camera track
