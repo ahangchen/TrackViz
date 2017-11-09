@@ -10,20 +10,6 @@ import numpy as np
 import pandas as pd
 
 
-def real_track(answer_path):
-    answer_lines = read_lines(answer_path)
-    real_tracks = list()
-    for answer in answer_lines:
-        info = answer.split('_')
-        if 'bmp' in info[2]:
-            info[2] = info[2].split('.')[0]
-        if len(info) > 4 and 'jpe' in info[6]:
-            real_tracks.append([info[0], int(info[1][0]), int(info[2])])
-        else:
-            real_tracks.append([info[0], int(info[1][1]), int(info[2])])
-    return real_tracks
-
-
 def smooth_score(c1, c2, time1, time2, camera_delta_s):
     track_interval = 20
     smooth_window_size = 10
@@ -41,27 +27,17 @@ def smooth_score(c1, c2, time1, time2, camera_delta_s):
     return score
 
 
-def predict_track_scores(camera_delta_s, fusion_param, smooth=False):
+def predict_track_scores(real_tracks, camera_delta_s, fusion_param, smooth=False):
     # fusion_param = get_fusion_param()
     # persons_deltas_score = pickle_load(fusion_param['persons_deltas_path'])
     # if pickle_load(fusion_param['persons_deltas_path']) is not None:
     #     return persons_deltas_score
     predict_path = fusion_param['renew_pid_path']
     # test_tracks.txt
-    answer_path = fusion_param['answer_path']
-    answer_lines = read_lines(answer_path)
-    # 左图
-    real_tracks = list()
-    for answer in answer_lines:
-        info = answer.split('_')
-        if 'bmp' in info[2]:
-            info[2] = info[2].split('.')[0]
-        if len(info) > 4 and 'jpe' in info[6]:
-            real_tracks.append([info[0], int(info[1][0]), int(info[2])])
-        else:
-            real_tracks.append([info[0], int(info[1][1]), int(info[2]), int(info[1][3])])
+
     top_cnt = 10
     persons_deltas_score = list()
+    # todo 不用读第二遍
     pids4probes = np.genfromtxt(predict_path, delimiter=' ')
     for probe_i, pids4probe in enumerate(pids4probes):
         person_deltas_score = list()
@@ -99,14 +75,7 @@ def predict_img_scores(fusion_param):
     # if pickle_load(fusion_param['persons_ap_path']) is not None:
     #     return final_persons_scores
     predict_score_path = fusion_param['renew_ac_path']
-    final_persons_scores = list()
-    persons_scores = read_lines(predict_score_path)
-    for person_scores in persons_scores:
-        res_score = list()
-        scores = person_scores.split()
-        for score in scores:
-            res_score.append(float(score))
-        final_persons_scores.append(res_score)
+    final_persons_scores = np.genfromtxt(predict_score_path, delimiter=' ').astype(float)
     # pickle_save(fusion_param['persons_ap_path'], final_persons_scores)
     return final_persons_scores
 
@@ -117,29 +86,31 @@ def predict_pids(fusion_param):
     # if pickle_load(fusion_param['predict_person_path']) is not None:
     #     return predict_persons
     predict_person_path = fusion_param['renew_pid_path']
-    predict_persons = list()
-    persons_predicts = read_lines(predict_person_path)
-    for person_predict in persons_predicts:
-        res_pids = list()
-        pids = person_predict.split()
-        for pid in pids:
-            res_pids.append(int(pid))
-        predict_persons.append(res_pids)
+    predict_persons = np.genfromtxt(predict_person_path, delimiter=' ').astype(int)
     # pickle_save(fusion_param['predict_person_path'], predict_persons)
     return predict_persons
 
 
 def get_person_pids(predict_path):
     predict_person_path = predict_path
-    predict_persons = list()
-    persons_predicts = read_lines(predict_person_path)
-    for person_predict in persons_predicts:
-        res_pids = list()
-        pids = person_predict.split()
-        for pid in pids:
-            res_pids.append(int(pid))
-        predict_persons.append(res_pids)
+    predict_persons = np.genfromtxt(predict_person_path, delimiter=' ').astype(int)
     return predict_persons
+
+
+def train_tracks(fusion_param):
+    answer_path = fusion_param['answer_path']
+    answer_lines = read_lines(answer_path)
+    # 左图
+    real_tracks = list()
+    for answer in answer_lines:
+        info = answer.split('_')
+        if 'bmp' in info[2]:
+            info[2] = info[2].split('.')[0]
+        if len(info) > 4 and 'jpe' in info[6]:
+            real_tracks.append([info[0], int(info[1][0]), int(info[2])])
+        else:
+            real_tracks.append([info[0], int(info[1][1]), int(info[2]), int(info[1][3])])
+    return real_tracks
 
 
 def fusion_st_img_ranker(fusion_param):
@@ -153,10 +124,11 @@ def fusion_st_img_ranker(fusion_param):
     rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
     diff_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'].replace('rand', 'diff'))
 
+    real_tracks = train_tracks(fusion_param)
     # 计算时空评分和随机时空评分
-    persons_track_scores = predict_track_scores(camera_delta_s, fusion_param)
-    rand_track_scores = predict_track_scores(rand_delta_s, fusion_param)
-    diff_track_scores = predict_track_scores(diff_delta_s, fusion_param)
+    persons_track_scores = predict_track_scores(real_tracks, camera_delta_s, fusion_param)
+    rand_track_scores = predict_track_scores(real_tracks, rand_delta_s, fusion_param)
+    diff_track_scores = predict_track_scores(real_tracks, diff_delta_s, fusion_param)
 
     persons_cross_scores = list()
     log_path = fusion_param['eval_fusion_path']
@@ -184,7 +156,10 @@ def fusion_st_img_ranker(fusion_param):
                 # diff seq not sort and not normalize
                 persons_cross_scores[i][j] /= max_score
             else:
-                person_cross_score *= -0.02
+                persons_cross_scores[i][j] *= -0.02
+            # if real_tracks[i][1] == real_tracks[persons_ap_pids[i][j]][1]:
+            #     # print '%d, %d' % (i, j)
+            #     persons_cross_scores[i][j] = 0
     person_score_idx_s = list()
     top1_scores = list()
     print 'above person score ready'
@@ -254,7 +229,7 @@ def gallery_track_scores(camera_delta_s, fusion_param, smooth=False):
             pid4probe = int(pid4probe)
             if len(query_tracks[0]) > 3:
                 # market index minus 1
-                probe_i_tmp = probe_i - 1  # (probe_i + 1) % len(pids4probes)
+                probe_i_tmp = probe_i # (probe_i + 1) % len(pids4probes)
             else:
                 probe_i_tmp = probe_i
             # todo transfer: if predict by python, start from 0, needn't minus 1
@@ -296,7 +271,7 @@ def fusion_st_gallery_ranker(fusion_param):
     diff_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'].replace('rand', 'diff'))
     persons_track_scores = gallery_track_scores(camera_delta_s, fusion_param)
     rand_track_scores = gallery_track_scores(rand_delta_s, fusion_param)
-    diff_track_scores = gallery_track_scores(rand_delta_s, fusion_param)
+    diff_track_scores = gallery_track_scores(diff_delta_s, fusion_param)
 
     persons_cross_scores = list()
     safe_remove(map_score_path)
@@ -309,7 +284,6 @@ def fusion_st_gallery_ranker(fusion_param):
             # if cur_track_score < 0.02:
             #     cur_track_score = cur_track_score
             rand_track_score = rand_track_scores[i][j]
-            diff_track_score = diff_track_scores[i][j]
             if rand_track_score < 0.02:
                 rand_track_score = 0.02
             cross_score = (cur_track_score * (1 - ep) - en * diff_track_scores[i][j]) * (
@@ -359,7 +333,7 @@ def fusion_curve(fusion_param):
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     rand_camera_deltas = pickle_load(fusion_param['rand_distribution_pickle_path'])
     delta_width = 3000.0
-    delta_cnt = 20
+    delta_cnt = 30
     interval_width = delta_width/ delta_cnt
     delta_stripe = delta_width / delta_cnt
     delta_range = map(lambda x: x * delta_stripe - delta_width/2, range(delta_cnt))
@@ -380,7 +354,7 @@ def fusion_curve(fusion_param):
                 cur_prob.append(match_track_score)
                 # raw_probs[i][j].append(match_track_score)
                 # rand_probs[i][j].append(rand_track_score)
-                # over_probs[i][j].append(match_track_score / rand_track_score)
+                over_probs[i][j].append(match_track_score)
             probs.append(cur_prob)
     np_probs = np.array(probs)
     np.savetxt('probs.txt', np_probs, fmt='%.6f\t')
@@ -423,14 +397,15 @@ def fusion_heat(fusion_param):
     return pt
 
 if __name__ == '__main__':
-    ctrl_msg['data_folder_path'] = 'market_market-test'
+    ctrl_msg['data_folder_path'] = 'grid_market-test'
     # fusion_param = get_fusion_param()
     # fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
     # eval_on_train_test(fusion_param, test_mode=True)
     fusion_param = get_fusion_param()
-    # fusion_st_gallery_ranker(fusion_param)
-    # elta_range, over_probs = fusion_curve(fusion_param)
+    fusion_st_gallery_ranker(fusion_param)
+    # fusion_st_img_ranker(fusion_param)
+    # delta_range, over_probs = fusion_curve(fusion_param)
     # viz_fusion_curve(delta_range, [over_probs])
-    pt = fusion_heat(fusion_param)
-    viz_heat_map(pt)
+    # pt = fusion_heat(fusion_param)
+    # viz_heat_map(pt)
 

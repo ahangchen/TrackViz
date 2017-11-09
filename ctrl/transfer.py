@@ -63,7 +63,9 @@ def rank_transfer(source, target, fusion_train_rank_pids_path, fusion_train_rank
     transfer_test_rank_scores_path = fusion_test_dir + '/renew_ac.log'
     if 'grid' in target:
         target_train_list = '/home/cwh/coding/TrackViz/data/grid/' + target + '-train.txt'
-    elif 'market' in target:
+    elif target == 'markets1':
+        target_train_list = '/home/cwh/coding/TrackViz/data/markets1/train.txt'
+    elif target == 'market':
         target_train_list = '/home/cwh/coding/TrackViz/data/market/train.txt'
     else:
         target_train_list = 'error_target_dataset'
@@ -91,7 +93,7 @@ def fusion_transfer(source, target):
     fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion(source, target)
     dataset_eval(source, target, fusion_test_rank_pids_path)
 
-    for i in range(10):
+    for i in range(1):
     # rank transfer, rank and eval
         transfer_train_rank_pids_path, transfer_train_rank_scores_path, \
         transfer_test_rank_pids_path, transfer_test_rank_scores_path \
@@ -108,18 +110,22 @@ def fusion_transfer(source, target):
 def dataset_fusion_transfer():
     # sources = ['market', 'cuhk', 'viper', 'grid']
     # sources = ['grid']
-    sources = ['market']
-    for source in sources:
-        for i in range(0, 1):
-            if 'grid' in source:
-                fusion_transfer('grid-cv-%d' % i, 'grid-cv%d' % i)
-            else:
-                fusion_transfer(source, 'grid-cv%d' % i)
+    # sources = ['market']
+    # for source in sources:
+    #     for i in range(0, 1):
+    #         if 'grid' in source:
+    #             fusion_transfer('grid-cv-%d' % i, 'grid-cv%d' % i)
+    #         else:
+    #             fusion_transfer(source, 'grid-cv%d' % i)
     # sources = ['market', 'grid', 'cuhk', 'viper']
     # sources = ['grid']
     # sources = ['market']
     # for source in sources:
     #     fusion_transfer(source, 'market')
+    sources = ['grid']
+    # sources = ['market']
+    for source in sources:
+        fusion_transfer(source, 'markets1')
 
 
 if __name__ == '__main__':
