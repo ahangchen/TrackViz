@@ -72,7 +72,7 @@ def get_predict_delta_tracks(fusion_param, useful_predict_limit=10, random=False
             predict_pid = int(predict_pid)
             # same seq
             # todo ignore same camera track
-            if real_tracks[i][3] == real_tracks[predict_pid][3]: #and real_tracks[i][1] != real_tracks[predict_pid][1]:
+            if real_tracks[i][3] == real_tracks[predict_pid][3] and real_tracks[i][1] != real_tracks[predict_pid][1]:
                 useful_cnt += 1
                 delta = real_tracks[i][2] - real_tracks[predict_pid][2]
                 if abs(delta) < 1000000:
