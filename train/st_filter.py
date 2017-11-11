@@ -281,57 +281,30 @@ def fusion_st_gallery_ranker(fusion_param):
     safe_remove(map_score_path)
     safe_remove(log_path)
 
-    # fusion_track_scores = np.zeros([len(persons_ap_pids), len(persons_ap_pids[0])])
-    # for i, person_ap_pids in enumerate(persons_ap_pids):
-    #     for j, person_ap_pid in enumerate(person_ap_pids):
-    #         cur_track_score = persons_track_scores[i][j]
-    #         rand_track_score = rand_track_scores[i][j]
-    #         if rand_track_score < 0.00002:
-    #             rand_track_score = 0.00002
-    #         fusion_track_scores[i][j] = (cur_track_score * (1 - ep) - en * diff_track_scores[i][j]) / rand_track_score
-    # for i, person_ap_pids in enumerate(persons_ap_pids):
-    #     cur_max_predict = max(persons_track_scores[i])
-    #     cur_max_rand = max(rand_track_scores[i])
-    #     for j in range(len(fusion_track_scores[i])):
-    #         if fusion_track_scores[i][j] >= 0:
-    #             fusion_track_scores[i][j] /= cur_max_predict/cur_max_rand
-    #         else:
-    #             fusion_track_scores[i][j] = 1.
+    fusion_track_scores = np.zeros([len(persons_ap_pids), len(persons_ap_pids[0])])
+    for i, person_ap_pids in enumerate(persons_ap_pids):
+        for j, person_ap_pid in enumerate(person_ap_pids):
+            cur_track_score = persons_track_scores[i][j]
+            rand_track_score = rand_track_scores[i][j]
+            if rand_track_score < 0.00002:
+                rand_track_score = 0.00002
+            fusion_track_scores[i][j] = (cur_track_score * (1 - ep) - en * diff_track_scores[i][j]) / rand_track_score
+    for i, person_ap_pids in enumerate(persons_ap_pids):
+        cur_max_predict = max(persons_track_scores[i])
+        cur_max_rand = max(rand_track_scores[i])
+        for j in range(len(fusion_track_scores[i])):
+            if fusion_track_scores[i][j] >= 0:
+                fusion_track_scores[i][j] /= cur_max_predict/cur_max_rand
+            else:
+                fusion_track_scores[i][j] = 1.
 
     for i, person_ap_pids in enumerate(persons_ap_pids):
         cross_scores = list()
         for j, person_ap_pid in enumerate(person_ap_pids):
-            cur_track_score = persons_track_scores[i][j]
-            # if cur_track_score < 0.02:
-            #     cur_track_score = cur_track_score
-            rand_track_score = rand_track_scores[i][j]
-            if rand_track_score < 0.00002:
-                rand_track_score = 0.00002
-            cross_score = (cur_track_score * (1 - ep) - en * diff_track_scores[i][j]) * (
-                persons_ap_scores[i][j] + ep / (1 - ep - en)) / rand_track_score
+            cross_score = fusion_track_scores[i][j] * (persons_ap_scores[i][j] + ep / (1 - ep - en))
             cross_scores.append(cross_score)
         persons_cross_scores.append(cross_scores)
-        # pickle_save(ctrl_msg['data_folder_path']+'viper_r-testpersons_cross_scores.pick', persons_cross_scores)
-        # pickle_save(ctrl_msg['data_folder_path']+'viper_r-testpersons_ap_pids.pick', persons_ap_pids)
 
-    max_score_s = [max(predict_cross_scores) for predict_cross_scores in persons_cross_scores]
-    for i, person_cross_scores in enumerate(persons_cross_scores):
-        for j, person_cross_score in enumerate(person_cross_scores):
-            if persons_cross_scores[i][j] >= 0:
-                # diff seq not sort, not rank for max, and not normalize
-                if max_score_s[i] == 0:
-                    print i
-                persons_cross_scores[i][j] /= max_score_s[i]
-                # persons_cross_scores[i][j] /= max_score
-                # if persons_cross_scores[i][j] > 0.5:
-                #     print 'same'
-                #     print persons_cross_scores[i][j]
-            else:
-                # so diff seq is negative, normalize by minimum
-                # persons_cross_scores[i][j] /= min_score_s[i]
-                # persons_cross_scores[i][j] *= 1.0
-                persons_cross_scores[i][j] *= -0.00002
-                # print persons_cross_scores[i][j]
     person_score_idx_s = list()
 
     for i, person_cross_scores in enumerate(persons_cross_scores):
@@ -346,12 +319,6 @@ def fusion_st_gallery_ranker(fusion_param):
             sorted_persons_ap_scores[i][j] = persons_cross_scores[i][person_score_idx_s[i][j]]
     np.savetxt(log_path, sorted_persons_ap_pids, fmt='%d')
     np.savetxt(map_score_path, sorted_persons_ap_scores, fmt='%f')
-    # for i, person_ap_pids in enumerate(persons_ap_pids):
-    #     for j in range(len(person_ap_pids)):
-    #         write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
-    #         write(map_score_path, '%.3f ' % persons_cross_scores[i][person_score_idx_s[i][j]])
-    #     write(log_path, '\n')
-    #     write(map_score_path, '\n')
     return person_score_idx_s
 
 
@@ -439,4 +406,3 @@ if __name__ == '__main__':
     # viz_fusion_curve(delta_range, [over_probs])
     # pt = fusion_heat(fusion_param)
     # viz_heat_map(pt)
-
