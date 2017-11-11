@@ -10,7 +10,7 @@ import seaborn as sns
 import sys
 from numpy.linalg import LinAlgError
 
-from profile.fusion_param import get_fusion_param
+from profile.fusion_param import get_fusion_param, ctrl_msg
 from util.file_helper import read_lines_and, read_lines
 
 # data type :
@@ -316,12 +316,13 @@ def sensitivity_eval():
 
 if __name__ == '__main__':
     # print(camera_distribute(1))
+    # ctrl_msg['data_folder_path'] = 'market_market-test'
     # fusion_param = get_fusion_param()
     # viz_market_distribution(fusion_param)
-    # viz_market()
+    # viz_market(fusion_param)
     # sns.palplot(sns.cubehelix_palette(n_colors=8, start=3, rot=0.7, dark=0.4, light=0.8, gamma=1.0, hue=0))
     # sns.plt.show()
-    # accs = iter_acc_data('../post_process/grid_market_iter.txt')
+    accs = iter_acc_data('../post_process/grid_market_iter2.txt')
     # accs = iter_acc_data('../post_process/market_grid_iter.txt')
-    # draw_line(accs, np.arange(0, len(accs[0])), 'Rank1_acc', 'iteration times', ['vision', 'fusion'], title='')
-    sensitivity_eval()
+    draw_line(accs, np.arange(0, len(accs[0])), 'Rank1_acc', 'iteration times', ['vision', 'fusion'], title='')
+    # sensitivity_eval()

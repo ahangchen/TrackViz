@@ -140,10 +140,10 @@ if __name__ == '__main__':
     #
     # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
     # fusion_param = get_fusion_param()
-    ctrl_msg['data_folder_path'] = 'grid_market-train'
+    ctrl_msg['data_folder_path'] = 'market_market-train'
     fusion_param = get_fusion_param()
     init_strict_img_st_fusion()
-    ctrl_msg['data_folder_path'] = 'grid_market-test'
+    ctrl_msg['data_folder_path'] = 'market_market-test'
     fusion_param = get_fusion_param()
     os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
     os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
