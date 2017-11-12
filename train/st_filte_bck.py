@@ -222,7 +222,7 @@ def gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_pa
                 score = smooth_score(c1, c2, time1, time2, camera_delta_s)
             else:
                 # 给定摄像头，时间，获取时空评分，这里camera_deltas如果是随机算出来的，则是随机评分
-                score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100)
+                score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100, filter_interval=500)
             person_deltas_score.append(score)
         probe_i += 1
         persons_deltas_score.append(person_deltas_score)
@@ -260,26 +260,31 @@ def fusion_st_gallery_ranker(fusion_param):
         else:
             gallery_tracks.append([info[0], int(info[1][1]), int(info[2]), int(info[1][3])])
 
-
+    print 'probe and gallery tracks ready'
     persons_ap_scores = predict_img_scores(fusion_param)
     persons_ap_pids = predict_pids(fusion_param)
-    # for i, person_ap_scores in enumerate(persons_ap_scores):
-    #     cur_max_vision = 0
-    #     for j, person_ap_score in enumerate(person_ap_scores):
-    #         if query_tracks[i][1] != gallery_tracks[persons_ap_pids[i][j]][1]:
-    #             # diff vision
-    #             cur_max_vision = person_ap_score
-    #     persons_ap_scores[i] /= cur_max_vision
+    print 'read vision scores and pids ready'
+    for i, person_ap_scores in enumerate(persons_ap_scores):
+        cur_max_vision = 0
+        for j, person_ap_score in enumerate(person_ap_scores):
+            if query_tracks[i][1] != gallery_tracks[persons_ap_pids[i][j]][1]:
+                # diff vision
+                cur_max_vision = person_ap_score
+        persons_ap_scores[i] /= cur_max_vision
 
 
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
-    # camera_delta_s = pickle_load('true_market_train.pck')
+    # camera_delta_s = pickle_load('true_market_probe.pck')
+    print 'load track deltas ready'
     rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
+    print 'load rand deltas ready'
     # diff_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'].replace('rand', 'diff'))
     # todo tmp diff deltas
     diff_delta_s = rand_delta_s
     rand_track_scores = gallery_track_scores(query_tracks, gallery_tracks, rand_delta_s, fusion_param)
+    print 'rand scores ready'
     persons_track_scores = gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_param)
+    print 'track scores ready'
     # diff_track_scores = gallery_track_scores(diff_delta_s, fusion_param)
     # todo tmp diff scores
     diff_track_scores = rand_track_scores
@@ -312,10 +317,15 @@ def fusion_st_gallery_ranker(fusion_param):
             rand_track_score = rand_track_scores[i][j]
             if rand_track_score < 0.00002:
                 rand_track_score = 0.00002
+            # elif rand_track_score < 0.00002:
+            #     rand_track_score = 0.00002
+            #     cur_track_score = 0
+
             cross_score = (cur_track_score * (1 - ep) - en * diff_track_scores[i][j]) * (
                 persons_ap_scores[i][j] + ep / (1 - ep - en)) / rand_track_score
             cross_scores.append(cross_score)
         persons_cross_scores.append(cross_scores)
+    print 'fusion scores ready'
         # pickle_save(ctrl_msg['data_folder_path']+'viper_r-testpersons_cross_scores.pick', persons_cross_scores)
         # pickle_save(ctrl_msg['data_folder_path']+'viper_r-testpersons_ap_pids.pick', persons_ap_pids)
 
@@ -339,6 +349,7 @@ def fusion_st_gallery_ranker(fusion_param):
                 # persons_cross_scores[i][j] *= 1.0
                 persons_cross_scores[i][j] *= -0.00002
                 # print persons_cross_scores[i][j]
+    print 'fusion scores normalized, diff seq use vision score to rank'
     person_score_idx_s = list()
 
     for i, person_cross_scores in enumerate(persons_cross_scores):
@@ -351,8 +362,10 @@ def fusion_st_gallery_ranker(fusion_param):
         for j in range(len(person_ap_pids)):
             sorted_persons_ap_pids[i][j] = persons_ap_pids[i][person_score_idx_s[i][j]]
             sorted_persons_ap_scores[i][j] = persons_cross_scores[i][person_score_idx_s[i][j]]
+    print 'sorted scores ready'
     np.savetxt(log_path, sorted_persons_ap_pids, fmt='%d')
     np.savetxt(map_score_path, sorted_persons_ap_scores, fmt='%f')
+    print 'save sorted fusion scores'
     # for i, person_ap_pids in enumerate(persons_ap_pids):
     #     for j in range(len(person_ap_pids)):
     #         write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
@@ -361,78 +374,6 @@ def fusion_st_gallery_ranker(fusion_param):
     #     write(map_score_path, '\n')
     return person_score_idx_s
 
-
-def fusion_curve(fusion_param):
-    camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
-    rand_camera_deltas = pickle_load(fusion_param['rand_distribution_pickle_path'])
-    # for actual calculate
-    delta_width = 300000.0
-    delta_cnt = 3000
-    # for distribution viz
-    # delta_width = 3000.0
-    # delta_cnt = 10
-    interval_width = delta_width/ delta_cnt
-    delta_stripe = delta_width / delta_cnt
-    delta_range = map(lambda x: x * delta_stripe - delta_width/2, range(delta_cnt))
-    # delta_range = map(lambda x: x*1.0 - 60.0, range(120))
-    over_probs = [[list() for j in range(6)] for i in range(6)]
-    probs = list()
-    for i in range(6):
-        for j in range(i+1, 6):
-            cur_prob = list()
-            for k in range(len(delta_range)):
-                match_track_score = track_score(camera_delta_s, i + 1, 0, j + 1, delta_range[k], interval=interval_width)
-                rand_track_score = track_score(rand_camera_deltas, i + 1, 0, j + 1, delta_range[k], interval=interval_width)
-                if rand_track_score < 0.00002:
-                    # print rand_track_score
-                    rand_track_score = 0.00002
-                # else:
-                #     print match_track_score / rand_track_score
-                cur_prob.append(rand_track_score)
-                # raw_probs[i][j].append(match_track_score)
-                # rand_probs[i][j].append(rand_track_score)
-                over_probs[i][j].append(rand_track_score)
-            probs.append(cur_prob)
-    np_probs = np.array(probs)
-    np.savetxt('rand_scores.txt', np_probs, fmt='%.6f\t')
-
-    return delta_range, over_probs
-
-
-def fusion_heat(fusion_param):
-    camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
-    rand_camera_deltas = pickle_load(fusion_param['rand_distribution_pickle_path'])
-    delta_width = 3000.0
-    delta_cnt = 10
-    interval_width = delta_width/ delta_cnt
-    delta_stripe = delta_width / delta_cnt
-    delta_range = map(lambda x: x * delta_stripe - delta_width/2, range(delta_cnt))
-    # delta_range = map(lambda x: x*1.0 - 60.0, range(120))
-    viz_deltas = list()
-    viz_camera_pairs = list()
-    viz_values = list()
-    for i in range(6):
-        for j in range(i+1, 6):
-            for k in range(len(delta_range)):
-                match_track_score = track_score(camera_delta_s, i + 1, 0, j + 1, delta_range[k], interval=interval_width)
-                rand_track_score = track_score(rand_camera_deltas, i + 1, 0, j + 1, delta_range[k], interval=interval_width)
-                if rand_track_score < 0.00002:
-                    # print rand_track_score
-                    rand_track_score = 0.00002
-                else:
-                    print match_track_score / rand_track_score
-
-                # raw_probs[i][j].append(match_track_score)
-                # rand_probs[i][j].append(rand_track_score)
-                viz_deltas.append(delta_range[k])
-                viz_camera_pairs.append('c%d-c%d' % (i + 1, j + 1))
-                viz_values.append(match_track_score)
-        break
-    df = pd.DataFrame({'transfer_time': viz_deltas,
-                       'camera_pair': viz_camera_pairs,
-                       'values': viz_values})
-    pt = df.pivot_table(index='camera_pair', columns='transfer_time', values='values', aggfunc=np.sum)
-    return pt
 
 if __name__ == '__main__':
     ctrl_msg['data_folder_path'] = 'market_market-test'
