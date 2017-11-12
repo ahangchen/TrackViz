@@ -22,12 +22,12 @@ def vision_rank(source, target):
     vision_test_rank_pids_path = fusion_test_dir + '/renew_pid.log'
     vision_test_rank_scores_path = fusion_test_dir + '/renew_ac.log'
     os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
-    os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 0 '
-              + source + ' ' + target + ' '
-              + vision_train_rank_pids_path + ' '
-              + vision_train_rank_scores_path + ' '
-              + vision_test_rank_pids_path + ' '
-              + vision_test_rank_scores_path)
+    # os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 0 '
+    #           + source + ' ' + target + ' '
+    #           + vision_train_rank_pids_path + ' '
+    #           + vision_train_rank_scores_path + ' '
+    #           + vision_test_rank_pids_path + ' '
+    #           + vision_test_rank_scores_path)
     return vision_train_rank_pids_path, vision_train_rank_scores_path, vision_test_rank_pids_path, vision_test_rank_scores_path
 
 
@@ -93,7 +93,7 @@ def fusion_transfer(source, target):
     fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion(source, target)
     dataset_eval(source, target, fusion_test_rank_pids_path)
 
-    for i in range(1):
+    for i in range(6):
     # rank transfer, rank and eval
         transfer_train_rank_pids_path, transfer_train_rank_scores_path, \
         transfer_test_rank_pids_path, transfer_test_rank_scores_path \
@@ -125,7 +125,7 @@ def dataset_fusion_transfer():
     sources = ['grid']
     # sources = ['market']
     for source in sources:
-        fusion_transfer(source, 'markets1')
+        fusion_transfer(source, 'market')
 
 
 if __name__ == '__main__':

@@ -1,5 +1,4 @@
 # coding=utf-8
-
 from post_process.track_prob import track_score
 from profile.fusion_param import get_fusion_param, ctrl_msg
 from util.file_helper import read_lines, read_lines_and, write, safe_remove
@@ -7,6 +6,7 @@ from util.serialize import pickle_load
 from viz.delta_track import viz_fusion_curve, viz_heat_map
 
 import numpy as np
+import os
 import pandas as pd
 
 
@@ -75,9 +75,9 @@ def predict_img_scores(fusion_param):
     # if pickle_load(fusion_param['persons_ap_path']) is not None:
     #     return final_persons_scores
     predict_score_path = fusion_param['renew_ac_path']
-    final_persons_scores = np.genfromtxt(predict_score_path, delimiter=' ').astype(float)
+    vision_persons_scores = np.genfromtxt(predict_score_path, delimiter=' ').astype(float)
     # pickle_save(fusion_param['persons_ap_path'], final_persons_scores)
-    return final_persons_scores
+    return vision_persons_scores
 
 
 def predict_pids(fusion_param):
@@ -176,48 +176,19 @@ def fusion_st_img_ranker(fusion_param):
     safe_remove(mid_score_path)
     write(mid_score_path, '%f\n' % mid_score)
     print(str(mid_score))
+    sorted_persons_ap_pids = np.zeros([len(persons_ap_pids), len(persons_ap_pids[0])])
+    sorted_persons_ap_scores = np.zeros([len(persons_ap_pids), len(persons_ap_pids[0])])
     for i, person_ap_pids in enumerate(persons_ap_pids):
-        # img_score_s = list()
-        # img_score_idx_s = list()
-        # for j in range(len(person_ap_pids)):
-        #     img_score_idx_s.append(person_ap_pids.index(person_ap_pids[person_score_idx_s[i][j]]))
-        #     img_score_s.append(persons_ap_scores[i][img_score_idx_s[j]])
-        # sort_img_score_s = sorted(img_score_s, reverse=True)
         for j in range(len(person_ap_pids)):
-            # write(map_score_path, '%f ' % sort_img_score_s[j])
-            # 按score排序得到的index对pid进行排序
-            write(map_score_path, '%f ' % (persons_cross_scores[i][person_score_idx_s[i][j]]))
-            write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
-        write(log_path, '\n')
-        write(map_score_path, '\n')
+            sorted_persons_ap_pids[i][j] = persons_ap_pids[i][person_score_idx_s[i][j]]
+            sorted_persons_ap_scores[i][j] = persons_cross_scores[i][person_score_idx_s[i][j]]
+    np.savetxt(log_path, sorted_persons_ap_pids, fmt='%d')
+    np.savetxt(map_score_path, sorted_persons_ap_scores, fmt='%f')
 
 
-def gallery_track_scores(camera_delta_s, fusion_param, smooth=False):
+
+def gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_param, smooth=False):
     predict_path = fusion_param['renew_pid_path']
-    # answer path is probe path
-    answer_path = fusion_param['answer_path']
-    answer_lines = read_lines(answer_path)
-    query_tracks = list()
-    for answer in answer_lines:
-        info = answer.split('_')
-        if 'bmp' in info[2]:
-            info[2] = info[2].split('.')[0]
-        if len(info) > 4 and 'jpe' in info[6]:
-            query_tracks.append([info[0], int(info[1][0]), int(info[2])])
-        else:
-            query_tracks.append([info[0], int(info[1][1]), int(info[2]), int(info[1][3])])
-
-    gallery_path = fusion_param['gallery_path']
-    gallery_lines = read_lines(gallery_path)
-    gallery_tracks = list()
-    for gallery in gallery_lines:
-        info = gallery.split('_')
-        if 'bmp' in info[2]:
-            info[2] = info[2].split('.')[0]
-        if len(info) > 4 and 'jpe' in info[6]:
-            gallery_tracks.append([info[0], int(info[1][0]), int(info[2])])
-        else:
-            gallery_tracks.append([info[0], int(info[1][1]), int(info[2]), int(info[1][3])])
 
     persons_deltas_score = list()
     pids4probes = np.genfromtxt(predict_path, delimiter=' ')
@@ -264,15 +235,51 @@ def fusion_st_gallery_ranker(fusion_param):
     en = fusion_param['en']
     log_path = fusion_param['eval_fusion_path']
     map_score_path = fusion_param['fusion_normal_score_path']  # fusion_param = get_fusion_param()
+    # answer path is probe path
+    answer_path = fusion_param['answer_path']
+    answer_lines = read_lines(answer_path)
+    query_tracks = list()
+    for answer in answer_lines:
+        info = answer.split('_')
+        if 'bmp' in info[2]:
+            info[2] = info[2].split('.')[0]
+        if len(info) > 4 and 'jpe' in info[6]:
+            query_tracks.append([info[0], int(info[1][0]), int(info[2])])
+        else:
+            query_tracks.append([info[0], int(info[1][1]), int(info[2]), int(info[1][3])])
+
+    gallery_path = fusion_param['gallery_path']
+    gallery_lines = read_lines(gallery_path)
+    gallery_tracks = list()
+    for gallery in gallery_lines:
+        info = gallery.split('_')
+        if 'bmp' in info[2]:
+            info[2] = info[2].split('.')[0]
+        if len(info) > 4 and 'jpe' in info[6]:
+            gallery_tracks.append([info[0], int(info[1][0]), int(info[2])])
+        else:
+            gallery_tracks.append([info[0], int(info[1][1]), int(info[2]), int(info[1][3])])
+
+
     persons_ap_scores = predict_img_scores(fusion_param)
     persons_ap_pids = predict_pids(fusion_param)
-    camera_delta_s = pickle_load('true_market_train.pck')
+    # for i, person_ap_scores in enumerate(persons_ap_scores):
+    #     cur_max_vision = 0
+    #     for j, person_ap_score in enumerate(person_ap_scores):
+    #         if query_tracks[i][1] != gallery_tracks[persons_ap_pids[i][j]][1]:
+    #             # diff vision
+    #             cur_max_vision = person_ap_score
+    #     persons_ap_scores[i] /= cur_max_vision
+
+
+    camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
+    # camera_delta_s = pickle_load('true_market_test.pck')
     rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
     # diff_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'].replace('rand', 'diff'))
     # todo tmp diff deltas
     diff_delta_s = rand_delta_s
-    rand_track_scores = gallery_track_scores(rand_delta_s, fusion_param)
-    persons_track_scores = gallery_track_scores(camera_delta_s, fusion_param)
+    rand_track_scores = gallery_track_scores(query_tracks, gallery_tracks, rand_delta_s, fusion_param)
+    persons_track_scores = gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_param)
     # diff_track_scores = gallery_track_scores(diff_delta_s, fusion_param)
     # todo tmp diff scores
     diff_track_scores = rand_track_scores
@@ -302,8 +309,6 @@ def fusion_st_gallery_ranker(fusion_param):
         cross_scores = list()
         for j, person_ap_pid in enumerate(person_ap_pids):
             cur_track_score = persons_track_scores[i][j]
-            # if cur_track_score < 0.02:
-            #     cur_track_score = cur_track_score
             rand_track_score = rand_track_scores[i][j]
             if rand_track_score < 0.00002:
                 rand_track_score = 0.00002
@@ -320,8 +325,10 @@ def fusion_st_gallery_ranker(fusion_param):
             if persons_cross_scores[i][j] >= 0:
                 # diff seq not sort, not rank for max, and not normalize
                 if max_score_s[i] == 0:
+                    # there exist probe track with same seq, diff camera but value > 1000
                     print i
-                persons_cross_scores[i][j] /= max_score_s[i]
+                else:
+                    persons_cross_scores[i][j] /= max_score_s[i]
                 # persons_cross_scores[i][j] /= max_score
                 # if persons_cross_scores[i][j] > 0.5:
                 #     print 'same'
@@ -355,78 +362,6 @@ def fusion_st_gallery_ranker(fusion_param):
     return person_score_idx_s
 
 
-def fusion_curve(fusion_param):
-    camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
-    rand_camera_deltas = pickle_load(fusion_param['rand_distribution_pickle_path'])
-    # for actual calculate
-    delta_width = 300000.0
-    delta_cnt = 3000
-    # for distribution viz
-    # delta_width = 3000.0
-    # delta_cnt = 10
-    interval_width = delta_width/ delta_cnt
-    delta_stripe = delta_width / delta_cnt
-    delta_range = map(lambda x: x * delta_stripe - delta_width/2, range(delta_cnt))
-    # delta_range = map(lambda x: x*1.0 - 60.0, range(120))
-    over_probs = [[list() for j in range(6)] for i in range(6)]
-    probs = list()
-    for i in range(6):
-        for j in range(i+1, 6):
-            cur_prob = list()
-            for k in range(len(delta_range)):
-                match_track_score = track_score(camera_delta_s, i + 1, 0, j + 1, delta_range[k], interval=interval_width)
-                rand_track_score = track_score(rand_camera_deltas, i + 1, 0, j + 1, delta_range[k], interval=interval_width)
-                if rand_track_score < 0.00002:
-                    # print rand_track_score
-                    rand_track_score = 0.00002
-                # else:
-                #     print match_track_score / rand_track_score
-                cur_prob.append(rand_track_score)
-                # raw_probs[i][j].append(match_track_score)
-                # rand_probs[i][j].append(rand_track_score)
-                over_probs[i][j].append(rand_track_score)
-            probs.append(cur_prob)
-    np_probs = np.array(probs)
-    np.savetxt('rand_scores.txt', np_probs, fmt='%.6f\t')
-
-    return delta_range, over_probs
-
-
-def fusion_heat(fusion_param):
-    camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
-    rand_camera_deltas = pickle_load(fusion_param['rand_distribution_pickle_path'])
-    delta_width = 3000.0
-    delta_cnt = 10
-    interval_width = delta_width/ delta_cnt
-    delta_stripe = delta_width / delta_cnt
-    delta_range = map(lambda x: x * delta_stripe - delta_width/2, range(delta_cnt))
-    # delta_range = map(lambda x: x*1.0 - 60.0, range(120))
-    viz_deltas = list()
-    viz_camera_pairs = list()
-    viz_values = list()
-    for i in range(6):
-        for j in range(i+1, 6):
-            for k in range(len(delta_range)):
-                match_track_score = track_score(camera_delta_s, i + 1, 0, j + 1, delta_range[k], interval=interval_width)
-                rand_track_score = track_score(rand_camera_deltas, i + 1, 0, j + 1, delta_range[k], interval=interval_width)
-                if rand_track_score < 0.00002:
-                    # print rand_track_score
-                    rand_track_score = 0.00002
-                else:
-                    print match_track_score / rand_track_score
-
-                # raw_probs[i][j].append(match_track_score)
-                # rand_probs[i][j].append(rand_track_score)
-                viz_deltas.append(delta_range[k])
-                viz_camera_pairs.append('c%d-c%d' % (i + 1, j + 1))
-                viz_values.append(match_track_score)
-        break
-    df = pd.DataFrame({'transfer_time': viz_deltas,
-                       'camera_pair': viz_camera_pairs,
-                       'values': viz_values})
-    pt = df.pivot_table(index='camera_pair', columns='transfer_time', values='values', aggfunc=np.sum)
-    return pt
-
 if __name__ == '__main__':
     ctrl_msg['data_folder_path'] = 'grid_market-test'
     # fusion_param = get_fusion_param()
@@ -434,6 +369,9 @@ if __name__ == '__main__':
     # eval_on_train_test(fusion_param, test_mode=True)
     fusion_param = get_fusion_param()
     fusion_st_gallery_ranker(fusion_param)
+    os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
+    os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
+              + 'market /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
     # fusion_st_img_ranker(fusion_param)
     # delta_range, over_probs = fusion_curve(fusion_param)
     # viz_fusion_curve(delta_range, [over_probs])
