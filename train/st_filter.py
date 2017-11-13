@@ -222,7 +222,7 @@ def gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_pa
                 score = smooth_score(c1, c2, time1, time2, camera_delta_s)
             else:
                 # 给定摄像头，时间，获取时空评分，这里camera_deltas如果是随机算出来的，则是随机评分
-                score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100)
+                score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100, filter_interval=5000)
             person_deltas_score.append(score)
         probe_i += 1
         persons_deltas_score.append(person_deltas_score)
@@ -260,9 +260,10 @@ def fusion_st_gallery_ranker(fusion_param):
         else:
             gallery_tracks.append([info[0], int(info[1][1]), int(info[2]), int(info[1][3])])
 
-
+    print 'probe and gallery tracks ready'
     persons_ap_scores = predict_img_scores(fusion_param)
     persons_ap_pids = predict_pids(fusion_param)
+    print 'read vision scores and pids ready'
     # for i, person_ap_scores in enumerate(persons_ap_scores):
     #     cur_max_vision = 0
     #     for j, person_ap_score in enumerate(person_ap_scores):
@@ -273,13 +274,17 @@ def fusion_st_gallery_ranker(fusion_param):
 
 
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
-    # camera_delta_s = pickle_load('true_market_test.pck')
+    # camera_delta_s = pickle_load('true_market_probe.pck')
+    print 'load track deltas ready'
     rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
+    print 'load rand deltas ready'
     # diff_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'].replace('rand', 'diff'))
     # todo tmp diff deltas
     diff_delta_s = rand_delta_s
     rand_track_scores = gallery_track_scores(query_tracks, gallery_tracks, rand_delta_s, fusion_param)
+    print 'rand scores ready'
     persons_track_scores = gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_param)
+    print 'track scores ready'
     # diff_track_scores = gallery_track_scores(diff_delta_s, fusion_param)
     # todo tmp diff scores
     diff_track_scores = rand_track_scores
@@ -310,12 +315,17 @@ def fusion_st_gallery_ranker(fusion_param):
         for j, person_ap_pid in enumerate(person_ap_pids):
             cur_track_score = persons_track_scores[i][j]
             rand_track_score = rand_track_scores[i][j]
-            if rand_track_score < 0.00002:
+            if rand_track_score < 0:
                 rand_track_score = 0.00002
+            elif rand_track_score < 0.00002:
+                rand_track_score = 0.00002
+                cur_track_score = -1
+
             cross_score = (cur_track_score * (1 - ep) - en * diff_track_scores[i][j]) * (
                 persons_ap_scores[i][j] + ep / (1 - ep - en)) / rand_track_score
             cross_scores.append(cross_score)
         persons_cross_scores.append(cross_scores)
+    print 'fusion scores ready'
         # pickle_save(ctrl_msg['data_folder_path']+'viper_r-testpersons_cross_scores.pick', persons_cross_scores)
         # pickle_save(ctrl_msg['data_folder_path']+'viper_r-testpersons_ap_pids.pick', persons_ap_pids)
 
@@ -339,6 +349,7 @@ def fusion_st_gallery_ranker(fusion_param):
                 # persons_cross_scores[i][j] *= 1.0
                 persons_cross_scores[i][j] *= -0.00002
                 # print persons_cross_scores[i][j]
+    print 'fusion scores normalized, diff seq use vision score to rank'
     person_score_idx_s = list()
 
     for i, person_cross_scores in enumerate(persons_cross_scores):
@@ -351,8 +362,10 @@ def fusion_st_gallery_ranker(fusion_param):
         for j in range(len(person_ap_pids)):
             sorted_persons_ap_pids[i][j] = persons_ap_pids[i][person_score_idx_s[i][j]]
             sorted_persons_ap_scores[i][j] = persons_cross_scores[i][person_score_idx_s[i][j]]
+    print 'sorted scores ready'
     np.savetxt(log_path, sorted_persons_ap_pids, fmt='%d')
     np.savetxt(map_score_path, sorted_persons_ap_scores, fmt='%f')
+    print 'save sorted fusion scores'
     # for i, person_ap_pids in enumerate(persons_ap_pids):
     #     for j in range(len(person_ap_pids)):
     #         write(log_path, '%d ' % person_ap_pids[person_score_idx_s[i][j]])
