@@ -148,6 +148,9 @@ def save_grid_train_truth():
                 deltas[market_train_tracks[i][1] - 1][market_train_tracks[j][1] - 1].append(
                     market_train_tracks[i][2] - market_train_tracks[j][2]
                 )
+    for camera_delta in deltas:
+        for delta_s in camera_delta:
+            delta_s.sort()
     pickle_save('true_grid-cv0_train.pck', deltas)
 
 
@@ -189,15 +192,19 @@ def save_grid_test_truth():
                 deltas[query_tracks[i][1] - 1][gallery_tracks[j][1] - 1].append(
                     query_tracks[i][2] - gallery_tracks[j][2]
                 )
+    for camera_delta in deltas:
+        for delta_s in camera_delta:
+            delta_s.sort()
     pickle_save('true_grid-cv0_test.pck', deltas)
 
 
 if __name__ == '__main__':
     # probe_path = '../data/market/probe.txt'
     # gallery_path = '../data/market/gallery.txt'
-    #
+    save_grid_train_truth()
+    save_grid_test_truth()
     # save_market_img_list(probe_path, 'market_probe.csv')
     # save_market_img_list(gallery_path, 'market_gallery.csv')
-    save_market_train_truth()
+    # save_market_train_truth()
     # save_market_probe_truth()
     # save_market_test_truth()
