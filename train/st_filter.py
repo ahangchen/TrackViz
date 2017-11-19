@@ -61,7 +61,7 @@ def predict_track_scores(real_tracks, camera_delta_s, fusion_param, smooth=False
                 score = smooth_score(c1, c2, time1, time2, camera_delta_s)
             else:
                 # 给定摄像头，时间，获取时空评分，这里camera_deltas如果是随机算出来的，则是随机评分
-                score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100)
+                score = track_score(camera_delta_s, c1, time1, c2, time2, interval=700, filter_interval=40000)
             person_deltas_score.append(score)
         probe_i += 1
         persons_deltas_score.append(person_deltas_score)
@@ -222,7 +222,7 @@ def gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_pa
                 score = smooth_score(c1, c2, time1, time2, camera_delta_s)
             else:
                 # 给定摄像头，时间，获取时空评分，这里camera_deltas如果是随机算出来的，则是随机评分
-                score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100, filter_interval=5000)
+                score = track_score(camera_delta_s, c1, time1, c2, time2, interval=700, filter_interval=40000)
             person_deltas_score.append(score)
         probe_i += 1
         persons_deltas_score.append(person_deltas_score)
@@ -278,16 +278,18 @@ def fusion_st_gallery_ranker(fusion_param):
     print 'load track deltas ready'
     rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
     print 'load rand deltas ready'
-    # diff_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'].replace('rand', 'diff'))
+    diff_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'].replace('rand', 'diff'))
+    print 'load diff deltas ready'
     # todo tmp diff deltas
-    diff_delta_s = rand_delta_s
+    # diff_delta_s = rand_delta_s
     rand_track_scores = gallery_track_scores(query_tracks, gallery_tracks, rand_delta_s, fusion_param)
     print 'rand scores ready'
     persons_track_scores = gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_param)
     print 'track scores ready'
-    # diff_track_scores = gallery_track_scores(diff_delta_s, fusion_param)
+    diff_track_scores = gallery_track_scores(query_tracks, gallery_tracks, diff_delta_s, fusion_param)
+    print 'diff track score ready'
     # todo tmp diff scores
-    diff_track_scores = rand_track_scores
+    # diff_track_scores = rand_track_scores
 
     persons_cross_scores = list()
     safe_remove(map_score_path)
@@ -319,11 +321,18 @@ def fusion_st_gallery_ranker(fusion_param):
                 rand_track_score = 0.00002
             elif rand_track_score < 0.00002:
                 rand_track_score = 0.00002
-                cur_track_score = -1
+                if cur_track_score != 0:
+                    cur_track_score = -1
 
             cross_score = (cur_track_score * (1 - ep) - en * diff_track_scores[i][j]) * (
                 persons_ap_scores[i][j] + ep / (1 - ep - en)) / rand_track_score
+            if i == 0 and j % 100 ==0:
+                print '%f %f %f %f %f' % (cur_track_score, diff_track_scores[i][j], persons_ap_scores[i][j], rand_track_score, cross_score)
+            if cur_track_score > 0 and cross_score < 0:
+                cross_score = 0
             cross_scores.append(cross_score)
+        if max(cross_scores) == 0:
+            print i
         persons_cross_scores.append(cross_scores)
     print 'fusion scores ready'
         # pickle_save(ctrl_msg['data_folder_path']+'viper_r-testpersons_cross_scores.pick', persons_cross_scores)
@@ -348,7 +357,6 @@ def fusion_st_gallery_ranker(fusion_param):
                 # persons_cross_scores[i][j] /= min_score_s[i]
                 # persons_cross_scores[i][j] *= 1.0
                 persons_cross_scores[i][j] *= -0.00002
-                # print persons_cross_scores[i][j]
     print 'fusion scores normalized, diff seq use vision score to rank'
     person_score_idx_s = list()
 
@@ -377,6 +385,8 @@ def fusion_st_gallery_ranker(fusion_param):
 
 if __name__ == '__main__':
     ctrl_msg['data_folder_path'] = 'grid_market-test'
+    ctrl_msg['ep'] = 0.0
+    ctrl_msg['en'] = 0.0
     # fusion_param = get_fusion_param()
     # fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
     # eval_on_train_test(fusion_param, test_mode=True)

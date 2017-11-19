@@ -93,7 +93,7 @@ def fusion_transfer(source, target):
     fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion(source, target)
     dataset_eval(source, target, fusion_test_rank_pids_path)
 
-    for i in range(6):
+    for i in range(1):
     # rank transfer, rank and eval
         transfer_train_rank_pids_path, transfer_train_rank_scores_path, \
         transfer_test_rank_pids_path, transfer_test_rank_scores_path \
@@ -122,7 +122,7 @@ def dataset_fusion_transfer():
     # sources = ['market']
     # for source in sources:
     #     fusion_transfer(source, 'market')
-    sources = ['grid']
+    sources = ['grid', 'viper', 'cuhk']
     # sources = ['market']
     for source in sources:
         fusion_transfer(source, 'market')
