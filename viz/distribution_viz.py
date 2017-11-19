@@ -10,6 +10,7 @@ from viz.delta_track import viz_fusion_curve
 def fusion_curve(fusion_param):
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     rand_camera_deltas = pickle_load(fusion_param['rand_distribution_pickle_path'])
+    diff_camera_deltas = pickle_load(fusion_param['rand_distribution_pickle_path'].replace('rand','diff'))
     # for actual calculate
     delta_width = 2000.0
     delta_cnt = int(delta_width/100)
@@ -23,24 +24,27 @@ def fusion_curve(fusion_param):
     over_probs = [[list() for j in range(6)] for i in range(6)]
     probs = list()
     for i in range(6):
-        for j in range(i+1, 6):
+        for j in range(6):
             if i == j:
                 continue
             cur_prob = list()
             for k in range(len(delta_range)):
                 match_track_score = track_score(camera_delta_s, i + 1, 0, j + 1, delta_range[k], interval=interval_width, filter_interval=delta_width/2)
-                rand_track_score = track_score(rand_camera_deltas, i + 1, 0, j + 1, delta_range[k], interval=interval_width)
+                rand_track_score = track_score(rand_camera_deltas, i + 1, 0, j + 1, delta_range[k], interval=interval_width, filter_interval=delta_width/2)
+                diff_track_score = track_score(diff_camera_deltas, i + 1, 0, j + 1, delta_range[k], interval=interval_width, filter_interval=delta_width/2)
                 if rand_track_score < 0.00002:
                     # print rand_track_score
                     rand_track_score = 0.00002
-                if i == 3 and j == 4 and abs(delta_range[k]) <= 2000 :
-                    print i
+                # if i == 3 and j == 4 and abs(delta_range[k]) <= 2000 :
+                #     print i
                 # else:
                 #     print match_track_score / rand_track_score
                 cur_prob.append(rand_track_score)
                 # raw_probs[i][j].append(match_track_score)
                 # rand_probs[i][j].append(rand_track_score)
                 # over_probs[i][j].append(rand_track_score)
+                # over_probs[i][j].append((match_track_score * (1 - 0.25) - 0.5 * diff_track_score) *
+                #                         (0.8 + 0.25 / 0.25) / rand_track_score)
                 over_probs[i][j].append(match_track_score)
             probs.append(over_probs[i][j])
     np_probs = np.array(probs)
@@ -88,7 +92,7 @@ def fusion_heat(fusion_param):
 if __name__ == '__main__':
     ctrl_msg['data_folder_path'] = 'market_grid-cv0-test'
     fusion_param = get_fusion_param()
-    # fusion_param['distribution_pickle_path'] = 'true_grid-cv0_test.pck'
+    # fusion_param['distribution_pickle_path'] = 'true_market_pg.pck'
     fusion_curve(fusion_param)
     delta_range, over_probs = fusion_curve(fusion_param)
     viz_fusion_curve(delta_range, [over_probs])

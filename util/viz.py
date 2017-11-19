@@ -4,17 +4,18 @@ import numpy as np
 
 
 def draw_line(y_s, x_s, y_label, x_label, y_titles, title, line_color=None):
-    plt.subplots(figsize=(6, 4))
+    # plt.subplots()
+    plt.subplots(figsize=(6, 5))
     sns.set(font_scale=2.4)
     line_styles = ['--', '-']
     for i in range(len(y_s)):
-        plt.plot(x_s, y_s[i], color=line_color, label=y_titles[i], linestyle=line_styles[i])
-    plt.xlabel(x_label, fontsize=16)
-    plt.ylabel(y_label, fontsize=16)
+        plt.plot(x_s, y_s[i], color=line_color, label=y_titles[i], linestyle=line_styles[i], linewidth=5.)
+    plt.xlabel(x_label, fontsize=32)
+    plt.ylabel(y_label, fontsize=32)
     plt.ylim(min(min(y_s[0]), min(y_s[1]))*0.8, max(max(y_s[0]), max(y_s[1]))*1.2)
     plt.xlim(min(x_s), max(x_s))
-    plt.yticks(fontsize=16)
-    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=32)
+    plt.xticks(fontsize=32)
     plt.legend()
     plt.title(title)
     plt.show()

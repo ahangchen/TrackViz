@@ -61,7 +61,7 @@ def predict_track_scores(real_tracks, camera_delta_s, fusion_param, smooth=False
                 score = smooth_score(c1, c2, time1, time2, camera_delta_s)
             else:
                 # 给定摄像头，时间，获取时空评分，这里camera_deltas如果是随机算出来的，则是随机评分
-                score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100)
+                score = track_score(camera_delta_s, c1, time1, c2, time2, interval=700, filter_interval=40000)
             person_deltas_score.append(score)
         probe_i += 1
         persons_deltas_score.append(person_deltas_score)
@@ -315,11 +315,11 @@ def fusion_st_gallery_ranker(fusion_param):
         for j, person_ap_pid in enumerate(person_ap_pids):
             cur_track_score = persons_track_scores[i][j]
             rand_track_score = rand_track_scores[i][j]
-            if rand_track_score < 0.00002:
+            if rand_track_score < 0:
                 rand_track_score = 0.00002
-            # elif rand_track_score < 0.00002:
-            #     rand_track_score = 0.00002
-            #     cur_track_score = 0
+            elif rand_track_score < 0.00002:
+                rand_track_score = 0.00002
+                cur_track_score = -1
 
             cross_score = (cur_track_score * (1 - ep) - en * diff_track_scores[i][j]) * (
                 persons_ap_scores[i][j] + ep / (1 - ep - en)) / rand_track_score

@@ -250,18 +250,18 @@ def viz_heat_map(pt):
 def viz_gray_map(pt):
     f, ax = plt.subplots()
     # cmap = sns.color_palette("coolwarm", 7)
-    sns.set(font_scale=1.5)
+    sns.set(font_scale=2.5)
     cmap = sns.cubehelix_palette(n_colors=8, start=3, rot=0.7, dark=0.4, light=0.92, gamma=1.0, hue=0, as_cmap=True)
     sns.heatmap(pt, cmap=cmap, linewidths=0.0, ax=ax, annot=True, fmt='.3f')
     ax.set_title('')
     print sys.getdefaultencoding()
     reload(sys)
     sys.setdefaultencoding('utf8')
-    ax.set_xlabel('α', fontsize=16)
-    ax.set_ylabel('β', fontsize=16)
+    ax.set_xlabel('α', fontsize=32)
+    ax.set_ylabel('β', fontsize=32)
     ax.invert_yaxis()
-    plt.yticks(fontsize=16)
-    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=32)
+    plt.xticks(fontsize=32)
     sns.plt.show()
     f.savefig('sns_gray.jpg', bbox_inches='tight')
 
@@ -298,7 +298,7 @@ def iter_acc_data(data_path):
 
 def sensitivity_eval():
     grid_sensity_values = list()
-    lines = read_lines('../post_process/grid_sense.txt')
+    lines = read_lines('../post_process/market_sense.txt')
     rank1_accs = list()
     cur_cv = -1
     for i, line in enumerate(lines):
@@ -315,14 +315,16 @@ def sensitivity_eval():
 
 
 if __name__ == '__main__':
-    # print(camera_distribute(1))
+    # distribution visualization
     # ctrl_msg['data_folder_path'] = 'market_market-test'
     # fusion_param = get_fusion_param()
     # viz_market_distribution(fusion_param)
     # viz_market(fusion_param)
     # sns.palplot(sns.cubehelix_palette(n_colors=8, start=3, rot=0.7, dark=0.4, light=0.8, gamma=1.0, hue=0))
     # sns.plt.show()
-    accs = iter_acc_data('../post_process/grid_market_iter2.txt')
+    # multi iteration result
+    accs = iter_acc_data('../post_process/grid_market_iter.txt')
     # accs = iter_acc_data('../post_process/market_grid_iter.txt')
-    draw_line(accs, np.arange(0, len(accs[0])), 'Rank1_acc', 'iteration times', ['vision', 'fusion'], title='')
+    draw_line(accs, np.arange(0, len(accs[0])), 'Rank-1 precision', 'Number of iterations', ['Visual Classifier C', 'Fusion Model F'], title='')
+    # #sensitivity result
     # sensitivity_eval()

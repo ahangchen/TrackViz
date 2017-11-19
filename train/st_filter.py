@@ -222,7 +222,10 @@ def gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_pa
                 score = smooth_score(c1, c2, time1, time2, camera_delta_s)
             else:
                 # 给定摄像头，时间，获取时空评分，这里camera_deltas如果是随机算出来的，则是随机评分
-                score = track_score(camera_delta_s, c1, time1, c2, time2, interval=700, filter_interval=40000)
+                if 'market_market' in predict_path:
+                    score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100, filter_interval=500)
+                else:
+                    score = track_score(camera_delta_s, c1, time1, c2, time2, interval=700, filter_interval=40000)
             person_deltas_score.append(score)
         probe_i += 1
         persons_deltas_score.append(person_deltas_score)
@@ -264,13 +267,14 @@ def fusion_st_gallery_ranker(fusion_param):
     persons_ap_scores = predict_img_scores(fusion_param)
     persons_ap_pids = predict_pids(fusion_param)
     print 'read vision scores and pids ready'
-    # for i, person_ap_scores in enumerate(persons_ap_scores):
-    #     cur_max_vision = 0
-    #     for j, person_ap_score in enumerate(person_ap_scores):
-    #         if query_tracks[i][1] != gallery_tracks[persons_ap_pids[i][j]][1]:
-    #             # diff vision
-    #             cur_max_vision = person_ap_score
-    #     persons_ap_scores[i] /= cur_max_vision
+    if 'market_market' in log_path:
+        for i, person_ap_scores in enumerate(persons_ap_scores):
+            cur_max_vision = 0
+            for j, person_ap_score in enumerate(person_ap_scores):
+                if query_tracks[i][1] != gallery_tracks[persons_ap_pids[i][j]][1]:
+                    # diff vision
+                    cur_max_vision = person_ap_score
+            persons_ap_scores[i] /= cur_max_vision
 
 
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
