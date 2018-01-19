@@ -61,6 +61,7 @@ def predict_track_scores(real_tracks, camera_delta_s, fusion_param, smooth=False
                 score = smooth_score(c1, c2, time1, time2, camera_delta_s)
             else:
                 # 给定摄像头，时间，获取时空评分，这里camera_deltas如果是随机算出来的，则是随机评分
+                # todo grid 需要 改区间大小
                 score = track_score(camera_delta_s, c1, time1, c2, time2, interval=700, filter_interval=40000)
             person_deltas_score.append(score)
         probe_i += 1
@@ -224,8 +225,10 @@ def gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_pa
                 # 给定摄像头，时间，获取时空评分，这里camera_deltas如果是随机算出来的，则是随机评分
                 if 'market_market' in predict_path:
                     score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100, filter_interval=500)
-                else:
+                elif '_market' in predict_path:
                     score = track_score(camera_delta_s, c1, time1, c2, time2, interval=700, filter_interval=40000)
+                else:
+                    score = track_score(camera_delta_s, c1, time1, c2, time2)
             person_deltas_score.append(score)
         probe_i += 1
         persons_deltas_score.append(person_deltas_score)
@@ -395,8 +398,10 @@ if __name__ == '__main__':
     # fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
     # eval_on_train_test(fusion_param, test_mode=True)
     fusion_param = get_fusion_param()
-    fusion_st_gallery_ranker(fusion_param)
+    #fusion_st_gallery_ranker(fusion_param)
     os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
+    # os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
+    #           + 'market /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
     os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
               + 'market /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
     # fusion_st_img_ranker(fusion_param)

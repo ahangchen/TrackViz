@@ -22,12 +22,12 @@ def vision_rank(source, target):
     vision_test_rank_pids_path = fusion_test_dir + '/renew_pid.log'
     vision_test_rank_scores_path = fusion_test_dir + '/renew_ac.log'
     os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
-    # os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 0 '
-    #           + source + ' ' + target + ' '
-    #           + vision_train_rank_pids_path + ' '
-    #           + vision_train_rank_scores_path + ' '
-    #           + vision_test_rank_pids_path + ' '
-    #           + vision_test_rank_scores_path)
+    os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 0 '
+              + source + ' ' + target + ' '
+              + vision_train_rank_pids_path + ' '
+              + vision_train_rank_scores_path + ' '
+              + vision_test_rank_pids_path + ' '
+              + vision_test_rank_scores_path)
     return vision_train_rank_pids_path, vision_train_rank_scores_path, vision_test_rank_pids_path, vision_test_rank_scores_path
 
 
@@ -110,22 +110,22 @@ def fusion_transfer(source, target):
 def dataset_fusion_transfer():
     # sources = ['market', 'cuhk', 'viper', 'grid']
     # sources = ['grid']
-    # sources = ['market']
-    # for source in sources:
-    #     for i in range(0, 1):
-    #         if 'grid' in source:
-    #             fusion_transfer('grid-cv-%d' % i, 'grid-cv%d' % i)
-    #         else:
-    #             fusion_transfer(source, 'grid-cv%d' % i)
+    sources = ['grid']
+    for source in sources:
+        for i in range(0, 10):
+            if 'grid' in source:
+                fusion_transfer('grid-cv-%d' % i, 'grid-cv%d' % i)
+            else:
+                fusion_transfer(source, 'grid-cv%d' % i)
     # sources = ['market', 'grid', 'cuhk', 'viper']
     # sources = ['grid']
     # sources = ['market']
     # for source in sources:
     #     fusion_transfer(source, 'market')
-    sources = ['grid', 'viper', 'cuhk']
+    # sources = ['grid', 'viper', 'cuhk']
     # sources = ['market']
-    for source in sources:
-        fusion_transfer(source, 'market')
+    # for source in sources:
+    #     fusion_transfer(source, 'market')
 
 
 if __name__ == '__main__':

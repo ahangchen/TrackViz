@@ -231,6 +231,7 @@ def gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_pa
 
 
 def fusion_st_gallery_ranker(fusion_param):
+    print 'st_filter_market.fusion'
     ep = fusion_param['ep']
     en = fusion_param['en']
     log_path = fusion_param['eval_fusion_path']
