@@ -390,7 +390,7 @@ def fusion_st_gallery_ranker(fusion_param):
 
 
 if __name__ == '__main__':
-    ctrl_msg['data_folder_path'] = 'cuhk_grid_viper_mix_market-test'
+    ctrl_msg['data_folder_path'] = 'grid_market-test'
     ctrl_msg['ep'] = 0.0
     ctrl_msg['en'] = 0.0
     # fusion_param = get_fusion_param()

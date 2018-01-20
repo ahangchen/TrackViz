@@ -27,7 +27,7 @@ def prepare_diff_folder(fusion_param):
     shutil.copy(fusion_param['renew_pid_path'], diff_predict_path)
 
 
-def get_predict_delta_tracks(fusion_param, useful_predict_limit=10, random=False, diff_person=False):
+def get_predict_delta_tracks(fusion_param, useful_predict_limit=10, random=False, diff_person=False, use_real_st=False):
     # 获取左图列表
     answer_path = fusion_param['answer_path']
     answer_lines = read_lines(answer_path)
@@ -73,10 +73,13 @@ def get_predict_delta_tracks(fusion_param, useful_predict_limit=10, random=False
             # same seq
             # todo ignore same camera track
             if real_tracks[i][3] == real_tracks[predict_pid][3] and real_tracks[i][1] != real_tracks[predict_pid][1]:
-                useful_cnt += 1
-                delta = real_tracks[i][2] - real_tracks[predict_pid][2]
-                if abs(delta) < 1000000:
-                    camera_delta_s[real_tracks[i][1] - 1][real_tracks[predict_pid][1] - 1].append(delta)
+                # and pid equal: real st
+                # if use_real_st and random or real_tracks[i][0] == real_tracks[predict_pid][0]:
+                if True:
+                    useful_cnt += 1
+                    delta = real_tracks[i][2] - real_tracks[predict_pid][2]
+                    if abs(delta) < 1000000:
+                        camera_delta_s[real_tracks[i][1] - 1][real_tracks[predict_pid][1] - 1].append(delta)
     print 'deltas collected'
     for camera_delta in camera_delta_s:
         for delta_s in camera_delta:
