@@ -84,9 +84,9 @@ def rank_transfer(source, target, fusion_train_rank_pids_path, fusion_train_rank
 
 def fusion_transfer(source, target):
     # vision rank and eval
-    vision_train_rank_pids_path, vision_train_rank_scores_path, \
-    vision_test_rank_pids_path, vision_test_rank_scores_path \
-        = vision_rank(source, target)
+    # vision_train_rank_pids_path, vision_train_rank_scores_path, \
+    # vision_test_rank_pids_path, vision_test_rank_scores_path \
+    #     = vision_rank(source, target)
 
     # fusion rank and eval
     fusion_train_rank_pids_path, fusion_train_rank_scores_path, \
@@ -110,18 +110,18 @@ def fusion_transfer(source, target):
 def dataset_fusion_transfer():
     # sources = ['market', 'cuhk', 'viper', 'grid']
     # sources = ['grid']
-    sources = ['grid']
-    for source in sources:
-        for i in range(0, 10):
-            if 'grid' in source:
-                fusion_transfer('grid-cv-%d' % i, 'grid-cv%d' % i)
-            else:
-                fusion_transfer(source, 'grid-cv%d' % i)
-    # sources = ['market', 'grid', 'cuhk', 'viper']
-    # sources = ['grid']
     # sources = ['market']
     # for source in sources:
-    #     fusion_transfer(source, 'market')
+    #     for i in range(0, 10):
+    #         if 'grid' in source:
+    #             fusion_transfer('grid-cv-%d' % i, 'grid-cv%d' % i)
+    #         else:
+    #             fusion_transfer(source, 'grid-cv%d' % i)
+    # sources = ['market', 'grid', 'cuhk', 'viper']
+    # sources = ['grid']
+    sources = ['cuhk_grid_viper_mix']
+    for source in sources:
+        fusion_transfer(source, 'market')
     # sources = ['grid', 'viper', 'cuhk']
     # sources = ['market']
     # for source in sources:

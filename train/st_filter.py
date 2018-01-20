@@ -3,7 +3,6 @@ from post_process.track_prob import track_score
 from profile.fusion_param import get_fusion_param, ctrl_msg
 from util.file_helper import read_lines, read_lines_and, write, safe_remove
 from util.serialize import pickle_load
-from viz.delta_track import viz_fusion_curve, viz_heat_map
 
 import numpy as np
 import os
@@ -391,14 +390,14 @@ def fusion_st_gallery_ranker(fusion_param):
 
 
 if __name__ == '__main__':
-    ctrl_msg['data_folder_path'] = 'grid_market-test'
+    ctrl_msg['data_folder_path'] = 'cuhk_grid_viper_mix_market-test'
     ctrl_msg['ep'] = 0.0
     ctrl_msg['en'] = 0.0
     # fusion_param = get_fusion_param()
     # fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
     # eval_on_train_test(fusion_param, test_mode=True)
     fusion_param = get_fusion_param()
-    #fusion_st_gallery_ranker(fusion_param)
+    fusion_st_gallery_ranker(fusion_param)
     os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
     # os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
     #           + 'market /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])

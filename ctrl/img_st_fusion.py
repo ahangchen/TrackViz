@@ -5,6 +5,7 @@ import os
 
 from profile.fusion_param import get_fusion_param, ctrl_msg
 from train.st_estim import get_predict_delta_tracks, prepare_rand_folder, prepare_diff_folder
+from train.st_filter import fusion_st_img_ranker, fusion_st_gallery_ranker
 
 # need to run on src directory
 from util.file_helper import safe_remove, safe_mkdir
@@ -20,10 +21,6 @@ def test_fusion(fusion_param, ep=0.5, en=0.01):
     except shutil.Error:
         print 'pickle ready'
     # merge visual probability and track distribution probability
-    if '_market' in fusion_param['renew_pid_path']:
-        from train.st_filter_market import fusion_st_gallery_ranker
-    else:
-        from train.st_filter import fusion_st_gallery_ranker
     fusion_st_gallery_ranker(fusion_param)
     # evaluate
     # todo transfer: no eval by fusion code
@@ -35,10 +32,6 @@ def train_fusion(fusion_param, ep=0.5, en=0.01):
     # get_predict_tracks(fusion_param)
     # get distribution sorted list for probability compute
     # store_sorted_deltas(fusion_param)
-    if '_market' in fusion_param['renew_pid_path']:
-        from train.st_filter_market import fusion_st_img_ranker
-    else:
-        from train.st_filter import fusion_st_img_ranker
     fusion_st_img_ranker(fusion_param)
     # evaluate
     # todo transfer: no eval by fusion code

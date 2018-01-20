@@ -39,11 +39,11 @@ def get_fusion_param():
         'en': ctrl_msg['en']
     }
 
-    if '_grid' in ctrl_msg['data_folder_path']:
+    if '_grid' in ctrl_msg['data_folder_path'] and '_grid_' not in ctrl_msg['data_folder_path']:
         origin_dict['probe_path'] = 'data/grid/grid-cv' + str(ctrl_msg['cv_num']) + '-probe.txt'
         origin_dict['train_path'] = 'data/grid/grid-cv' + str(ctrl_msg['cv_num']) + '-train.txt'
         origin_dict['gallery_path'] = 'data/grid/grid-cv' + str(ctrl_msg['cv_num']) + '-gallery.txt'
-    elif '_market' in ctrl_msg['data_folder_path']:
+    elif '_market' in ctrl_msg['data_folder_path'] and '_market_' not in ctrl_msg['data_folder_path']:
         origin_dict['probe_path'] = 'data/market/probe.txt'
         origin_dict['train_path'] = 'data/market/train.txt'
         origin_dict['gallery_path'] = 'data/market/gallery.txt'
