@@ -47,6 +47,10 @@ def get_fusion_param():
         origin_dict['probe_path'] = 'data/market/probe.txt'
         origin_dict['train_path'] = 'data/market/train.txt'
         origin_dict['gallery_path'] = 'data/market/gallery.txt'
+    elif '_duke' in ctrl_msg['data_folder_path']:
+        origin_dict['probe_path'] = 'data/duke/probe.list'
+        origin_dict['train_path'] = 'data/duke/train.list'
+        origin_dict['gallery_path'] = 'data/duke/test.list'
     if 'train' in ctrl_msg['data_folder_path']:
         origin_dict['answer_path'] = origin_dict['train_path']
     else:

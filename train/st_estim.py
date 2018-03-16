@@ -31,7 +31,7 @@ def get_predict_delta_tracks(fusion_param, useful_predict_limit=10, random=False
     # 获取左图列表
     answer_path = fusion_param['answer_path']
     answer_lines = read_lines(answer_path)
-
+    camera_cnt = 6
     real_tracks = list()
     for answer in answer_lines:
         info = answer.split('_')
@@ -41,6 +41,9 @@ def get_predict_delta_tracks(fusion_param, useful_predict_limit=10, random=False
         if len(info) > 4 and 'jpe' in info[6]:
             # grid
             real_tracks.append([info[0], int(info[1][0]), int(info[2]), 1])
+        elif 'f' in info[2]:
+            real_tracks.append([info[0], int(info[1][1]), int(info[2][1:-5]), 1])
+            camera_cnt = 8
         else:
             # market
             real_tracks.append([info[0], int(info[1][1]), int(info[2]), int(info[1][3])])
@@ -49,7 +52,7 @@ def get_predict_delta_tracks(fusion_param, useful_predict_limit=10, random=False
     renew_pid_path = fusion_param['renew_pid_path']
     predict_lines = read_lines(renew_pid_path)
     print 'predict images ready'
-    camera_cnt = 6
+
     # 左图中的人在右图可能出现在6个摄像头中
     camera_delta_s = [[list() for j in range(camera_cnt)] for i in range(camera_cnt)]
     person_cnt = len(answer_lines)

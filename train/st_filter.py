@@ -108,6 +108,8 @@ def train_tracks(fusion_param):
             info[2] = info[2].split('.')[0]
         if len(info) > 4 and 'jpe' in info[6]:
             real_tracks.append([info[0], int(info[1][0]), int(info[2])])
+        elif 'f' in info[2]:
+            real_tracks.append([info[0], int(info[1][1]), int(info[2][1:-5]), 1])
         else:
             real_tracks.append([info[0], int(info[1][1]), int(info[2]), int(info[1][3])])
     return real_tracks
@@ -226,6 +228,8 @@ def gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_pa
                     score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100, filter_interval=500)
                 elif '_market' in predict_path:
                     score = track_score(camera_delta_s, c1, time1, c2, time2, interval=700, filter_interval=40000)
+                elif '_duke' in predict_path:
+                    score = track_score(camera_delta_s, c1, time1, c2, time2, interval=700, filter_interval=50000)
                 else:
                     score = track_score(camera_delta_s, c1, time1, c2, time2)
             person_deltas_score.append(score)
@@ -250,6 +254,8 @@ def fusion_st_gallery_ranker(fusion_param):
             info[2] = info[2].split('.')[0]
         if len(info) > 4 and 'jpe' in info[6]:
             query_tracks.append([info[0], int(info[1][0]), int(info[2])])
+        elif 'f' in info[2]:
+            query_tracks.append([info[0], int(info[1][1]), int(info[2][1:-5]), 1])
         else:
             query_tracks.append([info[0], int(info[1][1]), int(info[2]), int(info[1][3])])
 
@@ -262,6 +268,8 @@ def fusion_st_gallery_ranker(fusion_param):
             info[2] = info[2].split('.')[0]
         if len(info) > 4 and 'jpe' in info[6]:
             gallery_tracks.append([info[0], int(info[1][0]), int(info[2])])
+        elif 'f' in info[2]:
+            gallery_tracks.append([info[0], int(info[1][1]), int(info[2][1:-5]), 1])
         else:
             gallery_tracks.append([info[0], int(info[1][1]), int(info[2]), int(info[1][3])])
 
@@ -390,7 +398,7 @@ def fusion_st_gallery_ranker(fusion_param):
 
 
 if __name__ == '__main__':
-    ctrl_msg['data_folder_path'] = 'grid_market-test'
+    ctrl_msg['data_folder_path'] = 'cuhk_duke-r-test'
     ctrl_msg['ep'] = 0.0
     ctrl_msg['en'] = 0.0
     # fusion_param = get_fusion_param()
@@ -402,7 +410,7 @@ if __name__ == '__main__':
     # os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
     #           + 'market /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
     os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
-              + 'market /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
+              + 'duke /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
     # fusion_st_img_ranker(fusion_param)
     # delta_range, over_probs = fusion_curve(fusion_param)
     # viz_fusion_curve(delta_range, [over_probs])

@@ -67,6 +67,8 @@ def rank_transfer(source, target, fusion_train_rank_pids_path, fusion_train_rank
         target_train_list = '/home/cwh/coding/TrackViz/data/markets1/train.txt'
     elif target == 'market':
         target_train_list = '/home/cwh/coding/TrackViz/data/market/train.txt'
+    elif target == 'duke':
+        target_train_list = '/home/cwh/coding/TrackViz/data/duke/train.list'
     else:
         target_train_list = 'error_target_dataset'
     os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
@@ -84,9 +86,9 @@ def rank_transfer(source, target, fusion_train_rank_pids_path, fusion_train_rank
 
 def fusion_transfer(source, target):
     # vision rank and eval
-    # vision_train_rank_pids_path, vision_train_rank_scores_path, \
-    # vision_test_rank_pids_path, vision_test_rank_scores_path \
-    #     = vision_rank(source, target)
+    vision_train_rank_pids_path, vision_train_rank_scores_path, \
+    vision_test_rank_pids_path, vision_test_rank_scores_path \
+        = vision_rank(source, target)
 
     # fusion rank and eval
     fusion_train_rank_pids_path, fusion_train_rank_scores_path, \
@@ -110,13 +112,22 @@ def fusion_transfer(source, target):
 def dataset_fusion_transfer():
     # sources = ['market', 'cuhk', 'viper', 'grid']
     # sources = ['grid']
-    sources = ['market']
-    for source in sources:
-        for i in range(0, 10):
-            if 'grid' in source:
-                fusion_transfer('grid-cv-%d' % i, 'grid-cv%d' % i)
-            else:
-                fusion_transfer(source, 'grid-cv%d' % i)
+    sources = [ 'grid']
+    targets = ['duke']
+    for target in targets:
+        if 'grid' in target:
+            for source in sources:
+                for i in range(0, 10):
+                    if 'grid' in source:
+                        fusion_transfer('grid-cv-%d' % i, 'grid-cv%d' % i)
+                    else:
+                        fusion_transfer(source, 'grid-cv%d' % i)
+        else:
+            for source in sources:
+                fusion_transfer(source, target)
+
+
+
     # sources = ['market', 'grid', 'cuhk', 'viper']
     # sources = ['grid']
     # sources = ['cuhk_grid_viper_mix']

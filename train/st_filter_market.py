@@ -108,6 +108,8 @@ def train_tracks(fusion_param):
             info[2] = info[2].split('.')[0]
         if len(info) > 4 and 'jpe' in info[6]:
             real_tracks.append([info[0], int(info[1][0]), int(info[2])])
+        elif 'f' in info[2]:
+            real_tracks.append([info[0], int(info[1][1]), int(info[2][1:-5]), 1])
         else:
             real_tracks.append([info[0], int(info[1][1]), int(info[2]), int(info[1][3])])
     return real_tracks
