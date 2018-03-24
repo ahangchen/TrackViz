@@ -3,8 +3,7 @@
 ## 代码结构
  - ctrl: 融合调度层
  - data: 数据配置目录, 存储图像数据与预测数据
- - feature: 提取时空特征
- - post_process: 测试与评估，可视化之前的后处理
+ - post_process: 可视化之前的后处理
  - profile: 初始参数配置
  - pre_process: 预处理层
  - train: 时空模型构建，核心的融合分类器
