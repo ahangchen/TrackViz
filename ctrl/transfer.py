@@ -32,8 +32,6 @@ def vision_rank(source, target):
 
 
 def dataset_eval(source, target, rank_pids_path):
-    # if 'market' in target:
-    #     return
     os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
     os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
               + target + ' ' + rank_pids_path)
@@ -95,14 +93,14 @@ def fusion_transfer(source, target):
     fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion(source, target)
     dataset_eval(source, target, fusion_test_rank_pids_path)
 
-    for i in range(1):
-    # rank transfer, rank and eval
+    iteration_cnt = 1
+    for i in range(iteration_cnt):
+        # rank transfer, rank and eval
         transfer_train_rank_pids_path, transfer_train_rank_scores_path, \
         transfer_test_rank_pids_path, transfer_test_rank_scores_path \
             = rank_transfer(source, target, fusion_train_rank_pids_path, fusion_train_rank_scores_path)
         transfer_target = target + '-r'
         # fusion rank and eval
-
         fusion_train_rank_pids_path, fusion_train_rank_scores_path, \
         fusion_test_rank_pids_path, fusion_test_rank_scores_path \
             = st_fusion(source, transfer_target)
@@ -110,37 +108,20 @@ def fusion_transfer(source, target):
 
 
 def dataset_fusion_transfer():
-    # sources = ['market', 'cuhk', 'viper', 'grid']
-    # sources = ['grid']
-    sources = [ 'grid']
-    targets = ['duke']
+    sources = ['market', 'cuhk', 'viper', 'grid']
+    targets = ['grid','market']
     for target in targets:
-        if 'grid' in target:
-            for source in sources:
+        for source in sources:
+            if 'grid' in target:
                 for i in range(0, 10):
                     if 'grid' in source:
                         fusion_transfer('grid-cv-%d' % i, 'grid-cv%d' % i)
                     else:
                         fusion_transfer(source, 'grid-cv%d' % i)
-        else:
-            for source in sources:
+            else:
                 fusion_transfer(source, target)
 
 
 
-    # sources = ['market', 'grid', 'cuhk', 'viper']
-    # sources = ['grid']
-    # sources = ['cuhk_grid_viper_mix']
-    # for source in sources:
-    #     fusion_transfer(source, 'market')
-    # sources = ['grid', 'viper', 'cuhk']
-    # sources = ['market']
-    # for source in sources:
-    #     fusion_transfer(source, 'market')
-
-
 if __name__ == '__main__':
     dataset_fusion_transfer()
-    # vision_rank('grid', 'market')
-    # dataset_eval('market', 'grid-cv1', '/home/cwh/coding/TrackViz/data/market_grid-cv1-r-test/renew_pid.log')
-    # dataset_eval('market', 'grid-cv1', '/home/cwh/coding/TrackViz/data/market_grid-cv1-r-test/cross_filter_pid.log')

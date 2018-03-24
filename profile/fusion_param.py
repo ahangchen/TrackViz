@@ -1,7 +1,5 @@
-from util.file_helper import write
-
 ctrl_msg = {
-    'data_folder_path': 'top-m2g-std2-test',
+    'data_folder_path': 'market_market-test',
     'cv_num': 0,
     'ep': 0,
     'en': 0
@@ -15,19 +13,14 @@ def get_fusion_param():
         'renew_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_pid.log',
         'renew_ac_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_ac.log',
         'predict_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_pid.log',
-        'origin_answer_path': 'data/' + ctrl_msg['data_folder_path'] + '/test_track.txt',
         'answer_path': 'data/' + ctrl_msg['data_folder_path'] + '/test_tracks.txt',
 
         'probe_path': '',
         'train_path': '',
         'gallery_path': '',
 
-        'predict_track_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_tracks.txt',
-        'predict_camera_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_c',
-
         'distribution_pickle_path': 'data/' + ctrl_msg['data_folder_path'] + '/sorted_deltas.pickle',
         'src_distribution_pickle_path': 'data/' + ctrl_msg['data_folder_path'].replace('test', 'train') + '/sorted_deltas.pickle',
-        'interval_pickle_path': 'data/' + ctrl_msg['data_folder_path'] + '/interval_scores.pickle',
         'persons_deltas_path': 'data/' + ctrl_msg['data_folder_path'] + '/persons_deltas_score.pickle',
         'persons_ap_path': 'data/' + ctrl_msg['data_folder_path'] + '/persons_ap_scores.pickle',
         'predict_person_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_persons.pickle',
@@ -69,12 +62,5 @@ def get_fusion_param():
         origin_dict[k] = v
     return origin_dict
 
-
-def update_fusion_param(key, value):
-    update_msg[key] = value
-
-
-def save_fusion_param():
-    write('data/fusion_param.json', fusion_param.__str__)
 
 fusion_param = get_fusion_param()
