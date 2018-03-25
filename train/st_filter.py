@@ -6,7 +6,6 @@ from util.serialize import pickle_load
 
 import numpy as np
 import os
-import pandas as pd
 
 
 def smooth_score(c1, c2, time1, time2, camera_delta_s):
