@@ -19,10 +19,11 @@ TrackViz
 
 Please cite this paper in your publications if it helps your research:
 
+```python
 @article{,
   title={Unsupervised Cross-dataset Person Re-identification by Transfer Learning of Spatial-Temporal Patterns},
   author={Jianming, Lv and Weihang, Chen and Qing, Li and Can, Yang},
-  journal={arxiv},
-  year={2017}
+  journal={CVPR},
+  year={2018}
 }
-                      
+```
