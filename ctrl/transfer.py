@@ -53,6 +53,19 @@ def st_fusion(source, target):
     return fusion_train_rank_pids_path, fusion_train_rank_scores_path, fusion_test_rank_pids_path, fusion_test_rank_scores_path
 
 
+def st_fusion_info(source, target):
+    ctrl_msg['data_folder_path'] = source + '_' + target + '-train'
+    fusion_data_path = '/home/cwh/coding/TrackViz/'
+    fusion_param = get_fusion_param()
+    fusion_train_rank_pids_path = fusion_data_path + fusion_param['eval_fusion_path']
+    fusion_train_rank_scores_path = fusion_data_path + fusion_param['fusion_normal_score_path']
+    ctrl_msg['data_folder_path'] = source + '_' + target + '-test'
+    fusion_param = get_fusion_param()
+    fusion_test_rank_pids_path = fusion_data_path + fusion_param['eval_fusion_path']
+    fusion_test_rank_scores_path = fusion_data_path + fusion_param['fusion_normal_score_path']
+    return fusion_train_rank_pids_path, fusion_train_rank_scores_path, fusion_test_rank_pids_path, fusion_test_rank_scores_path
+
+
 def rank_transfer(source, target, fusion_train_rank_pids_path, fusion_train_rank_scores_path):
     fusion_train_dir, fusion_test_dir = fusion_dir_prepare(source, target + '-r')
     transfer_train_rank_pids_path = fusion_train_dir + '/renew_pid.log'
@@ -91,6 +104,8 @@ def fusion_transfer(source, target):
     # fusion rank and eval
     fusion_train_rank_pids_path, fusion_train_rank_scores_path, \
     fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion(source, target)
+    # fusion_train_rank_pids_path, fusion_train_rank_scores_path, \
+    # fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion_info(source, target)
     dataset_eval(source, target, fusion_test_rank_pids_path)
 
     iteration_cnt = 1
@@ -108,8 +123,10 @@ def fusion_transfer(source, target):
 
 
 def dataset_fusion_transfer():
-    sources = ['market', 'cuhk', 'viper', 'grid']
-    targets = ['grid','market']
+    sources = ['grid']
+    targets = ['grid']
+    # sources = ['market']
+    # targets = ['dukehead', 'duketail']
     for target in targets:
         for source in sources:
             if 'grid' in target:

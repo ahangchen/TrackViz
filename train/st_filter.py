@@ -8,13 +8,12 @@ import numpy as np
 import os
 
 
-def smooth_score(c1, c2, time1, time2, camera_delta_s):
-    track_interval = 20
+def smooth_score(c1, c2, time1, time2, camera_delta_s, track_interval=20, filter_interval=1000):
     smooth_window_size = 10
     smooth_scores = [
         track_score(camera_delta_s, c1,
                     time1 - (smooth_window_size / 2 - 1) * track_interval + j * track_interval, c2, time2,
-                    interval=track_interval)
+                    interval=track_interval, filter_interval=filter_interval)
         for j in range(smooth_window_size)]
     # filter
     for j in range(smooth_window_size):
@@ -220,7 +219,16 @@ def gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_pa
             c1 = query_tracks[probe_i_tmp][1]
             c2 = gallery_tracks[pid4probe][1]
             if smooth:
-                score = smooth_score(c1, c2, time1, time2, camera_delta_s)
+                # 给定摄像头，时间，获取时空评分，这里camera_deltas如果是随机算出来的，则是随机评分
+                if 'market_market' in predict_path:
+                    score = smooth_score(c1, c2, time1, time2, camera_delta_s, track_interval=20, filter_interval=500)
+                elif '_market' in predict_path:
+                    score = smooth_score(c1, c2, time1, time2, camera_delta_s, track_interval=140, filter_interval=40000)
+                elif '_duke' in predict_path:
+                    score = smooth_score(c1, c2, time1, time2, camera_delta_s, track_interval=140, filter_interval=50000)
+                else:
+                    score = smooth_score(c1, c2, time1, time2, camera_delta_s)
+
             else:
                 # 给定摄像头，时间，获取时空评分，这里camera_deltas如果是随机算出来的，则是随机评分
                 if 'market_market' in predict_path:
@@ -295,11 +303,13 @@ def fusion_st_gallery_ranker(fusion_param):
     print 'load diff deltas ready'
     # todo tmp diff deltas
     # diff_delta_s = rand_delta_s
-    rand_track_scores = gallery_track_scores(query_tracks, gallery_tracks, rand_delta_s, fusion_param)
+    rand_track_scores = gallery_track_scores(query_tracks, gallery_tracks, rand_delta_s, fusion_param, smooth=False)
     print 'rand scores ready'
-    persons_track_scores = gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_param)
+    smooth = '_grid' in log_path
+    # smooth = True
+    persons_track_scores = gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_param, smooth=smooth)
     print 'track scores ready'
-    diff_track_scores = gallery_track_scores(query_tracks, gallery_tracks, diff_delta_s, fusion_param)
+    diff_track_scores = gallery_track_scores(query_tracks, gallery_tracks, diff_delta_s, fusion_param, smooth=smooth)
     print 'diff track score ready'
     # todo tmp diff scores
     # diff_track_scores = rand_track_scores
@@ -397,19 +407,22 @@ def fusion_st_gallery_ranker(fusion_param):
 
 
 if __name__ == '__main__':
-    ctrl_msg['data_folder_path'] = 'cuhk_duke-r-test'
+    ctrl_msg['data_folder_path'] = 'market_duketail-test'
+    # ctrl_msg['data_folder_path'] = 'duke_market-test'
     ctrl_msg['ep'] = 0.0
     ctrl_msg['en'] = 0.0
     # fusion_param = get_fusion_param()
     # fusion_st_img_ranker(fusion_param, fusion_param['pos_shot_rate'], fusion_param['neg_shot_rate'])
     # eval_on_train_test(fusion_param, test_mode=True)
     fusion_param = get_fusion_param()
+    fusion_param['distribution_pickle_path'] = fusion_param['distribution_pickle_path'].replace('duketail', 'duke')
+    fusion_param['rand_distribution_pickle_path'] = fusion_param['rand_distribution_pickle_path'].replace('duketail', 'duke')
     fusion_st_gallery_ranker(fusion_param)
     os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
-    # os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
-    #           + 'market /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
     os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
-              + 'duke /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
+              + 'duketail /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
+    # os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
+    #           + 'duke /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
     # fusion_st_img_ranker(fusion_param)
     # delta_range, over_probs = fusion_curve(fusion_param)
     # viz_fusion_curve(delta_range, [over_probs])

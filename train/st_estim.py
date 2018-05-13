@@ -58,7 +58,7 @@ def get_predict_delta_tracks(fusion_param, useful_predict_limit=10, random=False
     person_cnt = len(answer_lines)
     # market1501数据集有六个序列，只有同一个序列才能计算delta
     if random:
-        useful_predict_limit = max(len(predict_lines)/100, 10)
+        useful_predict_limit = max(len(predict_lines)/100, 100)
     for i, line in enumerate(predict_lines):
         predict_pids = line.split(' ')
         useful_cnt = 0
