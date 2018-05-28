@@ -48,6 +48,14 @@ def get_fusion_param():
         origin_dict['probe_path'] = 'data/duketail/probe.list'
         origin_dict['train_path'] = 'data/duketail/train.list'
         origin_dict['gallery_path'] = 'data/duketail/test.list'
+    elif '_duketqtail' in ctrl_msg['data_folder_path']:
+        origin_dict['probe_path'] = 'data/duketqtail/probe.list'
+        origin_dict['train_path'] = 'data/duketqtail/train.list'
+        origin_dict['gallery_path'] = 'data/duketqtail/test.list'
+    elif '_dukequerytail' in ctrl_msg['data_folder_path']:
+        origin_dict['probe_path'] = 'data/dukequerytail/probe.list'
+        origin_dict['train_path'] = 'data/dukequerytail/train.list'
+        origin_dict['gallery_path'] = 'data/dukequerytail/test.list'
     elif '_duke' in ctrl_msg['data_folder_path']:
         origin_dict['probe_path'] = 'data/duke/probe.list'
         origin_dict['train_path'] = 'data/duke/train.list'

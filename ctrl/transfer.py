@@ -94,26 +94,64 @@ def rank_transfer(source, target, fusion_train_rank_pids_path, fusion_train_rank
               + target_train_list)
     return transfer_train_rank_pids_path, transfer_train_rank_scores_path, transfer_test_rank_pids_path, transfer_test_rank_scores_path
 
+def iter_rank_transfer(source, target, fusion_train_rank_pids_path, fusion_train_rank_scores_path):
+    fusion_train_dir, fusion_test_dir = fusion_dir_prepare(source, target + '-r')
+    transfer_train_rank_pids_path = fusion_train_dir + '/renew_pid.log'
+    transfer_train_rank_scores_path = fusion_train_dir + '/renew_ac.log'
+    transfer_test_rank_pids_path = fusion_test_dir + '/renew_pid.log'
+    transfer_test_rank_scores_path = fusion_test_dir + '/renew_ac.log'
+    if 'grid' in target:
+        target_train_list = '/home/cwh/coding/TrackViz/data/grid/' + target + '-train.txt'
+    elif target == 'markets1':
+        target_train_list = '/home/cwh/coding/TrackViz/data/markets1/train.txt'
+    elif target == 'market':
+        target_train_list = '/home/cwh/coding/TrackViz/data/market/train.txt'
+    elif target == 'duke':
+        target_train_list = '/home/cwh/coding/TrackViz/data/duke/train.list'
+    else:
+        target_train_list = 'error_target_dataset'
+    os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
+    os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 3 '
+              + source + ' ' + target + ' '
+              + fusion_train_rank_pids_path + ' '
+              + fusion_train_rank_scores_path + ' '
+              + transfer_train_rank_pids_path + ' '
+              + transfer_train_rank_scores_path + ' '
+              + transfer_test_rank_pids_path + ' '
+              + transfer_test_rank_scores_path + ' '
+              + target_train_list)
+    return transfer_train_rank_pids_path, transfer_train_rank_scores_path, transfer_test_rank_pids_path, transfer_test_rank_scores_path
 
 def fusion_transfer(source, target):
     # vision rank and eval
-    vision_train_rank_pids_path, vision_train_rank_scores_path, \
-    vision_test_rank_pids_path, vision_test_rank_scores_path \
-        = vision_rank(source, target)
+    # vision_train_rank_pids_path, vision_train_rank_scores_path, \
+    # vision_test_rank_pids_path, vision_test_rank_scores_path \
+    #     = vision_rank(source, target)
+    #
+    # # fusion rank and eval
+    # fusion_train_rank_pids_path, fusion_train_rank_scores_path, \
+    # fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion(source, target)
+    fusion_train_rank_pids_path, fusion_train_rank_scores_path, \
+    fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion_info(source, target)
+    # dataset_eval(source, target, fusion_test_rank_pids_path)
 
+    # rank transfer, rank and eval
+    transfer_train_rank_pids_path, transfer_train_rank_scores_path, \
+    transfer_test_rank_pids_path, transfer_test_rank_scores_path \
+        = rank_transfer(source, target, fusion_train_rank_pids_path, fusion_train_rank_scores_path)
+    transfer_target = target + '-r'
     # fusion rank and eval
     fusion_train_rank_pids_path, fusion_train_rank_scores_path, \
-    fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion(source, target)
-    # fusion_train_rank_pids_path, fusion_train_rank_scores_path, \
-    # fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion_info(source, target)
-    dataset_eval(source, target, fusion_test_rank_pids_path)
+    fusion_test_rank_pids_path, fusion_test_rank_scores_path \
+        = st_fusion(source, transfer_target)
+    dataset_eval(source, transfer_target, fusion_test_rank_pids_path)
 
-    iteration_cnt = 1
+    iteration_cnt = 9
     for i in range(iteration_cnt):
         # rank transfer, rank and eval
         transfer_train_rank_pids_path, transfer_train_rank_scores_path, \
         transfer_test_rank_pids_path, transfer_test_rank_scores_path \
-            = rank_transfer(source, target, fusion_train_rank_pids_path, fusion_train_rank_scores_path)
+            = iter_rank_transfer(source, target, fusion_train_rank_pids_path, fusion_train_rank_scores_path)
         transfer_target = target + '-r'
         # fusion rank and eval
         fusion_train_rank_pids_path, fusion_train_rank_scores_path, \
@@ -123,10 +161,10 @@ def fusion_transfer(source, target):
 
 
 def dataset_fusion_transfer():
-    sources = ['grid']
+    sources = ['market']
     targets = ['grid']
     # sources = ['market']
-    # targets = ['dukehead', 'duketail']
+    # targets = ['duketqtail', 'dukequerytail']
     for target in targets:
         for source in sources:
             if 'grid' in target:

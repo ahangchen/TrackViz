@@ -5,7 +5,8 @@ import os
 
 from profile.fusion_param import get_fusion_param, ctrl_msg
 from train.st_estim import get_predict_delta_tracks, prepare_rand_folder, prepare_diff_folder
-from train.st_filter import fusion_st_img_ranker, fusion_st_gallery_ranker
+from train.st_filter import fusion_st_img_ranker, fusion_st_gallery_ranker, simple_fusion_st_img_ranker, \
+    simple_fusion_st_gallery_ranker
 
 # need to run on src directory
 from util.file_helper import safe_remove, safe_mkdir
@@ -22,6 +23,7 @@ def test_fusion(fusion_param, ep=0.5, en=0.01):
         print 'pickle ready'
     # merge visual probability and track distribution probability
     fusion_st_gallery_ranker(fusion_param)
+    # simple_fusion_st_gallery_ranker(fusion_param)
     # evaluate
     # todo transfer: no eval by fusion code
     # eval_on_train_test(fusion_param, test_mode=True)
@@ -32,10 +34,8 @@ def train_fusion(fusion_param, ep=0.5, en=0.01):
     # get_predict_tracks(fusion_param)
     # get distribution sorted list for probability compute
     # store_sorted_deltas(fusion_param)
+    # simple_fusion_st_img_ranker(fusion_param)
     fusion_st_img_ranker(fusion_param)
-    # evaluate
-    # todo transfer: no eval by fusion code
-    # eval_on_train_test(fusion_param)
 
 
 def init_strict_img_st_fusion():
@@ -116,17 +116,22 @@ def iter_strict_img_st_fusion(on_test=False):
 if __name__ == '__main__':
     ctrl_msg['ep'] = 0
     ctrl_msg['en'] = 0
+
     # ctrl_msg['data_folder_path'] = 'market_grid-cv3-train'
     # ctrl_msg['data_folder_path'] = 'market_duketail-train'
-    ctrl_msg['data_folder_path'] = 'viper_market-train'
+    ctrl_msg['data_folder_path'] = 'market_dukequerytail-train'
+    # ctrl_msg['data_folder_path'] = 'grid_market-train'
+    # ctrl_msg['data_folder_path'] = 'viper_duke-train'
     fusion_param = get_fusion_param()
     init_strict_img_st_fusion()
+    ctrl_msg['data_folder_path'] = 'market_dukequerytail-test'
+    # ctrl_msg['data_folder_path'] = 'grid_market-test'
     # ctrl_msg['data_folder_path'] = 'market_grid-cv3-test'
-    ctrl_msg['data_folder_path'] = 'viper_market-test'
+    # ctrl_msg['data_folder_path'] = 'viper_duke-test'
     fusion_param = get_fusion_param()
     os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
     os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
-              + 'market /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
+              + 'dukequerytail /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
     # for i in range(0, 4):
     #     for j in range(0, 4 - i):
     #         ctrl_msg['ep'] = i * 0.25

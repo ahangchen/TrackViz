@@ -1,5 +1,7 @@
 # coding=utf-8
+from profile.fusion_param import ctrl_msg, get_fusion_param
 from util.serialize import pickle_load
+import numpy as np
 
 
 def binary_search(a, target):
@@ -19,13 +21,19 @@ def binary_search(a, target):
     return low
 
 
-def track_score(camera_delta_s, camera1, time1, camera2, time2, interval=100, test=True, filter_interval=1000):
+def track_score(camera_delta_s, camera1, time1, camera2, time2, interval=100, moving_st=False, filter_interval=1000):
+    if moving_st:
+        return local_model_score(camera_delta_s, camera1, time1, camera2, time2, interval=interval)
+    else:
+        return global_track_score(camera_delta_s, camera1, time1, camera2, time2, interval=interval,
+                                  filter_interval=filter_interval)
+
+
+def global_track_score(camera_delta_s, camera1, time1, camera2, time2, interval=100, filter_interval=1000):
     if abs(time1 - time2) > filter_interval:
         return -1.
     camera1 -= 1
     camera2 -= 1
-    # if test and camera1 == camera2:
-    #     return 0.0000001
     cur_delta = time1 - time2
     delta_distribution = camera_delta_s[camera1][camera2]
     total_cnt = sum(map(len, camera_delta_s[camera1]))
@@ -43,25 +51,74 @@ def track_score(camera_delta_s, camera1, time1, camera2, time2, interval=100, te
     # score = (right_index - left_index + 1) / float(len(camera_delta_s[camera1][camera2]))
     if len(delta_distribution) == 0:
         return 0.0
-    # score = (right_index - left_index + 1) / float(len(camera_delta_s[camera1][2]))
-    # if score > 0:
-    #     print(len(delta_distribution))
-    #     print('delta range %d ~ %d' % (delta_distribution[0], delta_distribution[-1]))
-    #     print(left_index)
-    #     print(right_index)
-    #     print('probablity: %f%%' % (score * 100))
     return score
 
 
-def track_interval_score(interval_score_s, camera1, time1, camera2, time2):
-    delta = time2 - time1
-    for i, camera_pair_travel_prob in enumerate(interval_score_s[camera1 - 1][camera2 - 1]):
-        if camera_pair_travel_prob['left'] < delta < camera_pair_travel_prob['right']:
-            print('camera1: %d, camera2: %d, delta: %d, interval: %d, prob: %f' % (
-                camera1, camera2, delta, i, camera_pair_travel_prob['prob']))
-            return camera_pair_travel_prob['prob']
-    return 0
+def local_frame_infos(frames, time1, local_prop):
+    delta_range = abs(frames[-1] - frames[0])
+
+    left_frame = max(time1 - delta_range / local_prop / 2, frames[0])
+    if left_frame == frames[0]:
+        right_frame = min(left_frame + delta_range / local_prop, frames[-1])
+    else:
+        right_frame = min(time1 + delta_range / local_prop / 2, frames[-1])
+    if right_frame == frames[-1]:
+        left_frame = max(right_frame - delta_range / local_prop, frames[0])
+    left_local_index = binary_search(frames, left_frame)
+    right_local_index = binary_search(frames, right_frame)
+    local_interval_length = max(right_local_index - left_local_index, 1)
+    return local_interval_length, left_local_index, right_local_index
+
+
+def other_frames_length(frames, left_frame, right_frame):
+    left_frame = max(left_frame, frames[0])
+    right_frame = min(right_frame, frames[-1])
+    left_local_index = binary_search(frames, left_frame)
+    right_local_index = binary_search(frames, right_frame)
+    local_interval_length = max(right_local_index - left_local_index, 1)
+    return local_interval_length
+
+
+def local_model_score(distribution_dict, camera1, time1, camera2, time2, interval=100):
+    # if abs(time1 - time2) > filter_interval:
+    #     return -1.
+    cameras_delta_s = distribution_dict['deltas']
+    cameras_frame_s = distribution_dict['frames']
+
+    camera1 -= 1
+    camera2 -= 1
+    cur_delta = time1 - time2
+    deltas = cameras_delta_s[camera1][camera2]
+    frames = cameras_frame_s[camera1][camera2]
+    total_cnt = len(deltas)
+    if total_cnt == 0:
+        return 0.0
+    local_prop = 1
+    local_interval_length, left_local_index, right_local_index = local_frame_infos(frames, time1, local_prop)
+    if abs(time1 - time2) > abs(frames[-1] - frames[0]):
+        return -1
+    # interval = (frames[-1] - frames[0]) / 1000
+    left_bound = cur_delta - interval
+    right_bound = cur_delta + interval
+    local_deltas = np.array(deltas[left_local_index: right_local_index])
+    target_interval_cnt = len(local_deltas[(local_deltas > left_bound) & (local_deltas < right_bound)])
+
+    all_frame_cnt_for_camera1 = local_interval_length
+    for i in range(len(cameras_delta_s)):
+        if i == camera1 or i == camera2:
+            continue
+        tmp_frames = cameras_frame_s[camera1][i]
+        tmp_local_interval_length = other_frames_length(tmp_frames, frames[left_local_index], frames[right_local_index])
+        all_frame_cnt_for_camera1 += tmp_local_interval_length
+    # if we use uniform Denominator, we means spatial & temporal probability
+    score = target_interval_cnt / float(all_frame_cnt_for_camera1)
+    return score
+
 
 if __name__ == '__main__':
-    camera_delta_s = pickle_load('data/top10/sorted_deltas.pickle')
-    track_score(camera_delta_s, 1, 25, 2, 250)
+    ctrl_msg['ep'] = 0
+    ctrl_msg['en'] = 0
+    ctrl_msg['data_folder_path'] = 'market_duke-test'
+    fusion_param = get_fusion_param()
+    camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
+    track_score(camera_delta_s, 1, 25, 2, 5250, filter_interval=40000)

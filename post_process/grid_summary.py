@@ -25,10 +25,10 @@ def avg_acc(grid_eval_path):
                     after_fusion_accs[j] += float(accs[j])
             i_cv_cnt += 1
     write('grid_eval.log', '\n' + grid_eval_path + '\n')
-    write('grid_eval.log', 'before_retrain_vision\n%f %f %f\n' % (before_vision_accs[0]/10, before_vision_accs[1]/10, before_vision_accs[2]/10))
-    write('grid_eval.log', 'before_retrain_fusion\n%f %f %f\n' % (before_fusion_accs[0]/10, before_fusion_accs[1]/10, before_fusion_accs[2]/10))
-    write('grid_eval.log', 'after_retrain_vision\n%f %f %f\n' % (after_vision_accs[0]/10, after_vision_accs[1]/10, after_vision_accs[2]/10))
-    write('grid_eval.log', 'after_retrain_fusion\n%f %f %f\n' % (after_fusion_accs[0]/10, after_fusion_accs[1]/10, after_fusion_accs[2]/10))
+    write('grid_eval.log', 'before_retrain_vision\n& %.2f & %.2f & %.2f\n' % (before_vision_accs[0]*10, before_vision_accs[1]*10, before_vision_accs[2]*10))
+    write('grid_eval.log', 'before_retrain_fusion\n& %.2f & %.2f & %.2f\n' % (before_fusion_accs[0]*10, before_fusion_accs[1]*10, before_fusion_accs[2]*10))
+    write('grid_eval.log', 'after_retrain_vision\n& %.2f & %.2f & %.2f\n' % (after_vision_accs[0]*10, after_vision_accs[1]*10, after_vision_accs[2]*10))
+    write('grid_eval.log', 'after_retrain_fusion\n& %.2f & %.2f & %.2f\n' % (after_fusion_accs[0]*10, after_fusion_accs[1]*10, after_fusion_accs[2]*10))
 
 
 if __name__ == '__main__':
