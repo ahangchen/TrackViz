@@ -158,13 +158,14 @@ def get_predict_frame_delta_tracks(fusion_param, useful_predict_limit=10, random
             # todo ignore same camera track
             if real_tracks[i][3] == real_tracks[predict_pid][3] and real_tracks[i][1] != real_tracks[predict_pid][1]:
                 # and pid equal: real st
-                # if use_real_st and random or real_tracks[i][0] == real_tracks[predict_pid][0]:
+                # if random or real_tracks[i][0] == real_tracks[predict_pid][0]:
                 if True:
                     useful_cnt += 1
                     delta = real_tracks[i][2] - real_tracks[predict_pid][2]
                     if abs(delta) < 1000000:
                         camera_delta_s[real_tracks[i][1] - 1][real_tracks[predict_pid][1] - 1].append(delta)
                         camera_frame_s[real_tracks[i][1] - 1][real_tracks[predict_pid][1] - 1].append(real_tracks[i][2])
+
     print 'deltas collected'
     for i in range(camera_cnt):
         for j in range(camera_cnt):
@@ -173,6 +174,8 @@ def get_predict_frame_delta_tracks(fusion_param, useful_predict_limit=10, random
             camera_frame_s[i][j] = frames[sorted_indexes]
             delta_s = np.array(camera_delta_s[i][j])
             camera_delta_s[i][j] = delta_s[sorted_indexes]
+            # camera_delta_s[i][j] = camera_delta_s[i][j].tolist()
+            # camera_frame_s[i][j] = camera_frame_s[i][j].tolist()
     print 'deltas sorted'
     safe_remove(fusion_param['distribution_pickle_path'])
     pickle_save(fusion_param['distribution_pickle_path'], distribution_dict)

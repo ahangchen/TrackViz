@@ -262,7 +262,7 @@ def gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_pa
     persons_deltas_score = list()
     pids4probes = np.genfromtxt(predict_path, delimiter=' ')
     for probe_i, pids4probe in enumerate(pids4probes):
-        person_deltas_score = list()
+        person_deltas_score = np.ones(len(pids4probe))
         if probe_i % 10 == 0:
             print probe_i
         for i, pid4probe in enumerate(pids4probe):
@@ -281,7 +281,7 @@ def gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_pa
                 # print predict_idx
                 s2 = gallery_tracks[pid4probe][3]
                 if s1 != s2:
-                    person_deltas_score.append(-1.0)
+                    person_deltas_score[i] = -1.0
                     continue
             time1 = query_tracks[probe_i_tmp][2]
             # if track_score_idx == 3914:
@@ -314,7 +314,7 @@ def gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_pa
                     score = track_score(camera_delta_s, c1, time1, c2, time2, interval=700, filter_interval=50000)
                 else:
                     score = track_score(camera_delta_s, c1, time1, c2, time2)
-            person_deltas_score.append(score)
+            person_deltas_score[i] = score
         probe_i += 1
         persons_deltas_score.append(person_deltas_score)
 

@@ -2,23 +2,28 @@
 from profile.fusion_param import ctrl_msg, get_fusion_param
 from util.serialize import pickle_load
 import numpy as np
-
+from util.cffi_bisect import c_bisect_lib
+from bisect import bisect_left
 
 def binary_search(a, target):
+    return bisect_left(a, target)
+    # return np.searchsorted(a, target)
+    # return c_bisect_lib.bisect_left(a, len(a) - 1, target)
+    # return bisect_left(a, target)
     # 不同于普通的二分查找，目标是寻找target最适合的index
-    low = 0
-    high = len(a) - 1
-
-    while low <= high:
-        mid = (low + high) // 2
-        mid_val = a[mid]
-        if mid_val < target:
-            low = mid + 1
-        elif mid_val > target:
-            high = mid - 1
-        else:
-            return mid
-    return low
+    # low = 0
+    # high = len(a) - 1
+    #
+    # while low <= high:
+    #     mid = (low + high) // 2
+    #     mid_val = a[mid]
+    #     if mid_val < target:
+    #         low = mid + 1
+    #     elif mid_val > target:
+    #         high = mid - 1
+    #     else:
+    #         return mid
+    # return low
 
 
 def track_score(camera_delta_s, camera1, time1, camera2, time2, interval=100, moving_st=False, filter_interval=1000):
@@ -93,15 +98,16 @@ def local_model_score(distribution_dict, camera1, time1, camera2, time2, interva
     total_cnt = len(deltas)
     if total_cnt == 0:
         return 0.0
-    local_prop = 1
+    local_prop = 2
     local_interval_length, left_local_index, right_local_index = local_frame_infos(frames, time1, local_prop)
     if abs(time1 - time2) > abs(frames[-1] - frames[0]):
         return -1
     # interval = (frames[-1] - frames[0]) / 1000
     left_bound = cur_delta - interval
     right_bound = cur_delta + interval
-    local_deltas = np.array(deltas[left_local_index: right_local_index])
+    local_deltas = deltas[left_local_index: right_local_index]
     target_interval_cnt = len(local_deltas[(local_deltas > left_bound) & (local_deltas < right_bound)])
+    # target_interval_cnt = c_bisect_lib.in_count(local_deltas, len(local_deltas), left_bound, right_bound)
 
     all_frame_cnt_for_camera1 = local_interval_length
     for i in range(len(cameras_delta_s)):
