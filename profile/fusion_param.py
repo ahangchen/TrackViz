@@ -2,7 +2,9 @@ ctrl_msg = {
     'data_folder_path': 'market_market-test',
     'cv_num': 0,
     'ep': 0,
-    'en': 0
+    'en': 0,
+    'window_interval': 500,
+    'filter_interval': 80000
 }
 
 update_msg = {}
@@ -29,7 +31,9 @@ def get_fusion_param():
         'eval_fusion_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_filter_pid.log',
         'fusion_normal_score_path': 'data/' + ctrl_msg['data_folder_path'] + '/cross_filter_score.log',
         'ep': ctrl_msg['ep'],
-        'en': ctrl_msg['en']
+        'en': ctrl_msg['en'],
+        'window_interval': ctrl_msg['window_interval'],
+        'filter_interval': ctrl_msg['filter_interval']
     }
 
     if '_grid' in ctrl_msg['data_folder_path'] and '_grid_' not in ctrl_msg['data_folder_path']:

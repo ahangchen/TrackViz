@@ -28,7 +28,8 @@ def binary_search(a, target):
 
 def track_score(camera_delta_s, camera1, time1, camera2, time2, interval=100, moving_st=False, filter_interval=1000):
     if moving_st:
-        return local_model_score(camera_delta_s, camera1, time1, camera2, time2, interval=interval)
+        return local_model_score(camera_delta_s, camera1, time1, camera2, time2, interval=interval,
+                                 filter_interval=filter_interval)
     else:
         return global_track_score(camera_delta_s, camera1, time1, camera2, time2, interval=interval,
                                   filter_interval=filter_interval)
@@ -59,16 +60,16 @@ def global_track_score(camera_delta_s, camera1, time1, camera2, time2, interval=
     return score
 
 
-def local_frame_infos(frames, time1, local_prop):
+def local_frame_infos(frames, time1, search_interval_length):
     delta_range = abs(frames[-1] - frames[0])
 
-    left_frame = max(time1 - delta_range / local_prop / 2, frames[0])
+    left_frame = max(time1 - search_interval_length / 2, frames[0])
     if left_frame == frames[0]:
-        right_frame = min(left_frame + delta_range / local_prop, frames[-1])
+        right_frame = min(left_frame + search_interval_length, frames[-1])
     else:
-        right_frame = min(time1 + delta_range / local_prop / 2, frames[-1])
+        right_frame = min(time1 + search_interval_length / 2, frames[-1])
     if right_frame == frames[-1]:
-        left_frame = max(right_frame - delta_range / local_prop, frames[0])
+        left_frame = max(right_frame - search_interval_length, frames[0])
     left_local_index = binary_search(frames, left_frame)
     right_local_index = binary_search(frames, right_frame)
     local_interval_length = max(right_local_index - left_local_index, 1)
@@ -84,7 +85,7 @@ def other_frames_length(frames, left_frame, right_frame):
     return local_interval_length
 
 
-def local_model_score(distribution_dict, camera1, time1, camera2, time2, interval=100):
+def local_model_score(distribution_dict, camera1, time1, camera2, time2, interval=100, filter_interval=50000):
     # if abs(time1 - time2) > filter_interval:
     #     return -1.
     cameras_delta_s = distribution_dict['deltas']
@@ -95,14 +96,28 @@ def local_model_score(distribution_dict, camera1, time1, camera2, time2, interva
     cur_delta = time1 - time2
     deltas = cameras_delta_s[camera1][camera2]
     frames = cameras_frame_s[camera1][camera2]
+
     total_cnt = len(deltas)
     if total_cnt == 0:
         return 0.0
-    local_prop = 2
-    local_interval_length, left_local_index, right_local_index = local_frame_infos(frames, time1, local_prop)
     if abs(time1 - time2) > abs(frames[-1] - frames[0]):
-        return -1
-    # interval = (frames[-1] - frames[0]) / 1000
+        # print 'delta larger than frames width'
+        return -1.
+    # delta_range = abs(frames[-1] - frames[0])
+    # local_prop = 2
+    # filter_interval = delta_range / local_prop
+    local_interval_length, left_local_index, right_local_index = local_frame_infos(frames, time1, filter_interval)
+
+    left_time_min = frames[left_local_index]
+    right_time_max = frames[right_local_index]
+    for i in range(len(cameras_delta_s)):
+        if i == camera1 or i == camera2:
+            continue
+        local_interval_length, left_local_index, right_local_index = local_frame_infos(frames, time1, filter_interval)
+        left_time_min = min(frames[left_local_index], left_time_min)
+        right_time_max = max(frames[right_local_index], right_time_max)
+
+
     left_bound = cur_delta - interval
     right_bound = cur_delta + interval
     local_deltas = deltas[left_local_index: right_local_index]
@@ -114,7 +129,7 @@ def local_model_score(distribution_dict, camera1, time1, camera2, time2, interva
         if i == camera1 or i == camera2:
             continue
         tmp_frames = cameras_frame_s[camera1][i]
-        tmp_local_interval_length = other_frames_length(tmp_frames, frames[left_local_index], frames[right_local_index])
+        tmp_local_interval_length = other_frames_length(tmp_frames, left_time_min, right_time_max)
         all_frame_cnt_for_camera1 += tmp_local_interval_length
     # if we use uniform Denominator, we means spatial & temporal probability
     score = target_interval_cnt / float(all_frame_cnt_for_camera1)

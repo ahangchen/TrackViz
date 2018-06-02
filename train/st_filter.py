@@ -63,7 +63,9 @@ def predict_track_scores(real_tracks, camera_delta_s, fusion_param, smooth=False
                 # 给定摄像头，时间，获取时空评分，这里camera_deltas如果是随机算出来的，则是随机评分
                 # todo grid 需要 改区间大小
                 if '_dukequerytail' in predict_path:
-                    score = track_score(camera_delta_s, c1, time1, c2, time2, interval=500, moving_st=True, filter_interval=50000)
+                    score = track_score(camera_delta_s, c1, time1, c2, time2,
+                                        interval=fusion_param['window_interval'], moving_st=True,
+                                        filter_interval=fusion_param['filter_interval'])
                 else:
                     score = track_score(camera_delta_s, c1, time1, c2, time2, interval=700, filter_interval=40000)
             person_deltas_score.append(score)
@@ -309,7 +311,7 @@ def gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_pa
                 elif '_market' in predict_path:
                     score = track_score(camera_delta_s, c1, time1, c2, time2, interval=700, filter_interval=40000)
                 elif '_dukequerytail' in predict_path:
-                    score = track_score(camera_delta_s, c1, time1, c2, time2, interval=500, moving_st=True, filter_interval=50000)
+                    score = track_score(camera_delta_s, c1, time1, c2, time2, interval=fusion_param['window_interval'], moving_st=True, filter_interval=fusion_param['filter_interval'])
                 elif '_duke' in predict_path:
                     score = track_score(camera_delta_s, c1, time1, c2, time2, interval=700, filter_interval=50000)
                 else:

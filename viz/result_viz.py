@@ -31,8 +31,10 @@ def viz_gray_map(pt):
     print sys.getdefaultencoding()
     reload(sys)
     sys.setdefaultencoding('utf8')
-    ax.set_xlabel('α', fontsize=32)
-    ax.set_ylabel('β', fontsize=32)
+    # ax.set_xlabel('α', fontsize=32)
+    # ax.set_ylabel('β', fontsize=32)
+    ax.set_xlabel('W/10³', fontsize=32)
+    ax.set_ylabel('t', fontsize=32)
     ax.invert_yaxis()
     plt.yticks(fontsize=32)
     plt.xticks(fontsize=32)
@@ -46,6 +48,14 @@ def gray_data(values):
                        'b': [0.0, 0.25, 0.5, 0.75, 0.0, 0.25, 0.5, 0.0, 0.25, 0.0],
                        'values': values})
     pt = df.pivot_table(index='a', columns='b', values='values', aggfunc=np.sum)
+    return pt
+
+
+def duke_sensity_data(values):
+    df = pd.DataFrame({'a': [(j+1)*200 for j in range(5) for i in range(5)],
+                       'b': [(i % 5 + 1) * 40 for i in range(25)],
+                       'values': values})
+    pt = df.pivot_table(index='a', columns='b', values='values')
     return pt
 
 
@@ -87,9 +97,8 @@ def iter_vision_acc_data(data_path):
     avg_accs = avg_accs.mean(axis=0)
     return avg_accs
 
-def sensitivity_eval():
-    grid_sensity_values = list()
-    lines = read_lines('../post_process/market_sense.txt')
+def sensitivity_eval(sense_file_path):
+    lines = read_lines(sense_file_path)
     rank1_accs = list()
     cur_cv = -1
     for i, line in enumerate(lines):
@@ -100,9 +109,17 @@ def sensitivity_eval():
             continue
         rank1_accs[cur_cv].append(float(line.split()[0]))
     grid_avg_accs = np.array(rank1_accs).mean(axis=0)
-    market_values = [0.740202, 0.746437, 0.746140, 0.745843, 0.739311, 0.745843, 0.746140, 0.739905,
-                     0.746734, 0.739311]
     viz_gray_map(gray_data(grid_avg_accs))
+
+
+def st_hp_sensitivity_eval(sense_file_path):
+    lines = read_lines(sense_file_path)
+    grid_avg_accs = list()
+    for i, line in enumerate(lines):
+        if i % 2 == 0:
+            continue
+        grid_avg_accs.append(float(line.split()[0]))
+    viz_gray_map(duke_sensity_data(grid_avg_accs))
 
 
 if __name__ == '__main__':
@@ -113,9 +130,12 @@ if __name__ == '__main__':
     # accs = iter_acc_data('market_grid_iter.txt')
     # draw_line(accs, np.arange(0, len(accs[0])), 'Rank-1 precision', 'Number of iterations',
     #           ['Visual Classifier C', 'Fusion Model F'], title='')
-    accs = iter_vision_acc_data('vision_market_grid_iter.txt')
-    draw_line([accs], np.arange(0, len(accs)), 'Rank-1 precision', 'Number of iterations', ['Visual Classifier C'],
-              title='')
+    # accs = iter_vision_acc_data('vision_market_grid_iter.txt')
+    # draw_line([accs], np.arange(0, len(accs)), 'Rank-1 precision', 'Number of iterations', ['Visual Classifier C'],
+    #           title='')
 
     # draw_line(accs, np.arange(0, len(accs[0])), 'Rank-1 precision', 'Number of iterations', ['Visual Classifier C', 'Fusion Model F'], title='')
-    # sensitivity_eval()
+    # sensitivity_eval(sense_file_path='market_sense.txt')
+    # sensitivity_eval(sense_file_path='grid_sense.txt')
+    # sensitivity_eval(sense_file_path='duke2market_sense.txt')
+    st_hp_sensitivity_eval(sense_file_path='dukesense.txt')

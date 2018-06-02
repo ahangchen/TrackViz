@@ -11,15 +11,19 @@ def load_viz_deltas_distribution(delta_path):
 
 def distribute_in_cameras(data_s, subplot, camera_id):
     sns.set(color_codes=True)
+    # markers = ['', '*', '', '.']
+    markers = ['', '', '', '.']
+    line_styles = ['-','-', '--', '-']
     for i, data in enumerate(data_s):
-        # if len(data) < 1 or i > 3:
-        if len(data) < 1: #or i > 3:
+        if len(data) < 1 or i > 3:
             continue
         else:
             print len(data)
+        # sns.distplot(np.array(data), label='camera %d' % (i + 1), hist=False, ax=subplot,
+        #              kde_kws={'marker': markers[i % len(markers)], 'linestyle': line_styles[i % len(line_styles)]},
+        #              axlabel='Distribution for camera 1 in window %d' % camera_id)
         sns.distplot(np.array(data), label='camera %d' % (i + 1), hist=False, ax=subplot,
-                     axlabel='Distribution for camera 1 in window %d' % camera_id)
-        # sns.distplot(np.array(data), label='camera %d' % (i + 1), hist=False, ax=subplot)
+                     kde_kws={'marker': markers[i % len(markers)], 'linestyle': line_styles[i % len(line_styles)]})
         # sns.distplot(np.array(data), label='camera %d' % (i + 1), hist=False, ax=subplot,
         #              axlabel='Distribution for camera %d' % camera_id)
 
@@ -78,5 +82,5 @@ if __name__ == "__main__":
     # for i in range(slice_cnt):
     #     cameras_delta_s = load_viz_deltas_distribution('part%d_duke_real.pck' % i)
     #     viz_market_distribution(cameras_delta_s, 8)
-    evolving_deltas_viz(slice_cnt)
-    # two_part_evolving_deltas_viz(slice_cnt)
+    # evolving_deltas_viz(slice_cnt)
+    two_part_evolving_deltas_viz(slice_cnt)
