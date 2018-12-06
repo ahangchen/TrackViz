@@ -133,6 +133,8 @@ def fusion_transfer(source, target):
     # fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion(source, target)
     fusion_train_rank_pids_path, fusion_train_rank_scores_path, \
     fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion(source, target)
+    # fusion_train_rank_pids_path, fusion_train_rank_scores_path, \
+    # fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion_info(source, target)
     dataset_eval(source, target, fusion_test_rank_pids_path)
 
     # rank transfer, rank and eval
