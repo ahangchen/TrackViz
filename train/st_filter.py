@@ -1,4 +1,6 @@
 # coding=utf-8
+import datetime
+
 from post_process.track_prob import track_score
 from profile.fusion_param import get_fusion_param, ctrl_msg
 from util.file_helper import read_lines, read_lines_and, write, safe_remove
@@ -38,6 +40,8 @@ def predict_track_scores(real_tracks, camera_delta_s, fusion_param, smooth=False
     pids4probes = np.genfromtxt(predict_path, delimiter=' ')
     for probe_i, pids4probe in enumerate(pids4probes):
         person_deltas_score = list()
+        if probe_i % 100 == 0:
+            print '%d of %d' % (probe_i, len(pids4probes))
         for pid4probe in pids4probe:
             # todo transfer: if predict by python, start from 0, needn't minus 1
             pid4probe = int(pid4probe)
@@ -130,13 +134,13 @@ def fusion_st_img_ranker(fusion_param):
     # 从磁盘获取之前建立的时空模型，以及随机时空模型
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     rand_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'])
-    diff_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'].replace('rand', 'diff'))
+    # diff_delta_s = pickle_load(fusion_param['rand_distribution_pickle_path'].replace('rand', 'diff'))
 
     real_tracks = train_tracks(fusion_param)
     # 计算时空评分和随机时空评分
     persons_track_scores = predict_track_scores(real_tracks, camera_delta_s, fusion_param)
     rand_track_scores = predict_track_scores(real_tracks, rand_delta_s, fusion_param)
-    diff_track_scores = predict_track_scores(real_tracks, diff_delta_s, fusion_param)
+    diff_track_scores = rand_track_scores #predict_track_scores(real_tracks, diff_delta_s, fusion_param)
 
     persons_cross_scores = list()
     log_path = fusion_param['eval_fusion_path']
@@ -144,6 +148,11 @@ def fusion_st_img_ranker(fusion_param):
     safe_remove(map_score_path)
     safe_remove(log_path)
     line_log_cnt = 10
+
+    for i, person_ap_scores in enumerate(persons_ap_scores):
+        cur_max_vision = max(person_ap_scores)
+        cur_min_vision = min(person_ap_scores)
+        persons_ap_scores[i] = (persons_ap_scores[i] - cur_min_vision) / (cur_max_vision - cur_min_vision)
 
     for i, person_ap_pids in enumerate(persons_ap_pids):
         cross_scores = list()
@@ -153,21 +162,27 @@ def fusion_st_img_ranker(fusion_param):
             else:
                 cross_score = (persons_track_scores[i][j] * (1 - ep) - en * diff_track_scores[i][j]) * (
                 persons_ap_scores[i][j] + ep / (1 - ep - en)) / rand_track_scores[i][j]
+
             cross_scores.append(cross_score)
         persons_cross_scores.append(cross_scores)
     print 'img score ready'
     max_score = max([max(predict_cross_scores) for predict_cross_scores in persons_cross_scores])
+    print 'max_cross_score %f' % max_score
 
     for i, person_cross_scores in enumerate(persons_cross_scores):
         for j, person_cross_score in enumerate(person_cross_scores):
-            if person_cross_score > 0:
+            if person_cross_score > 0: # diff camera
                 # diff seq not sort and not normalize
                 persons_cross_scores[i][j] /= max_score
-            else:
-                persons_cross_scores[i][j] *= -0.00002
+            else: # same camera and (diff camere && rand score == -1    )
+                persons_cross_scores[i][j] = persons_ap_scores[i][j]
             # if real_tracks[i][1] == real_tracks[persons_ap_pids[i][j]][1]:
             #     # print '%d, %d' % (i, j)
             #     persons_cross_scores[i][j] = 0
+            if i == 0 and j % 100 == 0:
+                print 'st:%f st_diff%f vis:%f fus:%f' % (
+                    persons_track_scores[i][j], diff_track_scores[i][j], persons_ap_scores[i][j], persons_cross_scores[i][j])
+
     person_score_idx_s = list()
     top1_scores = list()
     print 'above person score ready'
@@ -361,14 +376,12 @@ def fusion_st_gallery_ranker(fusion_param):
     persons_ap_scores = predict_img_scores(fusion_param)
     persons_ap_pids = predict_pids(fusion_param)
     print 'read vision scores and pids ready'
-    if 'market_market' in log_path:
+    if True:
+    # if 'market_market' in log_path:
         for i, person_ap_scores in enumerate(persons_ap_scores):
-            cur_max_vision = 0
-            for j, person_ap_score in enumerate(person_ap_scores):
-                if query_tracks[i][1] != gallery_tracks[persons_ap_pids[i][j]][1]:
-                    # diff vision
-                    cur_max_vision = person_ap_score
-            persons_ap_scores[i] /= cur_max_vision
+            cur_max_vision = max(person_ap_scores)
+            cur_min_vision = min(person_ap_scores)
+            persons_ap_scores[i] = (persons_ap_scores[i] - cur_min_vision) / (cur_max_vision - cur_min_vision)
 
 
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
@@ -432,7 +445,7 @@ def fusion_st_gallery_ranker(fusion_param):
                 cross_score = 0
             cross_scores.append(cross_score)
         if max(cross_scores) == 0:
-            print i
+            print 'max cross scores %d is 0' % i
         persons_cross_scores.append(cross_scores)
     print 'fusion scores ready'
         # pickle_save(ctrl_msg['data_folder_path']+'viper_r-testpersons_cross_scores.pick', persons_cross_scores)
@@ -445,7 +458,7 @@ def fusion_st_gallery_ranker(fusion_param):
                 # diff seq not sort, not rank for max, and not normalize
                 if max_score_s[i] == 0:
                     # there exist probe track with same seq, diff camera but value > 1000
-                    print i
+                    print 'max_score_s %d is 0' % i
                 else:
                     persons_cross_scores[i][j] /= max_score_s[i]
                 # persons_cross_scores[i][j] /= max_score
@@ -521,14 +534,12 @@ def simple_fusion_st_gallery_ranker(fusion_param):
     persons_ap_scores = predict_img_scores(fusion_param)
     persons_ap_pids = predict_pids(fusion_param)
     print 'read vision scores and pids ready'
-    if 'market_market' in log_path:
+    if True:
+    # if 'market_market' in log_path:
         for i, person_ap_scores in enumerate(persons_ap_scores):
-            cur_max_vision = 0
-            for j, person_ap_score in enumerate(person_ap_scores):
-                if query_tracks[i][1] != gallery_tracks[persons_ap_pids[i][j]][1]:
-                    # diff vision
-                    cur_max_vision = person_ap_score
-            persons_ap_scores[i] /= cur_max_vision
+            cur_max_vision = max(person_ap_scores)
+            cur_min_vision = min(person_ap_scores)
+            persons_ap_scores[i] = (persons_ap_scores[i] - cur_min_vision) / (cur_max_vision - cur_min_vision)
 
 
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
@@ -550,7 +561,7 @@ def simple_fusion_st_gallery_ranker(fusion_param):
             cross_score = cur_track_score * persons_ap_scores[i][j]
             cross_scores.append(cross_score)
         if max(cross_scores) == 0:
-            print i
+            print 'max_cross_scores %d is 0' % i
         persons_cross_scores.append(cross_scores)
     print 'fusion scores ready'
     max_score_s = [max(predict_cross_scores) for predict_cross_scores in persons_cross_scores]
@@ -560,7 +571,7 @@ def simple_fusion_st_gallery_ranker(fusion_param):
                 # diff seq not sort, not rank for max, and not normalize
                 if max_score_s[i] == 0:
                     # there exist probe track with same seq, diff camera but value > 1000
-                    print i
+                    print 'max_score_s %d is 0' % i
                 else:
                     persons_cross_scores[i][j] /= max_score_s[i]
             else:
@@ -587,8 +598,8 @@ def simple_fusion_st_gallery_ranker(fusion_param):
     return person_score_idx_s
 
 if __name__ == '__main__':
-    ctrl_msg['data_folder_path'] = 'market_dukequerytail-test'
-    # ctrl_msg['data_folder_path'] = 'duke_market-test'
+    # ctrl_msg['data_folder_path'] = 'cuhk_duke-train'
+    ctrl_msg['data_folder_path'] = 'duke_market-train'
     ctrl_msg['ep'] = 0.0
     ctrl_msg['en'] = 0.0
     # fusion_param = get_fusion_param()
@@ -597,10 +608,11 @@ if __name__ == '__main__':
     fusion_param = get_fusion_param()
     # fusion_param['distribution_pickle_path'] = fusion_param['distribution_pickle_path'].replace('duketail', 'duke')
     # fusion_param['rand_distribution_pickle_path'] = fusion_param['rand_distribution_pickle_path'].replace('duketail', 'duke')
-    fusion_st_gallery_ranker(fusion_param)
-    os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
-    os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
-              + 'dukequerytail /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
+    fusion_st_img_ranker(fusion_param)
+    # fusion_st_gallery_ranker(fusion_param)
+    # os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
+    # os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
+    #           + 'grid-cv-0 /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
     # os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
     #           + 'duke /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
     # fusion_st_img_ranker(fusion_param)
