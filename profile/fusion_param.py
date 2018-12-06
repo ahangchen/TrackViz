@@ -1,3 +1,5 @@
+from util.file_helper import safe_mkdir
+
 ctrl_msg = {
     'data_folder_path': 'market_market-test',
     'cv_num': 0,
@@ -12,6 +14,7 @@ update_msg = {}
 
 def get_fusion_param():
     origin_dict = {
+        'gt_fusion': False,
         'renew_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_pid.log',
         'renew_ac_path': 'data/' + ctrl_msg['data_folder_path'] + '/renew_ac.log',
         'predict_pid_path': 'data/' + ctrl_msg['data_folder_path'] + '/predict_pid.log',
@@ -35,6 +38,7 @@ def get_fusion_param():
         'window_interval': ctrl_msg['window_interval'],
         'filter_interval': ctrl_msg['filter_interval']
     }
+    safe_mkdir('data/' + ctrl_msg['data_folder_path'])
 
     if '_grid' in ctrl_msg['data_folder_path'] and '_grid_' not in ctrl_msg['data_folder_path']:
         origin_dict['probe_path'] = 'data/grid/grid-cv' + str(ctrl_msg['cv_num']) + '-probe.txt'
@@ -70,8 +74,7 @@ def get_fusion_param():
         origin_dict['answer_path'] = origin_dict['probe_path']
     if 'r-' in origin_dict['src_distribution_pickle_path']:
         # use track info before increment
-        origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('r-train',
-                                                                                                           'train_rand')
+        origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('r-train', 'train_rand')
     else:
         # use track info after increment
         origin_dict['rand_distribution_pickle_path'] = origin_dict['src_distribution_pickle_path'].replace('train',
@@ -82,5 +85,3 @@ def get_fusion_param():
         origin_dict[k] = v
     return origin_dict
 
-
-fusion_param = get_fusion_param()

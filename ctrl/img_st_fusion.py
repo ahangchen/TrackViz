@@ -22,11 +22,11 @@ def test_fusion(fusion_param, ep=0.5, en=0.01):
     except shutil.Error:
         print 'pickle ready'
     # merge visual probability and track distribution probability
-    fusion_st_gallery_ranker(fusion_param)
-    # simple_fusion_st_gallery_ranker(fusion_param)
+    if fusion_param['gt_fusion']:
+        simple_fusion_st_gallery_ranker(fusion_param)
+    else:
+        fusion_st_gallery_ranker(fusion_param)
     # evaluate
-    # todo transfer: no eval by fusion code
-    # eval_on_train_test(fusion_param, test_mode=True)
 
 
 def train_fusion(fusion_param, ep=0.5, en=0.01):
@@ -34,15 +34,18 @@ def train_fusion(fusion_param, ep=0.5, en=0.01):
     # get_predict_tracks(fusion_param)
     # get distribution sorted list for probability compute
     # store_sorted_deltas(fusion_param)
-    # simple_fusion_st_img_ranker(fusion_param)
-    fusion_st_img_ranker(fusion_param)
+    if fusion_param['gt_fusion']:
+        simple_fusion_st_img_ranker(fusion_param)
+    else:
+        fusion_st_img_ranker(fusion_param)
 
 
 def init_strict_img_st_fusion():
     # 全局调度入口，会同时做训练集和测试集上的融合与评分
     fusion_param = get_fusion_param()
     safe_mkdir('data/' + ctrl_msg['data_folder_path'])
-    # get_predict_delta_tracks(fusion_param)
+    get_predict_delta_tracks(fusion_param, use_real_st=fusion_param['gt_fusion'])
+
     # # only get rand model for train dataset
     prepare_rand_folder(fusion_param)
     prepare_diff_folder(fusion_param)
@@ -50,20 +53,20 @@ def init_strict_img_st_fusion():
     ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'] + '_rand'
     fusion_param = get_fusion_param()
     # 生成随机时空点的时空模型
-    # get_predict_delta_tracks(fusion_param, random=True)
+    get_predict_delta_tracks(fusion_param, random=True)
 
     ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'].replace('rand', 'diff')
     fusion_param = get_fusion_param()
-    # get_predict_delta_tracks(fusion_param, diff_person=True)
+    get_predict_delta_tracks(fusion_param, diff_person=True)
 
     # 改回非随机的train目录
     ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
 
     # has prepared more accurate ep, en
     print('fusion on training dataset')
-    # iter_strict_img_st_fusion(on_test=False)
-    # 改成测试目录
-    print('fusion on test dataset')
+    iter_strict_img_st_fusion(on_test=False)
+    # # 改成测试目录
+    # print('fusion on test dataset')
     ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-4] + 'est'
     safe_mkdir('data/' + ctrl_msg['data_folder_path'])
     iter_strict_img_st_fusion(on_test=True)
@@ -114,52 +117,52 @@ def iter_strict_img_st_fusion(on_test=False):
 
 
 if __name__ == '__main__':
-    for i in range(5):
-        for j in range(5):
-            ctrl_msg['window_interval'] = (i+1) * 200
-            ctrl_msg['filter_interval'] = (j+1) * 40000
-            ctrl_msg['data_folder_path'] = 'market_dukequerytail-train'
-            fusion_param = get_fusion_param()
-            init_strict_img_st_fusion()
-            ctrl_msg['data_folder_path'] = 'market_dukequerytail-test'
-            fusion_param = get_fusion_param()
-            os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
-            os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
-                      + 'dukequerytail /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
-
-
-    for i in range(0, 4):
-        for j in range(0, 4 - i):
-            ctrl_msg['ep'] = i * 0.25
-            ctrl_msg['en'] = j * 0.25
-            ctrl_msg['data_folder_path'] = 'grid_market-train'
-            fusion_param = get_fusion_param()
-            init_strict_img_st_fusion()
-            ctrl_msg['data_folder_path'] = 'grid_market-test'
-            fusion_param = get_fusion_param()
-            os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
-            os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
-                      + 'market' + ' ' + fusion_param['eval_fusion_path'])
-
-    for cv_num in range(10):
-        for i in range(0, 4):
-            for j in range(0, 4 - i):
-                ctrl_msg['ep'] = i * 0.25
-                ctrl_msg['en'] = j * 0.25
-                ctrl_msg['data_folder_path'] = 'market_grid-cv%d-train' % cv_num
-                fusion_param = get_fusion_param()
-                init_strict_img_st_fusion()
-                ctrl_msg['data_folder_path'] = 'market_grid-cv%d-test' % cv_num
-                fusion_param = get_fusion_param()
-                os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
-                os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
-                          + ('grid-cv%d' % cv_num) + ' ' + fusion_param['eval_fusion_path'])
+    # for i in range(5):
+    #     for j in range(5):
+    #         ctrl_msg['window_interval'] = (i+1) * 200
+    #         ctrl_msg['filter_interval'] = (j+1) * 40000
+    #         ctrl_msg['data_folder_path'] = 'market_dukequerytail-train'
+    #         fusion_param = get_fusion_param()
+    #         init_strict_img_st_fusion()
+    #         ctrl_msg['data_folder_path'] = 'market_dukequerytail-test'
+    #         fusion_param = get_fusion_param()
+    #         os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
+    #         os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
+    #                   + 'dukequerytail /home/cwh/coding/TrackViz/' + fusion_param['eval_fusion_path'])
+    #
+    #
+    # for i in range(0, 4):
+    #     for j in range(0, 4 - i):
+    #         ctrl_msg['ep'] = i * 0.25
+    #         ctrl_msg['en'] = j * 0.25
+    #         ctrl_msg['data_folder_path'] = 'grid_market-train'
+    #         fusion_param = get_fusion_param()
+    #         init_strict_img_st_fusion()
+    #         ctrl_msg['data_folder_path'] = 'grid_market-test'
+    #         fusion_param = get_fusion_param()
+    #         os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
+    #         os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
+    #                   + 'market' + ' ' + fusion_param['eval_fusion_path'])
+    #
+    # for cv_num in range(10):
+    #     for i in range(0, 4):
+    #         for j in range(0, 4 - i):
+    #             ctrl_msg['ep'] = i * 0.25
+    #             ctrl_msg['en'] = j * 0.25
+    #             ctrl_msg['data_folder_path'] = 'market_grid-cv%d-train' % cv_num
+    #             fusion_param = get_fusion_param()
+    #             init_strict_img_st_fusion()
+    #             ctrl_msg['data_folder_path'] = 'market_grid-cv%d-test' % cv_num
+    #             fusion_param = get_fusion_param()
+    #             os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')
+    #             os.system('/home/cwh/anaconda2/bin/python /home/cwh/coding/rank-reid/rank_reid.py 2 '
+    #                       + ('grid-cv%d' % cv_num) + ' ' + fusion_param['eval_fusion_path'])
 
     # ctrl_msg['ep'] = 0.25
     # ctrl_msg['en'] = 0.5
-    # ctrl_msg['data_folder_path'] = 'grid_market-train'
-    # fusion_param = get_fusion_param()
-    # init_strict_img_st_fusion()
+    ctrl_msg['data_folder_path'] = 'market_grid-cv-1-train'
+    fusion_param = get_fusion_param()
+    init_strict_img_st_fusion()
     # ctrl_msg['data_folder_path'] = 'grid_market-test'
     # fusion_param = get_fusion_param()
     # os.environ.setdefault('LD_LIBRARY_PATH', '/usr/local/cuda/lib64')

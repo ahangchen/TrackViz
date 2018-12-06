@@ -2,7 +2,6 @@
 from profile.fusion_param import ctrl_msg, get_fusion_param
 from util.serialize import pickle_load
 import numpy as np
-from util.cffi_bisect import c_bisect_lib
 from bisect import bisect_left
 
 def binary_search(a, target):
