@@ -88,8 +88,8 @@ def get_predict_pure_delta_tracks(fusion_param, useful_predict_limit=10, random=
             # todo ignore same camera track
             if real_tracks[i][3] == real_tracks[predict_pid][3] and real_tracks[i][1] != real_tracks[predict_pid][1]:
                 # and pid equal: real st
-                # if use_real_st and random or real_tracks[i][0] == real_tracks[predict_pid][0]:
-                if True:
+                if random or (use_real_st and real_tracks[i][0] == real_tracks[predict_pid][0]) or not use_real_st:
+                # if True:
                     useful_cnt += 1
                     delta = real_tracks[i][2] - real_tracks[predict_pid][2]
                     if abs(delta) < 1000000:
@@ -102,7 +102,7 @@ def get_predict_pure_delta_tracks(fusion_param, useful_predict_limit=10, random=
     # for python
     safe_remove(fusion_param['distribution_pickle_path'])
     pickle_save(fusion_param['distribution_pickle_path'], camera_delta_s)
-    print 'deltas saved'
+    print 'deltas saved to ' + fusion_param['distribution_pickle_path']
     return camera_delta_s
 
 
