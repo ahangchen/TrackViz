@@ -132,8 +132,8 @@ def fusion_transfer(source, target):
     # fusion_train_rank_pids_path, fusion_train_rank_scores_path, \
     # fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion(source, target)
     fusion_train_rank_pids_path, fusion_train_rank_scores_path, \
-    fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion_info(source, target)
-    # dataset_eval(source, target, fusion_test_rank_pids_path)
+    fusion_test_rank_pids_path, fusion_test_rank_scores_path = st_fusion(source, target)
+    dataset_eval(source, target, fusion_test_rank_pids_path)
 
     # rank transfer, rank and eval
     transfer_train_rank_pids_path, transfer_train_rank_scores_path, \
@@ -146,7 +146,7 @@ def fusion_transfer(source, target):
         = st_fusion(source, transfer_target)
     dataset_eval(source, transfer_target, fusion_test_rank_pids_path)
 
-    iteration_cnt = 9
+    iteration_cnt = 0
     for i in range(iteration_cnt):
         # rank transfer, rank and eval
         transfer_train_rank_pids_path, transfer_train_rank_scores_path, \
@@ -161,8 +161,8 @@ def fusion_transfer(source, target):
 
 
 def dataset_fusion_transfer():
-    sources = ['market']
-    targets = ['grid']
+    sources = ['grid', 'cuhk']
+    targets = ['duke']
     # sources = ['market']
     # targets = ['duketqtail', 'dukequerytail']
     for target in targets:
