@@ -75,5 +75,6 @@ def safe_mkdir(path):
 
 
 def safe_link(src, dst):
-    if not os.path.exists(dst):
-        os.symlink(src, dst)
+    if os.path.islink(dst):
+        os.unlink(dst)
+    os.symlink(src, dst)

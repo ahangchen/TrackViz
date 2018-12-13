@@ -1,4 +1,16 @@
+def warn(*args, **kwargs):
+    pass
+import warnings
+warnings.warn = warn
+
+from sklearn.cluster import SpectralClustering, AffinityPropagation, DBSCAN, KMeans
+from sklearn import metrics
+from sklearn.metrics import euclidean_distances
+
 from util.file_helper import read_lines
+import numpy as np
+import scipy.io
+from util.serialize import pickle_save, pickle_load
 
 
 def parse_tracks(track_path):
@@ -13,23 +25,24 @@ def parse_tracks(track_path):
         if 'bmp' in info[2]:
             info[2] = info[2].split('.')[0]
         if len(info) > 4 and 'jpe' in info[6]:
-            real_tracks.append([info[0], int(info[1][0]), int(info[2])])
+            real_tracks.append([int(info[0]), int(info[1][0]), int(info[2])])
         elif 'f' in info[2]:
-            real_tracks.append([info[0], int(info[1][1]), int(info[2][1:-5]), 1])
+            real_tracks.append([int(info[0]), int(info[1][1]), int(info[2][1:-5]), 1])
         else:
-            real_tracks.append([info[0], int(info[1][1]), int(info[2]), int(info[1][3])])
+            real_tracks.append([int(info[0]), int(info[1][1]), int(info[2]), int(info[1][3])])
         cameras.add(real_tracks[i][1])
         seqs.add(real_tracks[i][3])
     return real_tracks, cameras, seqs
 
 
 def single_camera_time_cluster(track_path):
+    # assign tracklet id to images in the same camera with
     real_tracks, cameras, seqs = parse_tracks(track_path)
     camera_cnt = len(cameras)
     seq_cnt = len(seqs)
     camera_tracks = [[ [] for j in range(seq_cnt)] for i in range(camera_cnt)]
-    for pid, camera, t, seq in real_tracks:
-        camera_tracks[camera - 1][seq - 1].append([pid, t])
+    for i, (pid, camera, t, seq) in enumerate(real_tracks):
+        camera_tracks[camera - 1][seq - 1].append([pid, t, i])
 
     pseudo_camera_tracks = [[ [] for j in range(seq_cnt)] for i in range(camera_cnt)]
     avg_flow_camera_seq = [[ [] for j in range(seq_cnt)] for i in range(camera_cnt)]
@@ -54,7 +67,7 @@ def single_camera_time_cluster(track_path):
                 if camera_seq[idx][0] != camera_seq[idx - 1]:
                     avg_flow_camera_seq[i][j].append(cur_time_flow)
             avg_flow_camera_seq[i][j] = sum(avg_flow_camera_seq[i][j]) / len(avg_flow_camera_seq[i][j])
-    print avg_flow_camera_seq
+    print(avg_flow_camera_seq)
     # [[215, 258, 277, 154, 185, 222],
     # [280, 240, 216, [], [], []],
     # [200, 133, 151, [], [], []],
@@ -64,5 +77,222 @@ def single_camera_time_cluster(track_path):
     return pseudo_camera_tracks
 
 
+class DataProvider(object):
+    def __init__(self):
+        self.data = None
+    def load_data(self):
+        return self
+    def provide(self):
+        return self.data
+
+
+class AffinityProvider(DataProvider):
+    def __init__(self, pid_path, score_path):
+        super(AffinityProvider, self).__init__()
+        self.pid_path = pid_path
+        self.score_path = score_path
+    def load_data(self):
+        print('loading matrix')
+        pid = np.genfromtxt(self.pid_path, delimiter=' ').astype(int)
+        print('pid shape')
+        print(pid.shape)
+        w = np.genfromtxt(self.score_path, delimiter=' ')
+        print('w shape')
+        print(w.shape)
+        print('loading done, fixing diag')
+        print('resorting')
+        for i in range(w.shape[0]):
+            mi = w[i].min()
+            ma = w[i].max()
+            w[i] = (w[i][pid[i]] - mi) / (ma - mi)
+        print(w[0])
+        print('make symmetric')
+        w = (w.T + w) / 2
+        print(w[0])
+        self.data = w
+        return self
+
+
+class Evolve_cluster:
+    def __init__(self, pseudo_cameras_tracks, visual_affinity_path, pid_path):
+        # pseudo_cameras_tracks: camera_cnt * seq_cnt lists
+        print('loading affinity')
+        ap = AffinityProvider(pid_path, visual_affinity_path).load_data()
+        self.w = ap.provide()
+        print(self.w[0][:100])
+        self.cameras_tracks = pseudo_cameras_tracks
+        self.score = 0
+        self.tracklet_cnt = 0
+        self.score2 = 0
+
+    def cluster(self, tracklet):
+        # tracklet: [[pid, time, img_id, pseudo_id],...], only img_id is used
+        ids = map(lambda arr: arr[2], tracklet)
+        # cluster = SpectralClustering(n_clusters=2, affinity='precomputed')
+        cluster = AffinityPropagation(preference=0.1, affinity='precomputed')
+        affinity = np.zeros((len(tracklet), len(tracklet)))
+        for i, img_i in enumerate(ids):
+            for j, img_j in enumerate(ids):
+                affinity[i][j] = self.w[img_i][img_j]
+        # cls = cluster.fit_predict(affinity)
+        cls = cluster.fit_predict(affinity).reshape(-1)
+        self.score2 += metrics.adjusted_rand_score([info[0] for info in tracklet], cls)
+        cls_cnt = len(set(cls))
+        cluster = SpectralClustering(n_clusters=cls_cnt, affinity='precomputed')
+        cls = cluster.fit_predict(affinity).reshape(-1)
+        # print(metrics.adjusted_rand_score([info[0] for info in cameras_tracks[0][0]],
+        #                                   cls))
+        self.score += metrics.adjusted_rand_score([info[0] for info in tracklet], cls)
+        self.tracklet_cnt += 1
+        return [(ids[i], cls[i]) for i in range(len(ids))]
+
+    def fit(self):
+        for i, pseudo_camera_tracks in enumerate(self.cameras_tracks):
+            # same camera
+            for j, pseudo_camera_seq in enumerate(pseudo_camera_tracks):
+                # same seq
+                print('cluster on camera %d, seq %d' % (i, j))
+                k = 0
+                tmp_tracklet = []
+                last_pse_track_id = 0
+                new_track_ids = [] # [[img_id, new_track_id], ...]
+                while k < len(pseudo_camera_seq):
+                    if pseudo_camera_seq[k][-1] != last_pse_track_id:
+                        # do cluster; reassign id; clear tracklet
+                        ids = self.cluster(tmp_tracklet)
+                        if len(new_track_ids) > 0:
+                            max_new_track_id = new_track_ids[-1][1]
+                        else:
+                            max_new_track_id = 0
+                        print('pseudo before assgin:')
+                        print(pseudo_camera_seq[k - len(ids):k])
+                        print('assign ids:')
+                        print(ids)
+                        ids = map(lambda p: [p[0], p[1] + max_new_track_id + 1], ids)
+                        new_track_ids.extend(ids)
+                        del tmp_tracklet[:]
+                    tmp_tracklet.append(pseudo_camera_seq[k])
+                    last_pse_track_id = pseudo_camera_seq[k][3]
+                    k += 1
+                # do cluster; reassign id; clear tracklet
+                ids = self.cluster(tmp_tracklet)
+                if len(new_track_ids) > 0:
+                    max_new_track_id = new_track_ids[-1][1]
+                else:
+                    max_new_track_id = 0
+                print('pseudo before assgin:')
+                print(pseudo_camera_seq[k - len(ids):k])
+                print('assign ids:')
+                print(ids)
+                ids = map(lambda p: [p[0], p[1] + max_new_track_id + 1], ids)
+                new_track_ids.extend(ids)
+                del tmp_tracklet[:]
+
+                print(pseudo_camera_seq)
+                for l, (img_id, new_track_id) in enumerate(new_track_ids):
+                    self.cameras_tracks[i][j][l].append(new_track_id)
+        print('spectral:')
+        print(self.score/ self.tracklet_cnt)
+        print('ap:')
+        print(self.score2/ self.tracklet_cnt)
+
+
+class TrackFeatureCluster:
+    def __init__(self, pseudo_cameras_tracks, visual_feature_path):
+        # pseudo_cameras_tracks: camera_cnt * seq_cnt lists
+        print('loading affinity')
+        self.feature = scipy.io.loadmat(visual_feature_path)['ft']
+        self.cameras_tracks = pseudo_cameras_tracks
+        self.ap_score = 0
+        self.tracklet_cnt = 0
+        self.spectral_score = 0
+        self.kmeans_score = 0
+
+    def cluster(self, tracklet):
+        # tracklet: [[pid, time, img_id, pseudo_id],...], only img_id is used
+        ids = map(lambda arr: arr[2], tracklet)
+        # cluster = SpectralClustering(n_clusters=2, affinity='precomputed')
+        track_features = []
+        for i, img_i in enumerate(ids):
+            track_features.append(self.feature[img_i])
+        similarity = -euclidean_distances(track_features, squared=True)
+        # cls = cluster.fit_predict(affinity)
+        cluster = AffinityPropagation(preference=np.median(similarity))
+        cls = cluster.fit_predict(track_features).reshape(-1)
+        self.spectral_score += metrics.adjusted_rand_score([info[0] for info in tracklet], cls)
+
+        cls_cnt = len(set(cls))
+
+        cluster = SpectralClustering(n_clusters=cls_cnt)
+        cls = cluster.fit_predict(track_features).reshape(-1)
+        self.ap_score += metrics.adjusted_rand_score([info[0] for info in tracklet], cls)
+
+        cluster = KMeans(n_clusters=cls_cnt)
+        cls = cluster.fit_predict(track_features).reshape(-1)
+        self.kmeans_score += metrics.adjusted_rand_score([info[0] for info in tracklet], cls)
+
+        self.tracklet_cnt += 1
+        return [(ids[i], cls[i]) for i in range(len(ids))]
+
+    def fit(self):
+        for i, pseudo_camera_tracks in enumerate(self.cameras_tracks):
+            # same camera
+            for j, pseudo_camera_seq in enumerate(pseudo_camera_tracks):
+                # same seq
+                print('cluster on camera %d, seq %d' % (i, j))
+                k = 0
+                tmp_tracklet = []
+                last_pse_track_id = 0
+                new_track_ids = [] # [[img_id, new_track_id], ...]
+                while k < len(pseudo_camera_seq):
+                    if pseudo_camera_seq[k][-1] != last_pse_track_id:
+                        # do cluster; reassign id; clear tracklet
+                        ids = self.cluster(tmp_tracklet)
+                        if len(new_track_ids) > 0:
+                            max_new_track_id = new_track_ids[-1][1]
+                        else:
+                            max_new_track_id = 0
+                        print('pseudo before assgin:')
+                        print(pseudo_camera_seq[k - len(ids):k])
+                        print('assign ids:')
+                        print(ids)
+                        ids = map(lambda p: [p[0], p[1] + max_new_track_id + 1], ids)
+                        new_track_ids.extend(ids)
+                        del tmp_tracklet[:]
+                    tmp_tracklet.append(pseudo_camera_seq[k])
+                    last_pse_track_id = pseudo_camera_seq[k][3]
+                    k += 1
+                # do cluster; reassign id; clear tracklet
+                ids = self.cluster(tmp_tracklet)
+                if len(new_track_ids) > 0:
+                    max_new_track_id = new_track_ids[-1][1]
+                else:
+                    max_new_track_id = 0
+                print('pseudo before assgin:')
+                print(pseudo_camera_seq[k - len(ids):k])
+                print('assign ids:')
+                print(ids)
+                ids = map(lambda p: [p[0], p[1] + max_new_track_id + 1], ids)
+                new_track_ids.extend(ids)
+                del tmp_tracklet[:]
+
+                print(pseudo_camera_seq)
+                for l, (img_id, new_track_id) in enumerate(new_track_ids):
+                    self.cameras_tracks[i][j][l].append(new_track_id)
+        print('spectral:')
+        print(self.ap_score / self.tracklet_cnt)
+        print('kmeans:')
+        print(self.kmeans_score / self.tracklet_cnt)
+        print('ap:')
+        print(self.spectral_score / self.tracklet_cnt)
+
+
+
 if __name__ == '__main__':
-    single_camera_time_cluster('../data/duke/train.list')
+    # cameras_tracks = pickle_load('spectral.pck')
+    pseudo_camera_tracks = single_camera_time_cluster('../data/duke/train.list')
+    c = TrackFeatureCluster(pseudo_camera_tracks, '/home/cwh/coding/taudl_pyt/baseline/eval/market_duke-train/train_ft.mat') #0.31
+    # c = Evolve_cluster(pseudo_camera_tracks, '../data/market_duke-train/cross_filter_score.log', '../data/market_duke-train/cross_filter_pid.log') # 0.22
+    c.fit()
+    # ap : 0.09
+    pickle_save('spectral.pck', c.cameras_tracks)
