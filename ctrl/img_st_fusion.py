@@ -55,9 +55,9 @@ def init_strict_img_st_fusion():
     # 生成随机时空点的时空模型
     get_predict_delta_tracks(fusion_param, random=True)
 
-    ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'].replace('rand', 'diff')
-    fusion_param = get_fusion_param()
-    get_predict_delta_tracks(fusion_param, diff_person=True)
+    # ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'].replace('rand', 'diff')
+    # fusion_param = get_fusion_param()
+    # get_predict_delta_tracks(fusion_param, diff_person=True)
 
     # 改回非随机的train目录
     ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-5]
@@ -66,7 +66,7 @@ def init_strict_img_st_fusion():
     print('fusion on training dataset')
     iter_strict_img_st_fusion(on_test=False)
     # # 改成测试目录
-    # print('fusion on test dataset')
+    print('fusion on test dataset')
     ctrl_msg['data_folder_path'] = ctrl_msg['data_folder_path'][:-4] + 'est'
     safe_mkdir('data/' + ctrl_msg['data_folder_path'])
     iter_strict_img_st_fusion(on_test=True)
@@ -160,7 +160,8 @@ if __name__ == '__main__':
 
     # ctrl_msg['ep'] = 0.25
     # ctrl_msg['en'] = 0.5
-    ctrl_msg['data_folder_path'] = 'market_grid-cv-1-train'
+    ctrl_msg['data_folder_path'] = 'duke_market-train'
+    # ctrl_msg['data_folder_path'] = 'market_grid-cv-1-train'
     fusion_param = get_fusion_param()
     init_strict_img_st_fusion()
     # ctrl_msg['data_folder_path'] = 'grid_market-test'

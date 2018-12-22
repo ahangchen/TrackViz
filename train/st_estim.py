@@ -92,7 +92,7 @@ def get_predict_pure_delta_tracks(fusion_param, useful_predict_limit=10, random=
                 # if True:
                     useful_cnt += 1
                     delta = real_tracks[i][2] - real_tracks[predict_pid][2]
-                    if abs(delta) < 1000000:
+                    if abs(delta) < 100000:
                         camera_delta_s[real_tracks[i][1] - 1][real_tracks[predict_pid][1] - 1].append(delta)
     print 'deltas collected'
     for camera_delta in camera_delta_s:

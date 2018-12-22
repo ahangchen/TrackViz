@@ -1,3 +1,6 @@
+import argparse
+
+
 def warn(*args, **kwargs):
     pass
 import warnings
@@ -75,42 +78,6 @@ def single_camera_time_cluster(track_path):
     # [152, 185, 242, [], [], []],
     # [89, 92, 123, 295, [], []]]
     return pseudo_camera_tracks
-
-
-class DataProvider(object):
-    def __init__(self):
-        self.data = None
-    def load_data(self):
-        return self
-    def provide(self):
-        return self.data
-
-
-class AffinityProvider(DataProvider):
-    def __init__(self, pid_path, score_path):
-        super(AffinityProvider, self).__init__()
-        self.pid_path = pid_path
-        self.score_path = score_path
-    def load_data(self):
-        print('loading matrix')
-        pid = np.genfromtxt(self.pid_path, delimiter=' ').astype(int)
-        print('pid shape')
-        print(pid.shape)
-        w = np.genfromtxt(self.score_path, delimiter=' ')
-        print('w shape')
-        print(w.shape)
-        print('loading done, fixing diag')
-        print('resorting')
-        for i in range(w.shape[0]):
-            mi = w[i].min()
-            ma = w[i].max()
-            w[i] = (w[i][pid[i]] - mi) / (ma - mi)
-        print(w[0])
-        print('make symmetric')
-        w = (w.T + w) / 2
-        print(w[0])
-        self.data = w
-        return self
 
 
 class TrackFeatureCluster:
@@ -210,22 +177,17 @@ class TrackFeatureCluster:
         print('ap:')
         print(self.spectral_score / self.tracklet_cnt)
 
-
+def arg_parse():
+    parser = argparse.ArgumentParser(description='eval on txt')
+    parser.add_argument('--train_list', default='../data/duke/train.list', type=str, help='')
+    parser.add_argument('--transfer_feature', default='/home/cwh/coding/taudl_pyt/baseline/eval/grid_duke-train/train_ft.mat', type=str, help='')
+    parser.add_argument('--transfer', default='grid_duke', type=str, help='')
+    opt = parser.parse_args()
+    return opt
 
 if __name__ == '__main__':
-    # cameras_tracks = pickle_load('market_cluster.pck')
-    cameras_tracks = pickle_load('duke_cluster.pck')
-    # pseudo_camera_tracks = single_camera_time_cluster('../data/market/train.txt')
-    pseudo_camera_tracks = single_camera_time_cluster('../data/duke/train.list')
-    # c = TrackFeatureCluster(pseudo_camera_tracks, '/home/cwh/coding/taudl_pyt/baseline/eval/duke_market-train/train_ft.mat') #0.31
-    c = TrackFeatureCluster(pseudo_camera_tracks, '/home/cwh/coding/taudl_pyt/baseline/eval/market_duke-train/train_ft.mat') #0.31
+    opt = arg_parse()
+    pseudo_camera_tracks = single_camera_time_cluster(opt.train_list)
+    c = TrackFeatureCluster(pseudo_camera_tracks, opt.transfer_feature) #0.31
     c.fit()
-    # ap : 0.09
-    pickle_save('duke_cluster.pck', c.cameras_tracks)
-    # pickle_save('market_cluster.pck', c.cameras_tracks)
-    # kmeans: 1000
-    # 0.538479149029
-    # 700:
-    # 0.518615411116
-    # 400:
-    # 0.510
+    pickle_save(opt.transfer + '_cluster.pck', c.cameras_tracks)
