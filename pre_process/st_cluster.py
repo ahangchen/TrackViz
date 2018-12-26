@@ -187,6 +187,7 @@ def arg_parse():
 
 if __name__ == '__main__':
     opt = arg_parse()
+    # a = pickle_load(opt.transfer+'_cluster.pck')
     pseudo_camera_tracks = single_camera_time_cluster(opt.train_list)
     c = TrackFeatureCluster(pseudo_camera_tracks, opt.transfer_feature) #0.31
     c.fit()

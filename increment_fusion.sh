@@ -3,12 +3,12 @@ export PYTHONPATH=/home/cwh/coding/TrackViz
 PYTHON2=/home/cwh/anaconda2/bin/python
 PYTHON3=/home/cwh/anaconda3/bin/python
 LD_LIBRAR_PATH=/usr/local/cuda/lib64
-VISION_DIR=/home/cwh/coding/taudl_pyt/taudl_transfer/eval
+VISION_DIR=/home/cwh/coding/taudl_pyt/taudl_iter/eval
 
-#source_names=("duke" "market"  "grid" "viper" "cuhk")
-source_names=("market")
-#target_names=("market" "duke")
-target_names=("market")
+source_names=("duke" "market"  "grid" "viper" "cuhk")
+#source_names=("market")
+target_names=("market" "duke")
+#target_names=("market")
 
 for j in "${!source_names[@]}"
 do
