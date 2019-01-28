@@ -325,10 +325,9 @@ def gallery_track_scores(query_tracks, gallery_tracks, camera_delta_s, fusion_pa
 
             else:
                 # 给定摄像头，时间，获取时空评分，这里camera_deltas如果是随机算出来的，则是随机评分
-                # if 'market_market' in predict_path:
-                #     score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100, filter_interval=500)
-                # el
-                if '_market' in predict_path:
+                if 'market_market' in predict_path:
+                    score = track_score(camera_delta_s, c1, time1, c2, time2, interval=100, filter_interval=10000)
+                elif '_market' in predict_path:
                     score = track_score(camera_delta_s, c1, time1, c2, time2, interval=700, filter_interval=40000)
                 elif '_dukequerytail' in predict_path:
                     score = track_score(camera_delta_s, c1, time1, c2, time2, interval=fusion_param['window_interval'], moving_st=True, filter_interval=fusion_param['filter_interval'])
@@ -381,13 +380,17 @@ def fusion_st_gallery_ranker(fusion_param):
     persons_ap_scores = predict_img_scores(fusion_param)
     persons_ap_pids = predict_pids(fusion_param)
     print 'read vision scores and pids ready'
+    if 'market_market' in log_path:
+        scale = 10
+    else:
+        scale = 3 # 1.5 for direct fusion
     if True:
     # if 'market_market' in log_path:
         for i, person_ap_scores in enumerate(persons_ap_scores):
             cur_max_vision = max(person_ap_scores)
             cur_min_vision = min(person_ap_scores)
             persons_ap_scores[i] = (persons_ap_scores[i] - cur_min_vision) / (cur_max_vision - cur_min_vision)
-            persons_ap_scores[i] = np.exp(persons_ap_scores[i] * 3)
+            persons_ap_scores[i] = np.exp(persons_ap_scores[i] * scale)
             cur_max_vision = max(persons_ap_scores[i])
             cur_min_vision = min(persons_ap_scores[i])
             persons_ap_scores[i] = (persons_ap_scores[i] - cur_min_vision) / (cur_max_vision - cur_min_vision)
@@ -435,7 +438,9 @@ def fusion_st_gallery_ranker(fusion_param):
     #             fusion_track_scores[i][j] = 1.
 
     min_rand = 1e-3 # 0.00002
-    min_rand = 2e-5 # 0.00002
+    # min_rand = 2e-5 # 0.00002
+    if 'market_market' in log_path:
+        min_rand = 1e-2  # 0.00002
     for i, person_ap_pids in enumerate(persons_ap_pids):
         cross_scores = list()
         for j, person_ap_pid in enumerate(person_ap_pids):
@@ -547,13 +552,21 @@ def simple_fusion_st_gallery_ranker(fusion_param):
     persons_ap_scores = predict_img_scores(fusion_param)
     persons_ap_pids = predict_pids(fusion_param)
     print 'read vision scores and pids ready'
-    if True:
+    if fusion_param['gt_fusion']:
+        scale = 6.
+    else:
+        scale = 3.
     # if 'market_market' in log_path:
+    if True:
+        # if 'market_market' in log_path:
         for i, person_ap_scores in enumerate(persons_ap_scores):
             cur_max_vision = max(person_ap_scores)
             cur_min_vision = min(person_ap_scores)
             persons_ap_scores[i] = (persons_ap_scores[i] - cur_min_vision) / (cur_max_vision - cur_min_vision)
-
+            persons_ap_scores[i] = np.exp(persons_ap_scores[i] * scale)
+            cur_max_vision = max(persons_ap_scores[i])
+            cur_min_vision = min(persons_ap_scores[i])
+            persons_ap_scores[i] = (persons_ap_scores[i] - cur_min_vision) / (cur_max_vision - cur_min_vision)
 
     camera_delta_s = pickle_load(fusion_param['distribution_pickle_path'])
     # camera_delta_s = pickle_load('true_market_probe.pck')
@@ -612,7 +625,7 @@ def simple_fusion_st_gallery_ranker(fusion_param):
 
 if __name__ == '__main__':
     # ctrl_msg['data_folder_path'] = 'cuhk_duke-train'
-    ctrl_msg['data_folder_path'] = 'market_grid-cv-1-test'
+    ctrl_msg['data_folder_path'] = 'duke_market-test'
     ctrl_msg['ep'] = 0.0
     ctrl_msg['en'] = 0.0
     # fusion_param = get_fusion_param()

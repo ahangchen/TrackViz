@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 export PYTHONPATH=/home/cwh/coding/TrackViz
 PYTHON2=/home/cwh/anaconda2/bin/python
-VISION_DIR=/home/cwh/coding/taudl_pyt/taudl_transfer/eval
+VISION_DIR=/home/cwh/coding/taudl_pyt/taudl_iter/eval
 
 source_names=("duke" "market"  "grid" "viper" "cuhk")
 #source_names=("cuhk")

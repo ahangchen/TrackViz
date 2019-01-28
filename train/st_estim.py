@@ -70,27 +70,38 @@ def get_predict_pure_delta_tracks(fusion_param, useful_predict_limit=10, random=
     # market1501数据集有六个序列，只有同一个序列才能计算delta
     if random:
         useful_predict_limit = max(len(predict_lines)/100, 100)
-    for i, line in enumerate(predict_lines):
-        predict_pids = line.split(' ')
-        useful_cnt = 0
-        for j, predict_pid in enumerate(predict_pids):
-            if useful_cnt > useful_predict_limit:
-                break
-            if random:
-                predict_pid = randint(0, person_cnt - 1)
-            elif diff_person:
-                predict_pid = randint(10, person_cnt - 1)
-            else:
-                # todo transfer: if predict by python, start from 0, needn't minus 1
+    if not use_real_st:
+        for i, line in enumerate(predict_lines):
+            predict_pids = line.split(' ')
+            useful_cnt = 0
+            for j, predict_pid in enumerate(predict_pids):
+                if useful_cnt > useful_predict_limit:
+                    break
+                if random:
+                    predict_pid = randint(0, person_cnt - 1)
+                elif diff_person:
+                    predict_pid = randint(10, person_cnt - 1)
+                else:
+                    # todo transfer: if predict by python, start from 0, needn't minus 1
+                    predict_pid = int(predict_pid)
                 predict_pid = int(predict_pid)
-            predict_pid = int(predict_pid)
-            # same seq
-            # todo ignore same camera track
-            if real_tracks[i][3] == real_tracks[predict_pid][3] and real_tracks[i][1] != real_tracks[predict_pid][1]:
-                # and pid equal: real st
-                if random or (use_real_st and real_tracks[i][0] == real_tracks[predict_pid][0]) or not use_real_st:
-                # if True:
+                # same seq
+                # todo ignore same camera track
+                if real_tracks[i][3] == real_tracks[predict_pid][3] and real_tracks[i][1] != real_tracks[predict_pid][1]:
+                    # and pid equal: real st
                     useful_cnt += 1
+                    delta = real_tracks[i][2] - real_tracks[predict_pid][2]
+                    if abs(delta) < 100000:
+                        camera_delta_s[real_tracks[i][1] - 1][real_tracks[predict_pid][1] - 1].append(delta)
+    else:
+        for i, line in enumerate(predict_lines):
+            predict_pids = line.split(' ')
+            for j, predict_pid in enumerate(predict_pids):
+                predict_pid = int(predict_pid)
+                # same seq
+                # todo ignore same camera track
+                if real_tracks[i][3] == real_tracks[predict_pid][3] and real_tracks[i][1] != real_tracks[predict_pid][1] \
+                        and real_tracks[i][0] == real_tracks[predict_pid][0]:
                     delta = real_tracks[i][2] - real_tracks[predict_pid][2]
                     if abs(delta) < 100000:
                         camera_delta_s[real_tracks[i][1] - 1][real_tracks[predict_pid][1] - 1].append(delta)
@@ -158,7 +169,6 @@ def get_predict_frame_delta_tracks(fusion_param, useful_predict_limit=10, random
             # todo ignore same camera track
             if real_tracks[i][3] == real_tracks[predict_pid][3] and real_tracks[i][1] != real_tracks[predict_pid][1]:
                 # and pid equal: real st
-                # if random or real_tracks[i][0] == real_tracks[predict_pid][0]:
                 if True:
                     useful_cnt += 1
                     delta = real_tracks[i][2] - real_tracks[predict_pid][2]
