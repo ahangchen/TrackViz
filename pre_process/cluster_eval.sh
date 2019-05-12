@@ -11,6 +11,15 @@ do
     for i in "${!target_names[@]}"
     do
         train_list="../data/${target_names[$i]}/train.txt"
+        $PYTHON2 cluster_eval.py --track_path ${PICKLE_DIR}/${source_names[$j]}_${target_names[$i]}_cluster.pck
+    done
+done
+
+for j in "${!source_names[@]}"
+do
+    for i in "${!target_names[@]}"
+    do
+        train_list="../data/${target_names[$i]}/train.txt"
         $PYTHON2 cluster_eval.py --track_path ${PICKLE_DIR}/${source_names[$j]}_${target_names[$i]}-iter_cluster.pck
     done
 done

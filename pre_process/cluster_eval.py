@@ -19,6 +19,7 @@ def arg_parse():
 
 
 def purity_score(y_true, y_pred):
+    # Equal to purity_score_raw, implement with contingency_matrix
     # compute contingency matrix (also called confusion matrix)
     contingency_matrix = metrics.cluster.contingency_matrix(y_true, y_pred)
     # return purity
@@ -93,7 +94,7 @@ def main():
     cluster_tracks = pickle_load(opt.track_path)
     score = purity_score_for_track(cluster_tracks)
     print('score %f' % score)
-    write(opt.result_path, 'cluster task: %s \tscore: %f\n' % (opt.track_path, score))
+    write(opt.result_path, 'cluster task: %s \t\tscore: %f\n' % (opt.track_path.split('/')[-1], score))
 
 
 if __name__ == '__main__':
