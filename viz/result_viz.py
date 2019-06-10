@@ -171,12 +171,21 @@ if __name__ == '__main__':
               ['Visual Classifier C'], 'grid2duke_vis_iter.pdf')
     draw_line(g2m_vis_accs, np.arange(0, len(g2m_vis_accs[0])), 'Rank-1 precision', 'Number of iterations',
               ['Visual Classifier C'], 'grid2market_vis_iter.pdf')
-    g2d_all_accs =  [g2d_multi_accs[0], g2d_multi_accs[1],g2d_rank_accs[0], g2d_rank_accs[1],  g2d_vis_accs[0]]
+    # g2d_all_accs =  [g2d_multi_accs[0], g2d_multi_accs[1],g2d_rank_accs[0], g2d_rank_accs[1],  g2d_vis_accs[0]]
+    # draw_line(g2d_all_accs, np.arange(0, len(g2d_all_accs[0])), 'Rank-1 precision', 'Number of iterations',
+    #           ['Multi Visual', 'Multi Fusion','Rank Visual', 'Rank Fusion',  'Pure Visual'], 'grid2duke_incre_all.pdf')
+    # g2m_all_accs = [g2m_multi_accs[0], g2m_multi_accs[1], g2m_rank_accs[0], g2m_rank_accs[1],  g2m_vis_accs[0]]
+    # draw_line(g2m_all_accs, np.arange(0, len(g2m_all_accs[0])), 'Rank-1 precision', 'Number of iterations',
+    #           ['Multi Visual', 'Multi Fusion', 'Rank Visual', 'Rank Fusion', 'Pure Visual'], 'grid2market_incre_all.pdf')
+
+    g2d_all_accs = [g2d_multi_accs[0], g2d_multi_accs[1], g2d_rank_accs[0], g2d_rank_accs[1]]
     draw_line(g2d_all_accs, np.arange(0, len(g2d_all_accs[0])), 'Rank-1 precision', 'Number of iterations',
-              ['Multi Visual', 'Multi Fusion','Rank Visual', 'Rank Fusion',  'Pure Visual'], 'grid2duke_incre_all.pdf')
-    g2m_all_accs = [g2m_multi_accs[0], g2m_multi_accs[1], g2m_rank_accs[0], g2m_rank_accs[1],  g2m_vis_accs[0]]
+              ['Multi-task(C)', 'Multi-task(F)', 'Learning to rank(C)', 'Learning to rank(F)'], 'grid2duke_incre_all.pdf')
+    g2m_all_accs = [g2m_multi_accs[0], g2m_multi_accs[1], g2m_rank_accs[0], g2m_rank_accs[1]]
     draw_line(g2m_all_accs, np.arange(0, len(g2m_all_accs[0])), 'Rank-1 precision', 'Number of iterations',
-              ['Multi Visual', 'Multi Fusion', 'Rank Visual', 'Rank Fusion', 'Pure Visual'], 'grid2market_incre_all.pdf')
+              ['Multi-task(C)', 'Multi-task(F)', 'Learning to rank(C)', 'Learning to rank(F)'],
+              'grid2market_incre_all.pdf')
+
     # draw_line(accs, np.arange(0, len(accs[0])), 'Rank-1 precision', 'Number of iterations', ['Visual Classifier C', 'Fusion Model F'], title='')
     # sensitivity_eval(sense_file_path='market_sense.txt')
     # sensitivity_eval(sense_file_path='grid_sense.txt')
